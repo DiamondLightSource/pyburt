@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b0bf982668b6b524003d15ea84ba40417ad96de6c2c20a8208a799f04978bf42"
+            "sha256": "8b6cc9dbf1e492738292e566ff49437b5d40c1a170bbd86e4bafd6c31a84e60b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,7 +15,8 @@
             }
         ]
     },
-    "default": {
+    "default": {},
+    "develop": {
         "alabaster": {
             "hashes": [
                 "sha256:446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359",
@@ -221,6 +222,5 @@
             ],
             "version": "==1.24.1"
         }
-    },
-    "develop": {}
+    }
 }
