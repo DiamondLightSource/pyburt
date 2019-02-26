@@ -1,0 +1,5 @@
+# IDE files
+/.idea/
+
+# Documentation build files
+*/_build/
