@@ -3,3 +3,9 @@
 
 # Documentation build files
 */_build/
+
+# Pipenv cache
+/.cache/
+
+# Python backup files
+*.pyc

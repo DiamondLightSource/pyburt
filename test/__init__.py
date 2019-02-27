@@ -1,0 +1,5 @@
+""" Shared globals used by the python tests."""
+BLANK_REQ_FILE = "test/testables/blank.req"
+BLANK_SNAP_FILE = "test/testables/blank.snap"
+REQ_FILE_1 = "test/testables/test_1.req"
+SNAP_FILE_1 = "test/testables/test_1.snap"
