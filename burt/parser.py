@@ -49,15 +49,15 @@ class SnapParser:
     """
 
     _ATTRIBUTES = {
-        burt.BURT_TIME_PREFIX: 'time',
-        burt.BURT_LOGINID_PREFIX: 'login_id',
-        burt.BURT_UID_PREFIX: 'u_id',
-        burt.BURT_GROUPID_PREFIX: 'group_id',
-        burt.BURT_KEYWORDS_PREFIX: 'keywords',
-        burt.BURT_COMMENTS_PREFIX: 'comments',
-        burt.BURT_TYPE_PREFIX: 'type',
-        burt.BURT_DIRECTORY_PREFIX: 'directory',
-        burt.BURT_REQ_FILE_PREFIX: 'req_file'
+        burt.TIME_PREFIX: 'time',
+        burt.LOGINID_PREFIX: 'login_id',
+        burt.UID_PREFIX: 'u_id',
+        burt.GROUPID_PREFIX: 'group_id',
+        burt.KEYWORDS_PREFIX: 'keywords',
+        burt.COMMENTS_PREFIX: 'comments',
+        burt.TYPE_PREFIX: 'type',
+        burt.DIRECTORY_PREFIX: 'directory',
+        burt.REQ_FILE_PREFIX: 'req_file'
     }
 
     def __init__(self, path):
@@ -84,17 +84,17 @@ class SnapParser:
         with open(self.path, 'r') as f:
             file_string = f.read()
 
-            if (burt.BURT_HEADER_START not in file_string) or (burt.BURT_HEADER_END not in file_string):
+            if (burt.HEADER_START not in file_string) or (burt.HEADER_END not in file_string):
                 raise ParserException(
                     "Malformed .snap header: BURT headers missing: ")
 
-            header, body = [part.strip() for part in file_string.split(burt.BURT_HEADER_END)]
+            header, body = [part.strip() for part in file_string.split(burt.HEADER_END)]
             header_lines = header.splitlines()
             body_lines = body.splitlines()
 
-            if header_lines[0] != burt.BURT_HEADER_START:
+            if header_lines[0] != burt.HEADER_START:
                 raise ParserException(
-                    "Malformed .snap header. Expected header start: " + burt.BURT_HEADER_START + ". Got: " +
+                    "Malformed .snap header. Expected header start: " + burt.HEADER_START + ". Got: " +
                     header_lines[0])
 
             self._parse_header(header_lines[1:])
@@ -105,8 +105,8 @@ class SnapParser:
         """
         for line in header_lines:
             # Ugly wart of .snap files. Directory line doesn't have a colon.
-            if burt.BURT_PREFIX_DELIMITER in line:
-                key, value = (part.strip() for part in line.split(burt.BURT_PREFIX_DELIMITER, 1))
+            if burt.PREFIX_DELIMITER in line:
+                key, value = (part.strip() for part in line.split(burt.PREFIX_DELIMITER, 1))
             else:
                 key, value = (part.strip() for part in line.split(None, 1))
             setattr(self, SnapParser._ATTRIBUTES[key], value)
