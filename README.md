@@ -22,5 +22,5 @@ To run the pytest tests:
 
 ```bash
 $ pipenv shell
-$ python -m pytest test
+$ pytest -vv
 ```

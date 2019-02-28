@@ -1,5 +1,12 @@
 # IDE files
 /.idea/
+/.vscode/
 
 # Documentation build files
 */_build/
+
+# Pipenv cache
+/.cache/
+
+# Python backup files
+*.pyc
