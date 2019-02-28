@@ -50,6 +50,18 @@ class SnapParser:
         req_file (str): The .req file to restore that is stored in the BURT header.
     """
 
+    _ATTRIBUTES = {
+        BURT_TIME_PREFIX: 'time',
+        BURT_LOGINID_PREFIX: 'login_id',
+        BURT_UID_PREFIX: 'u_id',
+        BURT_GROUPID_PREFIX: 'group_id',
+        BURT_KEYWORDS_PREFIX: 'keywords',
+        BURT_COMMENTS_PREFIX: 'comments',
+        BURT_TYPE_PREFIX: 'type',
+        BURT_DIRECTORY_PREFIX: 'directory',
+        BURT_REQ_FILE_PREFIX: 'req_file'
+    }
+
     def __init__(self, path):
         """Constructor.
 
@@ -93,27 +105,12 @@ class SnapParser:
         """Parses the header portion of a .snap file.
         """
         for line in header_lines:
-            if line.startswith(BURT_TIME_PREFIX):
-                self.time = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-            elif line.startswith(BURT_LOGINID_PREFIX):
-                self.login_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-            elif line.startswith(BURT_UID_PREFIX):
-                self.u_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-            elif line.startswith(BURT_GROUPID_PREFIX):
-                self.group_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-            elif line.startswith(BURT_KEYWORDS_PREFIX):
-                self.keywords = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-            elif line.startswith(BURT_COMMENTS_PREFIX):
-                self.comments = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-            elif line.startswith(BURT_TYPE_PREFIX):
-                self.type = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-
-            # Special case for the directory prefix as the colon delimiter doesn't exist.
-            elif line.startswith(BURT_DIRECTORY_PREFIX):
-                self.directory = line.split(BURT_DIRECTORY_PREFIX, 1)[1].strip()
-
-            elif line.startswith(BURT_REQ_FILE_PREFIX):
-                self.req_file = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+            # Ugly wart of .snap files. Directory line doesn't have a colon.
+            if ':' in line:
+                key, value = (part.strip() for part in line.split(':', 1))
+            else:
+                key, value = (part.strip() for part in line.split(None, 1))
+            setattr(self, SnapParser._ATTRIBUTES[key], value)
 
     def _parse_body(self, body_lines):
         """Parses the body portion of a .snap file.
