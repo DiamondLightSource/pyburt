@@ -57,7 +57,7 @@ class SnapParser:
     Attributes:
         path (str): The absolute path to the .snap file.
         pv_snapshots (dict): A dict of pvs contained in the .snap file, where a key corresponds to a pv, and the
-            corresponding value(s) are the snapshot values of the pv.
+            corresponding value is a tuple of (CA ARRAY LENGTH, [CA ARRAY or FLOAT])
         time (str): The time stored in the BURT header.
         login_id (str): The login ID stored in the BURT header.
         u_id (str): The UID stored in the BURT header.
@@ -69,7 +69,7 @@ class SnapParser:
         req_file (str): The .req file to restore that is stored in the BURT header.
     """
 
-    _ATTRIBUTES = {
+    _HEADER_ATTRIBUTES = {
         burt.TIME_PREFIX: 'time',
         burt.LOGINID_PREFIX: 'login_id',
         burt.UID_PREFIX: 'u_id',
@@ -130,7 +130,7 @@ class SnapParser:
                 key, value = (part.strip() for part in line.split(burt.PREFIX_DELIMITER, 1))
             else:
                 key, value = (part.strip() for part in line.split(None, 1))
-            setattr(self, SnapParser._ATTRIBUTES[key], value)
+            setattr(self, SnapParser._HEADER_ATTRIBUTES[key], value)
 
     def _parse_body(self, body_lines):
         """Parses the body portion of a .snap file.
@@ -138,10 +138,15 @@ class SnapParser:
         for line in body_lines:
             if line.startswith(burt.LINE_COMMENT):
                 pass
+
             elif line.strip():
                 pv_snapshot = line.split()
-                pv = pv_snapshot.pop(0)
-                self.pv_snapshots[pv] = pv_snapshot
+                assert len(pv_snapshot) >= 3
+
+                pv_name = pv_snapshot[0]
+                ca_arr_len = pv_snapshot[1]
+                ca_arr_vals = pv_snapshot[2:]
+                self.pv_snapshots[pv_name] = (ca_arr_len, ca_arr_vals)
 
 
 class ParserException(Exception):
