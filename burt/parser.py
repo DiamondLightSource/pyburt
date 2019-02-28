@@ -24,7 +24,7 @@ class ReqParser:
         """
         with open(self.path, 'r') as f:
             for line in f:
-                if line.startswith(burt.COMMENT_PREFIX):
+                if line.startswith(burt.LINE_COMMENT):
                     pass
                 elif line.strip():
                     self.pvs.append(line.strip())
@@ -115,7 +115,7 @@ class SnapParser:
         """Parses the body portion of a .snap file.
         """
         for line in body_lines:
-            if line.startswith(burt.COMMENT_PREFIX):
+            if line.startswith(burt.LINE_COMMENT):
                 pass
             elif line.strip():
                 pv_snapshot = line.split()

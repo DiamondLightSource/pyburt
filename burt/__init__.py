@@ -1,6 +1,6 @@
 """Pyburt package."""
 # Various symbols found in .req and .snap files.
-COMMENT_PREFIX = '#'
+LINE_COMMENT = '#'
 HEADER_START = "--- Start BURT header"
 HEADER_END = "--- End BURT header"
 TIME_PREFIX = "Time"
