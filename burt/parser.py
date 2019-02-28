@@ -86,10 +86,10 @@ class SnapParser:
                 raise ParserException(
                     "Malformed .snap header. Expected header start: " + BURT_HEADER_START + ". Got: " + header_lines[0])
 
-            self.parse_header(header_lines[1:])
-            self.parse_body(body_lines)
+            self._parse_header(header_lines[1:])
+            self._parse_body(body_lines)
 
-    def parse_header(self, header_lines):
+    def _parse_header(self, header_lines):
         """Parses the header portion of a .snap file.
         """
         for line in header_lines:
@@ -115,7 +115,7 @@ class SnapParser:
             elif line.startswith(BURT_REQ_FILE_PREFIX):
                 self.req_file = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
 
-    def parse_body(self, body_lines):
+    def _parse_body(self, body_lines):
         """Parses the body portion of a .snap file.
         """
         for line in body_lines:
