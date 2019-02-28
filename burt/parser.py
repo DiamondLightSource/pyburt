@@ -5,6 +5,13 @@ import burt
 class ReqParser:
     """ Stores the information of a .req BURT file.
 
+    The format of a .req file is:
+
+        <PV 1>
+        ...
+        # File comments are preceded by a hash sign.
+        <PV N>
+
     Attributes:
         path (str): The absolute path to the .req file.
         pvs (list): A list of pvs contained in the .req file.
@@ -32,6 +39,20 @@ class ReqParser:
 
 class SnapParser:
     """ Stores the information of a .snap BURT file
+
+    The format of the .snap file is:
+
+        <BURT HEADER>
+        <PREFIX 1> <VALUE>
+        ...
+        <PREFIX N> <VALUE>
+        <END BURT HEADER>
+        <PV 1> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
+        ...
+        # File comments are preceded by a hash sign.
+        <PV N> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
+
+    Where <CA ARRAY LENGTH> is 1 if the PV readings are not represented by a CA array. See test/testables for examples.
 
     Attributes:
         path (str): The absolute path to the .snap file.

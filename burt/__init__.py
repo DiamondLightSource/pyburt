@@ -1,4 +1,5 @@
 """Pyburt package."""
+
 # Various symbols found in .req and .snap files.
 LINE_COMMENT = '#'
 HEADER_START = "--- Start BURT header"
@@ -13,3 +14,7 @@ TYPE_PREFIX = "Type"
 DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
 PREFIX_DELIMITER = ":"
+
+# .req and .snap file extensions.
+REQ_FILE_EXT = '.req'
+SNAP_FILE_EXT = '.snap'
