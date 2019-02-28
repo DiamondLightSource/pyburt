@@ -72,33 +72,62 @@ class SnapParser:
         """Parses the .snap file located at self.path and stores the information in class attributes.
         """
         with open(self.path, 'r') as f:
-            for line in f:
-                if line.startswith(COMMENT_PREFIX):
-                    pass
-                elif line.startswith(BURT_HEADER_START):
-                    pass
-                elif line.startswith(BURT_HEADER_END):
-                    pass
-                elif line.startswith(BURT_TIME_PREFIX):
-                    self.time = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_LOGINID_PREFIX):
-                    self.login_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_UID_PREFIX):
-                    self.u_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_GROUPID_PREFIX):
-                    self.group_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_KEYWORDS_PREFIX):
-                    self.keywords = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_COMMENTS_PREFIX):
-                    self.comments = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_TYPE_PREFIX):
-                    self.type = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_DIRECTORY_PREFIX):
-                    self.directory = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.startswith(BURT_REQ_FILE_PREFIX):
-                    self.req_file = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
-                elif line.strip():
-                    pv_snapshot = line.split()
-                    pv = pv_snapshot.pop(0).strip()
-                    snapshot_vals = [val.strip() for val in pv_snapshot]
-                    self.pv_snapshots[pv] = snapshot_vals
+            file_string = f.read()
+
+            if (BURT_HEADER_START or BURT_HEADER_END) not in file_string:
+                raise ParserException(
+                    "Malformed .snap header: BURT headers missing: ")
+
+            header, body = [part.strip() for part in file_string.split(BURT_HEADER_END)]
+            header_lines = header.splitlines()
+            body_lines = body.splitlines()
+
+            if header_lines[0] != BURT_HEADER_START:
+                raise ParserException(
+                    "Malformed .snap header. Expected header start: " + BURT_HEADER_START + ". Got: " + header_lines[0])
+
+            self.parse_header(header_lines[1:])
+            self.parse_body(body_lines)
+
+    def parse_header(self, header_lines):
+        """Parses the header portion of a .snap file.
+        """
+        for line in header_lines:
+            if line.startswith(BURT_TIME_PREFIX):
+                self.time = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+            elif line.startswith(BURT_LOGINID_PREFIX):
+                self.login_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+            elif line.startswith(BURT_UID_PREFIX):
+                self.u_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+            elif line.startswith(BURT_GROUPID_PREFIX):
+                self.group_id = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+            elif line.startswith(BURT_KEYWORDS_PREFIX):
+                self.keywords = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+            elif line.startswith(BURT_COMMENTS_PREFIX):
+                self.comments = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+            elif line.startswith(BURT_TYPE_PREFIX):
+                self.type = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+
+            # Special case for the directory prefix as the colon delimiter doesn't exist.
+            elif line.startswith(BURT_DIRECTORY_PREFIX):
+                self.directory = line.split(BURT_DIRECTORY_PREFIX, 1)[1].strip()
+
+            elif line.startswith(BURT_REQ_FILE_PREFIX):
+                self.req_file = line.split(BURT_PREFIX_DELIMITER, 1)[1].strip()
+
+    def parse_body(self, body_lines):
+        """Parses the body portion of a .snap file.
+        """
+        for line in body_lines:
+            if line.startswith(COMMENT_PREFIX):
+                pass
+            elif line.strip():
+                pv_snapshot = line.split()
+                pv = pv_snapshot.pop(0)
+                self.pv_snapshots[pv] = pv_snapshot
+
+
+class ParserException(Exception):
+    """ Raised when the parsers run into unexpected malformed formats.
+    """
+    pass

@@ -1,8 +1,9 @@
 """ Various tests for the parser classes."""
 
-import pyburt
-from pyburt import parser
+import burt
+from burt import parser
 from . import BLANK_REQ_FILE, BLANK_SNAP_FILE, REQ_FILE_1, SNAP_FILE_1
+import pytest
 
 
 def test_base_case_req_parser():
@@ -49,18 +50,8 @@ def test_base_case_snap_parser():
     assert "" == snap_parser.directory
     assert "" == snap_parser.req_file
 
-    snap_parser.parse()
-    assert BLANK_SNAP_FILE == snap_parser.path
-    assert 0 == len(snap_parser.pv_snapshots)
-    assert "" == snap_parser.time
-    assert "" == snap_parser.login_id
-    assert "" == snap_parser.u_id
-    assert "" == snap_parser.group_id
-    assert "" == snap_parser.keywords
-    assert "" == snap_parser.comments
-    assert "" == snap_parser.type
-    assert "" == snap_parser.directory
-    assert "" == snap_parser.req_file
+    with pytest.raises(parser.ParserException):
+        snap_parser.parse()
 
 
 def test_basic_case_1_snap_parser():
