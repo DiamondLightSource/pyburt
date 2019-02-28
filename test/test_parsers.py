@@ -1,9 +1,9 @@
 """ Various tests for the parser classes."""
-
-import burt
-from burt import parser
-from . import BLANK_REQ_FILE, BLANK_SNAP_FILE, REQ_FILE_1, SNAP_FILE_1
 import pytest
+from burt import parser
+from . import BLANK_REQ_FILE, BLANK_SNAP_FILE, REQ_FILE_1, SNAP_FILE_1, \
+    WRONG_HEADER
+
 
 
 def test_base_case_req_parser():
@@ -88,3 +88,11 @@ def test_basic_case_1_snap_parser():
     assert "/home/ops/burt/backupFiles" == snap_parser.directory
     assert "/home/ops/burt/requestFiles/SR-DI.req" == snap_parser.req_file
     assert correct_pv_snapshots == snap_parser.pv_snapshots
+
+
+def test_incorrect_snap_header():
+    with pytest.raises(parser.ParserException):
+        snap_parser = parser.SnapParser(WRONG_HEADER)
+        snap_parser.parse()
+    assert False
+
