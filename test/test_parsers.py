@@ -5,7 +5,6 @@ from . import BLANK_REQ_FILE, BLANK_SNAP_FILE, REQ_FILE_1, SNAP_FILE_1, \
     WRONG_HEADER
 
 
-
 def test_base_case_req_parser():
     """Runs the .req parser against mostly blank files.
     """
@@ -94,5 +93,3 @@ def test_incorrect_snap_header():
     with pytest.raises(parser.ParserException):
         snap_parser = parser.SnapParser(WRONG_HEADER)
         snap_parser.parse()
-    assert False
-

@@ -86,7 +86,7 @@ class SnapParser:
         with open(self.path, 'r') as f:
             file_string = f.read()
 
-            if (BURT_HEADER_START or BURT_HEADER_END) not in file_string:
+            if (BURT_HEADER_START not in file_string) or (BURT_HEADER_END not in file_string):
                 raise ParserException(
                     "Malformed .snap header: BURT headers missing: ")
 
