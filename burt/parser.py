@@ -1,7 +1,5 @@
 """ Various parsers which read BURT related input/output files and encapsulates the information."""
-from . import COMMENT_PREFIX, BURT_HEADER_START, BURT_HEADER_END, BURT_TIME_PREFIX, BURT_LOGINID_PREFIX, \
-    BURT_UID_PREFIX, BURT_GROUPID_PREFIX, BURT_KEYWORDS_PREFIX, BURT_COMMENTS_PREFIX, BURT_TYPE_PREFIX, \
-    BURT_DIRECTORY_PREFIX, BURT_REQ_FILE_PREFIX, BURT_PREFIX_DELIMITER
+import burt
 
 
 class ReqParser:
@@ -26,7 +24,7 @@ class ReqParser:
         """
         with open(self.path, 'r') as f:
             for line in f:
-                if line.startswith(COMMENT_PREFIX):
+                if line.startswith(burt.COMMENT_PREFIX):
                     pass
                 elif line.strip():
                     self.pvs.append(line.strip())
@@ -51,15 +49,15 @@ class SnapParser:
     """
 
     _ATTRIBUTES = {
-        BURT_TIME_PREFIX: 'time',
-        BURT_LOGINID_PREFIX: 'login_id',
-        BURT_UID_PREFIX: 'u_id',
-        BURT_GROUPID_PREFIX: 'group_id',
-        BURT_KEYWORDS_PREFIX: 'keywords',
-        BURT_COMMENTS_PREFIX: 'comments',
-        BURT_TYPE_PREFIX: 'type',
-        BURT_DIRECTORY_PREFIX: 'directory',
-        BURT_REQ_FILE_PREFIX: 'req_file'
+        burt.BURT_TIME_PREFIX: 'time',
+        burt.BURT_LOGINID_PREFIX: 'login_id',
+        burt.BURT_UID_PREFIX: 'u_id',
+        burt.BURT_GROUPID_PREFIX: 'group_id',
+        burt.BURT_KEYWORDS_PREFIX: 'keywords',
+        burt.BURT_COMMENTS_PREFIX: 'comments',
+        burt.BURT_TYPE_PREFIX: 'type',
+        burt.BURT_DIRECTORY_PREFIX: 'directory',
+        burt.BURT_REQ_FILE_PREFIX: 'req_file'
     }
 
     def __init__(self, path):
@@ -86,17 +84,18 @@ class SnapParser:
         with open(self.path, 'r') as f:
             file_string = f.read()
 
-            if (BURT_HEADER_START not in file_string) or (BURT_HEADER_END not in file_string):
+            if (burt.BURT_HEADER_START not in file_string) or (burt.BURT_HEADER_END not in file_string):
                 raise ParserException(
                     "Malformed .snap header: BURT headers missing: ")
 
-            header, body = [part.strip() for part in file_string.split(BURT_HEADER_END)]
+            header, body = [part.strip() for part in file_string.split(burt.BURT_HEADER_END)]
             header_lines = header.splitlines()
             body_lines = body.splitlines()
 
-            if header_lines[0] != BURT_HEADER_START:
+            if header_lines[0] != burt.BURT_HEADER_START:
                 raise ParserException(
-                    "Malformed .snap header. Expected header start: " + BURT_HEADER_START + ". Got: " + header_lines[0])
+                    "Malformed .snap header. Expected header start: " + burt.BURT_HEADER_START + ". Got: " +
+                    header_lines[0])
 
             self._parse_header(header_lines[1:])
             self._parse_body(body_lines)
@@ -106,8 +105,8 @@ class SnapParser:
         """
         for line in header_lines:
             # Ugly wart of .snap files. Directory line doesn't have a colon.
-            if ':' in line:
-                key, value = (part.strip() for part in line.split(':', 1))
+            if burt.BURT_PREFIX_DELIMITER in line:
+                key, value = (part.strip() for part in line.split(burt.BURT_PREFIX_DELIMITER, 1))
             else:
                 key, value = (part.strip() for part in line.split(None, 1))
             setattr(self, SnapParser._ATTRIBUTES[key], value)
@@ -116,7 +115,7 @@ class SnapParser:
         """Parses the body portion of a .snap file.
         """
         for line in body_lines:
-            if line.startswith(COMMENT_PREFIX):
+            if line.startswith(burt.COMMENT_PREFIX):
                 pass
             elif line.strip():
                 pv_snapshot = line.split()
