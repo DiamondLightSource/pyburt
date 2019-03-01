@@ -75,10 +75,14 @@ def _gen_snap_footer(req_parser):
 
         # caget returns either a scalar or a ca array, and the pv entry in the .snap file requires the type length.
         ca_reading_len = 1
-        if ca_reading is cothread.dbr.ca_array:
-            ca_reading_len = len(ca_reading)
+        ca_reading_str = str(ca_reading)
 
-        footer += "{} {} {}".format(pv, ca_reading_len, ca_reading)
+        if type(ca_reading) is cothread.dbr.ca_array:
+            ca_reading_len = len(ca_reading)
+            # Raw string format looks like '[ 1 2 \n ... x y \n ]'
+            ca_reading_str = ca_reading_str[1:len(ca_reading_str) - 1].replace('\n', ' ')
+
+        footer += "{} {} {}".format(pv, ca_reading_len, ca_reading_str)
         footer += os.linesep
 
     return footer
@@ -130,7 +134,7 @@ def restore(snap_file):
         ValueError: If the snap file has an invalid extension, or if it does not exist.
     """
     if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (not os.path.isfile(snap_file)):
-        raise ValueError("Invalid .snap file .")
+        raise ValueError("Invalid .snap file.")
 
     snap_parser = burt.parser.SnapParser(snap_file)
     snap_parser.parse()

@@ -11,6 +11,7 @@ def test_blank_snapshot():
     """Runs the burt snapshot against a blank .req file.
     """
     tmp_blank_dest = "test/testables/tmp_blank_snap.snap"
+
     pyburt.take_snapshot(test.BLANK_REQ_FILE, tmp_blank_dest)
 
     assert os.path.isfile(tmp_blank_dest)
@@ -20,6 +21,10 @@ def test_blank_snapshot():
     snap_parser = parser.SnapParser(tmp_blank_dest)
     snap_parser.parse()
     assert 0 == len(snap_parser.pv_snapshots)
+    assert snap_parser.time
+    assert snap_parser.login_id
+    assert snap_parser.u_id
+    assert snap_parser.group_id
     assert not snap_parser.keywords
     assert not snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
@@ -36,22 +41,16 @@ def test_bad_file_arguments():
     """
     with pytest.raises(ValueError):
         pyburt.take_snapshot("", "")
-
     with pytest.raises(ValueError):
         pyburt.take_snapshot("goodbyeworld", "helloworld")
-
     with pytest.raises(ValueError):
         pyburt.take_snapshot("goodbyeworld.req", "helloworld.snap")
-
     with pytest.raises(ValueError):
         pyburt.take_snapshot(test.BLANK_REQ_FILE, "helloworld.txt")
-
     with pytest.raises(ValueError):
         pyburt.restore("")
-
     with pytest.raises(ValueError):
         pyburt.restore("goodbyeworld")
-
     with pytest.raises(ValueError):
         pyburt.restore("helloworld.snap")
 
@@ -62,6 +61,7 @@ def test_snapshot_1_scalars():
     tmp_dest = "test/testables/tmp_snap.snap"
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
+
     pyburt.take_snapshot(test.REQ_FILE_1, tmp_dest, test_comment, test_keywords)
 
     assert os.path.isfile(tmp_dest)
@@ -71,6 +71,10 @@ def test_snapshot_1_scalars():
     snap_parser = parser.SnapParser(tmp_dest)
     snap_parser.parse()
     assert 9 == len(snap_parser.pv_snapshots)
+    assert snap_parser.time
+    assert snap_parser.login_id
+    assert snap_parser.u_id
+    assert snap_parser.group_id
     assert test_keywords == snap_parser.keywords
     assert test_comment == snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
@@ -79,7 +83,6 @@ def test_snapshot_1_scalars():
 
     # Known scalar PV
     snapshot_vals = snap_parser.pv_snapshots[test.PV_SCALAR_1]
-    assert len(snapshot_vals) == 2
     assert snapshot_vals[0] == '1'
     assert len(snapshot_vals[1]) == 1
 
@@ -93,6 +96,7 @@ def test_snapshot_1_ca_arr():
     tmp_dest = "test/testables/tmp_snap.snap"
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
+
     pyburt.take_snapshot(test.REQ_FILE_2, tmp_dest, test_comment, test_keywords)
 
     assert os.path.isfile(tmp_dest)
@@ -101,18 +105,22 @@ def test_snapshot_1_ca_arr():
     # Reverse parsing should have the correct contents for the independent properties, e.g. keywords, directory, etc.
     snap_parser = parser.SnapParser(tmp_dest)
     snap_parser.parse()
-    assert 4 == len(snap_parser.pv_snapshots)
+    assert 3 == len(snap_parser.pv_snapshots)
+    assert snap_parser.time
+    assert snap_parser.login_id
+    assert snap_parser.u_id
+    assert snap_parser.group_id
     assert test_keywords == snap_parser.keywords
     assert test_comment == snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
     assert "test/testables" == snap_parser.directory
     assert test.REQ_FILE_2 == snap_parser.req_file
 
-    # Known scalar PV
-    snapshot_vals = snap_parser.pv_snapshots[test.PV_WITH_CA_ARR]
-    assert len(snapshot_vals) == 937
-    assert snapshot_vals[0] == '936'
-    assert len(snapshot_vals[1]) == 936
+    # Known ca array PV
+    snapshot_length_ca_arr_pv = snap_parser.pv_snapshots[test.PV_WITH_CA_ARR][0]
+    snapshot_vals_ca_arr_pv = snap_parser.pv_snapshots[test.PV_WITH_CA_ARR][1]
+    assert snapshot_length_ca_arr_pv == '936'
+    assert len(snapshot_vals_ca_arr_pv) == 936
 
     # cleanup
     os.remove(tmp_dest)
