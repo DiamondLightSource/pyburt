@@ -11,6 +11,7 @@ GROUPID_PREFIX = "Group ID"
 KEYWORDS_PREFIX = "Keywords"
 COMMENTS_PREFIX = "Comments"
 TYPE_PREFIX = "Type"
+TYPE_DEFAULT_VAL = "Absolute"  # The Type in a BURT header seems to be always this value, may need to revisit.
 DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
 PREFIX_DELIMITER = ":"
