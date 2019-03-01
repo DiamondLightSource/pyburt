@@ -3,8 +3,14 @@
 import pytest
 import test
 import burt
+import cothread
 from burt import pyburt, parser
 import os
+
+from pkg_resources import require
+
+require('cothread')
+from cothread.catools import caget
 
 
 def test_blank_snapshot():
@@ -129,16 +135,27 @@ def test_snapshot_1_ca_arr():
 def test_basic_restore():
     """Runs burt restore against a blank .snap file.
     """
-    pass
-
-
-def test_restore_1_scalars():
-    """Runs burt restore against a .snap file with scalar pvs.
-    """
-    pass
+    with pytest.raises(parser.ParserException):
+        pyburt.restore(test.BLANK_SNAP_FILE)
 
 
 def test_restore_1_ca_arr():
     """Runs burt restore against a .snap file with ca array pvs.
     """
-    pass
+    os.system('./test/testables/test_ioc.py')  # Note: need to kill this process afterwards???
+
+    pyburt.restore(test.IOC_SNAP_FILE_1)
+
+    ca_arr = caget(test.IOC_LOCAL_PV)
+    assert abs(ca_arr[0] - 3.259328000000000e+00) <= 0.2  # Allowed truncation margin
+    assert ca_arr[1] == 4
+    assert ca_arr[2] == -1
+
+
+def test_restore_2_ca_scalar():
+    """Runs burt restore against a .snap file with a scalar pv.
+    """
+    pyburt.restore(test.IOC_SNAP_FILE_2)
+
+    ca_arr = caget(test.IOC_LOCAL_PV)
+    assert ca_arr[0] == 2
