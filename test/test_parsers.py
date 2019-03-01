@@ -33,6 +33,19 @@ def test_basic_case_1_req_parser():
     assert correct_pv_list == req_parser.pvs
 
 
+def test_inline_comment():
+    """Runs the parsers against a problematic case with inline comments next to PVs.
+    """
+    correct_pv_list = ["SR01C-DI-COL-01:CENTRE", "SR01C-DI-COL-01:GAP", "SR01C-DI-COL-02:CENTRE"]
+
+    req_parser = parser.ReqParser(test.REQ_FILE_WITH_INLINE_COMMENTS)
+    req_parser.parse()
+
+    assert test.REQ_FILE_WITH_INLINE_COMMENTS == req_parser.path
+    assert 3 == len(req_parser.pvs)
+    assert correct_pv_list == req_parser.pvs
+
+
 def test_base_case_snap_parser():
     """Runs the .snap parser against mostly blank files.
     """
@@ -53,8 +66,8 @@ def test_base_case_snap_parser():
         snap_parser.parse()
 
 
-def test_basic_case_1_snap_parser():
-    """Runs the .snap parser against a basic case.
+def test_snap_parser_scalars():
+    """Runs the .snap parser against a basic case with only PV scalars.
     """
     correct_pv_snapshots = {"SR01C-DI-COL-01:POS1": ("1", ["3.259328000000000e+00"]),
                             "SR01C-DI-COL-01:POS2": ("1", ["-3.276854000000000e+00"]),
@@ -89,7 +102,7 @@ def test_basic_case_1_snap_parser():
     assert correct_pv_snapshots == snap_parser.pv_snapshots
 
 
-def test_basic_case_1_snap_parser():
+def test_snap_parser_ca_arr():
     """Runs the .snap parser against a case with ca arrays.
     """
     correct_pv_snapshots = {

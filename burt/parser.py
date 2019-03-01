@@ -33,9 +33,16 @@ class ReqParser:
             for line in f:
                 if line.startswith(burt.LINE_COMMENT):
                     pass
+
                 elif line.strip():
+                    # RO SR01C-DI-COL-01:POS1 -> SR01C-DI-COL-01:POS1
                     if line.startswith(burt.READONLY_SPECIFIER):
                         line = line[len(burt.READONLY_SPECIFIER):]
+
+                    # SR01C-DI-COL-01:POS1 # Random inline comment -> SR01C-DI-COL-01:POS1
+                    if burt.LINE_COMMENT in line:
+                        line = line[:line.find(burt.LINE_COMMENT)]
+
                     self.pvs.append(line.strip())
 
 
