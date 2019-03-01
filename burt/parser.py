@@ -34,6 +34,8 @@ class ReqParser:
                 if line.startswith(burt.LINE_COMMENT):
                     pass
                 elif line.strip():
+                    if line.startswith(burt.READONLY_SPECIFIER):
+                        line = line[len(burt.READONLY_SPECIFIER):]
                     self.pvs.append(line.strip())
 
 

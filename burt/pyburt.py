@@ -1,19 +1,19 @@
-"""BURT module.
+"""Main BURT module.
 
 Provides methods to save from a .req file to a .snap file, and the reverse. Uses the cothread.catools library to perform
 channel access operations.
 """
-from pkg_resources import require
-
-require('cothread')
-import cothread
-from cothread.catools import caget, caput
 import burt
-from burt import parser
+import cothread
 import os
 import errno
 import time
 import pwd
+from pkg_resources import require
+
+require('cothread')
+from cothread.catools import caget, caput
+from collections import OrderedDict
 
 
 def _gen_burt_header(req_parser, snap_file, comments, keywords):
@@ -26,17 +26,33 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
     Returns:
         str: The .snap file BURT header as a string.
     """
-    header = ""
+    header_elements = OrderedDict([
+        (burt.HEADER_START, ''),
+        (burt.TIME_PREFIX, time.ctime()),
+        (burt.LOGINID_PREFIX, os.getlogin()),
+        (burt.UID_PREFIX, os.getuid()),
+        (burt.GROUPID_PREFIX, pwd.getpwnam(os.getlogin()).pw_gid),
+        (burt.KEYWORDS_PREFIX, "" if keywords is None else keywords),
+        (burt.COMMENTS_PREFIX, "" if comments is None else comments),
+        (burt.TYPE_PREFIX, burt.TYPE_DEFAULT_VAL),
+        (burt.DIRECTORY_PREFIX, os.path.dirname(snap_file)),
+        (burt.REQ_FILE_PREFIX, req_parser.path),
+        (burt.HEADER_END, '')
+    ])
 
-    curr_time = time.ctime()
-    username = os.getlogin()
-    uid = os.getuid()
-    group_id = pwd.getpwnam(username).pw_gid
-    keywords = "" if comments is None else comments
-    comments = "" if keywords is None else keywords
-    type = burt.TYPE_DEFAULT_VAL
-    directory = os.path.dirname(snap_file)
-    req_file = req_parser.path
+    header = ""
+    for prefix in header_elements:
+        if (prefix == burt.HEADER_START) or (prefix == burt.HEADER_END):
+            header += prefix + os.linesep
+
+        # Special case with no colon.
+        elif prefix == burt.DIRECTORY_PREFIX:
+            header += "{} {}\n".format(prefix, header_elements[prefix])
+
+        # 10 space alignment from the left after the prefix.
+        else:
+            left_padding = " " * (10 - len(burt.PREFIX_DELIMITER) - len(prefix))
+            header += prefix + burt.PREFIX_DELIMITER + left_padding + str(header_elements[prefix]) + os.linesep
 
     return header
 
@@ -87,7 +103,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
         raise ValueError("Invalid .snap file destination.")
 
-    req_parser = parser.ReqParser(req_file)
+    req_parser = burt.parser.ReqParser(req_file)
     req_parser.parse()
 
     burt_header = _gen_burt_header(req_parser, snap_file, comments, keywords)
@@ -101,7 +117,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
                 raise
 
     with open(snap_file, "w") as f:
-        f.write(burt_header + os.linesep + snap_footer)
+        f.write(burt_header + snap_footer)
 
 
 def restore(snap_file):
@@ -116,7 +132,7 @@ def restore(snap_file):
     if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (not os.path.isfile(snap_file)):
         raise ValueError("Invalid .snap file .")
 
-    snap_parser = parser.SnapParser(snap_file)
+    snap_parser = burt.parser.SnapParser(snap_file)
     snap_parser.parse()
 
     pv_snapshots = snap_parser.pv_snapshots
