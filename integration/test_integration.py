@@ -10,7 +10,6 @@ require('cothread')
 from cothread.catools import caget
 
 
-@pytest.mark.integration
 def test_restore_integration():
     """Runs burt restore against a .snap file with ca array and scalar pvs.
 
