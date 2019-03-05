@@ -1,11 +1,12 @@
 # Integration tests for pyburt
 
-Listed below are a set of instructions for running the integration tests for the restore functionality of
-**pyburt**.
+Listed below are a set of instructions for running the integration tests for the **snapshot** and
+**restore** functionality of **pyburt**.
 
-It involves
-running an IOC server which hosts a dummy PV `SR-CS-TEST-01:TESTPV` and performing restore
-operations on some `.snap` files which write to this PV.
+It involves running an IOC server which hosts a dummy PV `SR-CS-TEST-01:TESTPV` and performing restore
+operations on some `.snap` files which write to this PV. It also involves
+doing some comparison tests against the vanilla BURT outputs, which requires running BURT on a set of
+`.req` and `.snap` files.
 
 ## Test Steps
 
@@ -28,7 +29,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 (InteractiveConsole)
 >>> 
 ```
-2.) In a separate terminal, run the integration test. Observe the output and check that
+2.) In a separate terminal, run the pytest integration tests. Observe the output and check that
 all tests pass:
 
 ```bash

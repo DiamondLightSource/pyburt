@@ -7,6 +7,7 @@
 
 ```python
 from burt import pyburt
+
 # Saves PV values in a .req file into a .snap file along with some additional metadata.
 pyburt.take_snapshot("/path/to/.req/file.req",
     "/path/to/.snap/file.snap", "comment", "keywords")
@@ -28,7 +29,7 @@ The generated pages are in `docs/_build/html`.
 
 ## Test
 
-To run the pytest tests:
+To run the core pytest tests:
 
 ```bash
 $ pipenv shell

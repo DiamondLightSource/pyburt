@@ -1,0 +1,87 @@
+""" Various parsers which read BURT related input/output files and encapsulates the information."""
+import burt
+import cothread
+from pkg_resources import require
+
+require('cothread')
+from cothread.catools import caget, caput
+
+
+class PV:
+    """ Stores the information of a PV in a parsed .snap or .req file, and provides functionality to save or restore a
+    PV's current state.
+
+    Attributes:
+        name (str): The name of the PV.
+        vals (list): A list of floats containing the PV values. This will be a singleton list if the data type of the
+            PV is not a CA array.
+        is_readonly (bool): Whether the PV is read only, or not. If so, it is not restored by pyburt.restore()
+        dtype_len (int): The length of the PV reading. If it is a CA array, this will be set to the length of the array,
+            otherwise it is set to 1.
+    """
+
+    def __init__(self, name, vals=None, is_readonly=False, dtype_len=1):
+        """ Constructor.
+
+        Args:
+            name (str): The name of the PV.
+            vals (list): A list of floats containing the PV values.
+            is_readonly (bool): Whether the PV is read only, or not.
+            dtype_len (int): The length of the PV reading.
+        """
+        self.name = name
+        self.vals = vals
+        self.is_readonly = is_readonly
+        self.dtype_len = dtype_len
+
+    def __eq__(self, other):
+        """ Equality operator override
+
+        Args:
+            other (PV): PV object to compare
+
+        Returns:
+            bool: If other is equal to self or not
+        """
+        eq = False
+
+        if type(other) is type(self):
+            eq = self.name == other.name
+            eq = self.vals == other.vals
+            eq = self.is_readonly == other.is_readonly
+            eq = self.dtype_len == other.dtype_len
+
+        return eq
+
+    def snapshot(self):
+        """ Takes a snapshot of the PV's current state, and stores the values as a formatted string to be placed in a
+        .snap file.
+
+        Returns:
+            str: The .snap file entry for the PV.
+        """
+        ca_reading = caget(self.name)
+
+        # caget returns either a scalar or a ca array, and the pv entry in the .snap file requires the type length.
+        ca_reading_len = 1
+        ca_reading_str = str(ca_reading)
+
+        if type(ca_reading) is cothread.dbr.ca_array:
+            ca_reading_len = len(ca_reading)
+
+            # Raw string format looks like '[ 1 2 \n ... x y \n ]'
+            ca_reading_str = ca_reading_str[1:len(ca_reading_str) - 1].replace('\n', ' ')
+
+        snapshot_entry = ""
+        if self.is_readonly:
+            snapshot_entry = "{} {} {} {}".format(burt.READONLY_SPECIFIER, self.name, ca_reading_len, ca_reading_str)
+        else:
+            snapshot_entry = "{} {} {}".format(self.name, ca_reading_len, ca_reading_str)
+
+        return snapshot_entry
+
+    def restore(self):
+        """ Restores a PV to its saved state. If the PV is specified as read only, do nothing.
+        """
+        if not self.is_readonly:
+            caput(self.name, self.vals)

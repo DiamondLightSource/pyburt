@@ -26,17 +26,31 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
     Returns:
         str: The .snap file BURT header as a string.
     """
+    # DAY MMM  D hh:mm:ss YYYY format
+    current_time = time.ctime()
+
+    # Username (Lastname, Initials (Firstname)) format
+    curr_user = os.getlogin() + " (" + pwd.getpwuid(os.getuid())[4] + ")"
+
+    uid = os.getuid()
+    groupid = pwd.getpwnam(os.getlogin()).pw_gid
+    keywords = "" if keywords is None else keywords
+    comments = "" if comments is None else comments
+    type = burt.TYPE_DEFAULT_VAL
+    directory = os.path.dirname(snap_file)
+    req_file = os.path.basename(req_parser.path)
+
     header_elements = OrderedDict([
         (burt.HEADER_START, ''),
-        (burt.TIME_PREFIX, time.ctime()),
-        (burt.LOGINID_PREFIX, os.getlogin()),
-        (burt.UID_PREFIX, os.getuid()),
-        (burt.GROUPID_PREFIX, pwd.getpwnam(os.getlogin()).pw_gid),
-        (burt.KEYWORDS_PREFIX, "" if keywords is None else keywords),
-        (burt.COMMENTS_PREFIX, "" if comments is None else comments),
-        (burt.TYPE_PREFIX, burt.TYPE_DEFAULT_VAL),
-        (burt.DIRECTORY_PREFIX, os.path.dirname(snap_file)),
-        (burt.REQ_FILE_PREFIX, req_parser.path),
+        (burt.TIME_PREFIX, current_time),
+        (burt.LOGINID_PREFIX, curr_user),
+        (burt.UID_PREFIX, uid),
+        (burt.GROUPID_PREFIX, groupid),
+        (burt.KEYWORDS_PREFIX, keywords),
+        (burt.COMMENTS_PREFIX, comments),
+        (burt.TYPE_PREFIX, type),
+        (burt.DIRECTORY_PREFIX, directory),
+        (burt.REQ_FILE_PREFIX, req_file),
         (burt.HEADER_END, '')
     ])
 
@@ -49,10 +63,10 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
         elif prefix == burt.DIRECTORY_PREFIX:
             header += "{} {}\n".format(prefix, header_elements[prefix])
 
-        # 10 space alignment from the left after the prefix.
+        # 10 space alignment from the left after the prefix for the non special cases.
         else:
-            left_padding = " " * (10 - len(burt.PREFIX_DELIMITER) - len(prefix))
-            header += prefix + burt.PREFIX_DELIMITER + left_padding + str(header_elements[prefix]) + os.linesep
+            left_padding = " " * (10 - len(burt.COLON) - len(prefix))
+            header += prefix + burt.COLON + left_padding + str(header_elements[prefix]) + os.linesep
 
     return header
 
@@ -70,19 +84,10 @@ def _gen_snap_footer(req_parser):
     footer = ""
 
     pvs = req_parser.pvs
+
     for pv in pvs:
-        ca_reading = caget(pv)
-
-        # caget returns either a scalar or a ca array, and the pv entry in the .snap file requires the type length.
-        ca_reading_len = 1
-        ca_reading_str = str(ca_reading)
-
-        if type(ca_reading) is cothread.dbr.ca_array:
-            ca_reading_len = len(ca_reading)
-            # Raw string format looks like '[ 1 2 \n ... x y \n ]'
-            ca_reading_str = ca_reading_str[1:len(ca_reading_str) - 1].replace('\n', ' ')
-
-        footer += "{} {} {}".format(pv, ca_reading_len, ca_reading_str)
+        snapshot_entry = pv.snapshot()
+        footer += snapshot_entry
         footer += os.linesep
 
     return footer
@@ -125,7 +130,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
 
 
 def restore(snap_file):
-    """Restores the state of the PVs in the .snap file.
+    """Restores the state of the PVs in the .snap file, if not specified as read only.
 
     Args:
         snap_file (str): The path to the .snap file.
@@ -141,7 +146,4 @@ def restore(snap_file):
 
     pv_snapshots = snap_parser.pv_snapshots
     for pv in pv_snapshots:
-        # Unknown purpose of ca array lengths in a .snap file.
-        # ca_arr_len = pv_snapshots[pv][0]
-        ca_vals = pv_snapshots[pv][1]
-        caput(pv, ca_vals)
+        pv.restore()

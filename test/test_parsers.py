@@ -3,6 +3,7 @@ import pytest
 import test
 import burt
 from burt import parser
+from burt.pv import PV
 
 
 def test_base_case_req_parser():
@@ -20,9 +21,10 @@ def test_base_case_req_parser():
 def test_basic_case_1_req_parser():
     """Runs the .req parser against a basic case.
     """
-    correct_pv_list = ["SR01C-DI-COL-01:CENTRE", "SR01C-DI-COL-01:GAP", "SR01C-DI-COL-02:CENTRE", "SR01C-DI-COL-02:GAP",
-                       "SR01C-DI-COL-01:POS1", "SR01C-DI-COL-01:POS2", "SR01C-DI-COL-02:POS1",
-                       "SR01C-DI-COL-02:POS2", "SR-CS-RING-01:MODE"]
+    correct_pv_list = [PV("SR01C-DI-COL-01:CENTRE"), PV("SR01C-DI-COL-01:GAP"), PV("SR01C-DI-COL-02:CENTRE"),
+                       PV("SR01C-DI-COL-02:GAP"),
+                       PV("SR01C-DI-COL-01:POS1"), PV("SR01C-DI-COL-01:POS2"), PV("SR01C-DI-COL-02:POS1"),
+                       PV("SR01C-DI-COL-02:POS2"), PV("SR-CS-RING-01:MODE")]
     req_parser = parser.ReqParser(test.REQ_FILE_1)
     assert test.REQ_FILE_1 == req_parser.path
     assert 0 == len(req_parser.pvs)
@@ -30,13 +32,14 @@ def test_basic_case_1_req_parser():
     req_parser.parse()
     assert test.REQ_FILE_1 == req_parser.path
     assert 9 == len(req_parser.pvs)
+
     assert correct_pv_list == req_parser.pvs
 
 
 def test_inline_comment():
     """Runs the parsers against a problematic case with inline comments next to PVs.
     """
-    correct_pv_list = ["SR01C-DI-COL-01:CENTRE", "SR01C-DI-COL-01:GAP", "SR01C-DI-COL-02:CENTRE"]
+    correct_pv_list = [PV("SR01C-DI-COL-01:CENTRE"), PV("SR01C-DI-COL-01:GAP"), PV("SR01C-DI-COL-02:CENTRE")]
 
     req_parser = parser.ReqParser(test.REQ_FILE_WITH_INLINE_COMMENTS)
     req_parser.parse()
@@ -69,10 +72,10 @@ def test_base_case_snap_parser():
 def test_snap_parser_scalars():
     """Runs the .snap parser against a basic case with only PV scalars.
     """
-    correct_pv_snapshots = {"SR01C-DI-COL-01:POS1": ("1", ["3.259328000000000e+00"]),
-                            "SR01C-DI-COL-01:POS2": ("1", ["-3.276854000000000e+00"]),
-                            "SR01C-DI-COL-02:POS1": ("1", ["-1.200000000000000e+01"]),
-                            "SR01C-DI-COL-02:POS2": ("1", ["1.200000000000000e+01"])}
+    correct_pv_snapshots = [PV("SR01C-DI-COL-01:POS1", ["3.259328000000000e+00"], dtype_len=1),
+                            PV("SR01C-DI-COL-01:POS2", ["-3.276854000000000e+00"], dtype_len=1),
+                            PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01"], dtype_len=1),
+                            PV("SR01C-DI-COL-02:POS2", ["1.200000000000000e+01"], dtype_len=1)]
     snap_parser = parser.SnapParser(test.SNAP_FILE_1)
     assert test.SNAP_FILE_1 == snap_parser.path
     assert 0 == len(snap_parser.pv_snapshots)
@@ -105,11 +108,12 @@ def test_snap_parser_scalars():
 def test_snap_parser_ca_arr():
     """Runs the .snap parser against a case with ca arrays.
     """
-    correct_pv_snapshots = {
-        "SR01C-DI-COL-01:POS1": ("3", ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"]),
-        "SR01C-DI-COL-01:POS2": ("1", ["-3.276854000000000e+00"]),
-        "SR01C-DI-COL-02:POS1": ("2", ["-1.200000000000000e+01", "-1.200000000000000e+01"]),
-        "SR01C-DI-COL-02:POS2": ("1", ["1.200000000000000e+01"])}
+    correct_pv_snapshots = [
+        PV("SR01C-DI-COL-01:POS1", ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"],
+           dtype_len=3),
+        PV("SR01C-DI-COL-01:POS2", ["-3.276854000000000e+00"], dtype_len=1),
+        PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01", "-1.200000000000000e+01"], dtype_len=2),
+        PV("SR01C-DI-COL-02:POS2", ["1.200000000000000e+01"], dtype_len=1)]
 
     snap_parser = parser.SnapParser(test.SNAP_FILE_2)
 
@@ -140,16 +144,6 @@ def test_incorrect_snap_header():
 def test_blank_snap_header():
     """Runs the .snap parser against a case where there are no header contents.
     """
-    snap_parser = parser.SnapParser(test.BLANK_HEADER_CONTENTS)
-    snap_parser.parse()
-    assert test.BLANK_HEADER_CONTENTS == snap_parser.path
-    assert 0 == len(snap_parser.pv_snapshots)
-    assert "" == snap_parser.time
-    assert "" == snap_parser.login_id
-    assert "" == snap_parser.u_id
-    assert "" == snap_parser.group_id
-    assert "" == snap_parser.keywords
-    assert "" == snap_parser.comments
-    assert "" == snap_parser.type
-    assert "" == snap_parser.directory
-    assert "" == snap_parser.req_file
+    with pytest.raises(parser.ParserException):
+        snap_parser = parser.SnapParser(test.BLANK_HEADER_CONTENTS)
+        snap_parser.parse()

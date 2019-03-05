@@ -35,7 +35,7 @@ def test_blank_snapshot():
     assert not snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
     assert "test/testables" == snap_parser.directory
-    assert test.BLANK_REQ_FILE == snap_parser.req_file
+    assert os.path.basename(test.BLANK_REQ_FILE) == snap_parser.req_file
     assert not snap_parser.pv_snapshots
 
     # cleanup
@@ -85,12 +85,13 @@ def test_snapshot_1_scalars():
     assert test_comment == snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
     assert "test/testables" == snap_parser.directory
-    assert test.REQ_FILE_1 == snap_parser.req_file
+    assert os.path.basename(test.REQ_FILE_1) == snap_parser.req_file
 
     # Known scalar PV
-    snapshot_vals = snap_parser.pv_snapshots[test.PV_SCALAR_1]
-    assert snapshot_vals[0] == '1'
-    assert len(snapshot_vals[1]) == 1
+    scalar_pv_snapshot = snap_parser.pv_snapshots[0]
+    assert scalar_pv_snapshot.name == "SR01C-DI-COL-01:CENTRE"
+    assert scalar_pv_snapshot.dtype_len == 1
+    assert len(scalar_pv_snapshot.vals) == 1
 
     # cleanup
     os.remove(tmp_dest)
@@ -120,13 +121,13 @@ def test_snapshot_1_ca_arr():
     assert test_comment == snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
     assert "test/testables" == snap_parser.directory
-    assert test.REQ_FILE_2 == snap_parser.req_file
+    assert os.path.basename(test.REQ_FILE_2) == snap_parser.req_file
 
     # Known ca array PV
-    snapshot_length_ca_arr_pv = snap_parser.pv_snapshots[test.PV_WITH_CA_ARR][0]
-    snapshot_vals_ca_arr_pv = snap_parser.pv_snapshots[test.PV_WITH_CA_ARR][1]
-    assert snapshot_length_ca_arr_pv == '936'
-    assert len(snapshot_vals_ca_arr_pv) == 936
+    snapshot_ca_arr_pv = snap_parser.pv_snapshots[1]
+    assert snapshot_ca_arr_pv.name == "SR-DI-PICO-01:BUCKETS"
+    assert snapshot_ca_arr_pv.dtype_len == 936
+    assert len(snapshot_ca_arr_pv.vals) == 936
 
     # cleanup
     os.remove(tmp_dest)

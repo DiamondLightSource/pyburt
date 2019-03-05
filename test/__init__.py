@@ -6,7 +6,7 @@ REQ_FILE_1 = "test/testables/test_1.req"
 REQ_FILE_2 = "test/testables/test_2.req"
 SNAP_FILE_1 = "test/testables/test_1.snap"
 SNAP_FILE_2 = "test/testables/test_2.snap"
-WRONG_HEADER = "test/testables/wrong_header.snap"
+WRONG_HEADER = "test/testables/missing_bottom_burt_header.snap"
 BLANK_HEADER_CONTENTS = "test/testables/only_header.snap"
 
 # Sample PVs to test against

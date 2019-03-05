@@ -1,5 +1,6 @@
 """ Various parsers which read BURT related input/output files and encapsulates the information."""
 import burt
+from burt.pv import PV
 
 
 class ReqParser:
@@ -7,14 +8,16 @@ class ReqParser:
 
     The format of a .req file is:
 
-        <PV 1>
+        <Optional RO specifier> <PV 1>
         ...
         # File comments are preceded by a hash sign.
-        <PV N>
+        <Optional RO specifier> <PV N>
+
+    See test/testables for examples.
 
     Attributes:
-        path (str): The absolute path to the .req file.
-        pvs (list): A list of pvs contained in the .req file.
+        path (str): The absolute path to a .req file.
+        pvs (list): A list of PV objects representing pvs contained in a .req file.
     """
 
     def __init__(self, path):
@@ -31,19 +34,22 @@ class ReqParser:
         """
         with open(self.path, 'r') as f:
             for line in f:
-                if line.startswith(burt.LINE_COMMENT):
+                is_comment_line = line.startswith(burt.LINE_COMMENT)
+                is_blank_line = not line.strip()
+
+                if is_comment_line or is_blank_line:
                     pass
 
-                elif line.strip():
-                    # RO SR01C-DI-COL-01:POS1 -> SR01C-DI-COL-01:POS1
-                    if line.startswith(burt.READONLY_SPECIFIER):
-                        line = line[len(burt.READONLY_SPECIFIER):]
-
-                    # SR01C-DI-COL-01:POS1 # Random inline comment -> SR01C-DI-COL-01:POS1
+                else:
+                    # Slice inline comments.
                     if burt.LINE_COMMENT in line:
                         line = line[:line.find(burt.LINE_COMMENT)]
 
-                    self.pvs.append(line.strip())
+                    is_readonly = line.strip().startswith(burt.READONLY_SPECIFIER)
+                    pv_name = line.split()[1].strip() if is_readonly else line.strip()
+
+                    pv = PV(pv_name, is_readonly=is_readonly)
+                    self.pvs.append(pv)
 
 
 class SnapParser:
@@ -56,17 +62,18 @@ class SnapParser:
         ...
         <PREFIX N> <VALUE>
         <END BURT HEADER>
-        <PV 1> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
+        <Optional RO specifier> <PV 1> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
         ...
         # File comments are preceded by a hash sign.
-        <PV N> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
+        <Optional RO specifier> <PV N> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
 
-    Where <CA ARRAY LENGTH> is 1 if the PV readings are not represented by a CA array. See test/testables for examples.
+    Where <CA ARRAY LENGTH> is 1 if the PV readings are scalar.
+
+    See test/testables for examples.
 
     Attributes:
-        path (str): The absolute path to the .snap file.
-        pv_snapshots (dict): A dict of pvs contained in the .snap file, where a key corresponds to a pv, and the
-            corresponding value is a tuple of (CA ARRAY LENGTH, [CA ARRAY or FLOAT])
+        path (str): The absolute path to a .snap file.
+        pv_snapshots (list): A list of PV objects representing pvs stored in a .snap file.
         time (str): The time stored in the BURT header.
         login_id (str): The login ID stored in the BURT header.
         u_id (str): The UID stored in the BURT header.
@@ -97,7 +104,7 @@ class SnapParser:
             path (str): The absolute path to the .snap file.
         """
         self.path = path
-        self.pv_snapshots = {}
+        self.pv_snapshots = []
         self.time = ''
         self.login_id = ''
         self.u_id = ''
@@ -114,20 +121,27 @@ class SnapParser:
         with open(self.path, 'r') as f:
             file_string = f.read()
 
-            if (burt.HEADER_START not in file_string) or (burt.HEADER_END not in file_string):
+            is_bottom_burt_header_present = burt.HEADER_END in file_string
+            if not is_bottom_burt_header_present:
                 raise ParserException(
-                    "Malformed .snap header: BURT headers missing: ")
+                    "Malformed .snap header: Bottom BURT header is missing.")
 
             header, body = [part.strip() for part in file_string.split(burt.HEADER_END)]
             header_lines = header.splitlines()
             body_lines = body.splitlines()
 
-            if header_lines[0] != burt.HEADER_START:
+            is_top_burt_header_present = (header_lines[0] == burt.HEADER_START)
+            if not is_top_burt_header_present:
                 raise ParserException(
-                    "Malformed .snap header. Expected header start: " + burt.HEADER_START + ". Got: " +
-                    header_lines[0])
+                    "Malformed .snap header: Top BURT header is missing.")
+            header_lines = header_lines[1:]
 
-            self._parse_header(header_lines[1:])
+            expected_header_line_count = len(self._HEADER_ATTRIBUTES)
+            if len(header_lines) != expected_header_line_count:
+                raise ParserException(
+                    "Malformed .snap header: Missing prefix/value pairs in BURT header.")
+
+            self._parse_header(header_lines)
             self._parse_body(body_lines)
 
     def _parse_header(self, header_lines):
@@ -135,8 +149,8 @@ class SnapParser:
         """
         for line in header_lines:
             # Ugly wart of .snap files. Directory line doesn't have a colon.
-            if burt.PREFIX_DELIMITER in line:
-                key, value = (part.strip() for part in line.split(burt.PREFIX_DELIMITER, 1))
+            if burt.COLON in line:
+                key, value = (part.strip() for part in line.split(burt.COLON, 1))
             else:
                 key, value = (part.strip() for part in line.split(None, 1))
             setattr(self, SnapParser._HEADER_ATTRIBUTES[key], value)
@@ -145,17 +159,31 @@ class SnapParser:
         """Parses the body portion of a .snap file.
         """
         for line in body_lines:
-            if line.startswith(burt.LINE_COMMENT):
+            is_comment_line = line.startswith(burt.LINE_COMMENT)
+            is_blank_line = not line.strip()
+
+            if is_comment_line or is_blank_line:
                 pass
 
-            elif line.strip():
-                pv_snapshot = line.split()
+            else:
+                # Slice inline comments.
+                if burt.LINE_COMMENT in line:
+                    line = line[:line.find(burt.LINE_COMMENT)]
+
+                pv_snapshot = line.strip().split()
                 assert len(pv_snapshot) >= 3
 
-                pv_name = pv_snapshot[0]
-                ca_arr_len = pv_snapshot[1]
-                ca_arr_vals = pv_snapshot[2:]
-                self.pv_snapshots[pv_name] = (ca_arr_len, ca_arr_vals)
+                is_readonly = (pv_snapshot[0].strip() == burt.READONLY_SPECIFIER)
+                pv_name_index = 1 if is_readonly else 0
+                dtype_index = pv_name_index + 1
+                vals_index = dtype_index + 1
+
+                pv_name = pv_snapshot[pv_name_index].strip()
+                dtype_len = pv_snapshot[dtype_index].strip()
+                vals = pv_snapshot[vals_index:]
+
+                pv = PV(pv_name, vals, is_readonly, int(dtype_len))
+                self.pv_snapshots.append(pv)
 
 
 class ParserException(Exception):
