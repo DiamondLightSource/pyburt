@@ -1,0 +1,13 @@
+--- Start BURT header
+Time:     blablabla
+Login ID:        whitespace           \n\n\n           \t                        ops-cc83 (Chris Christou)
+Eff  UID: not a number
+Group ID                     : 37245 # Random comment and colon has extraneous whitespace
+Keywords: _/#"1asd-323430==_`¬~@"0872983\|/.,m';][}{`,.';:` kw
+Comments:
+Type:     Absolute
+Directory /home/ops/burt/backupFiles
+Req File: /home/ops/burt/requestFiles/SR-DI.req
+--- End BURT header
+SR01C-DI-COL-02:POS2 1 1.200000000000000e+01
+SR01C-DI-COL-03:POS3 3 666 111 222

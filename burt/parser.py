@@ -34,16 +34,11 @@ class ReqParser:
         """
         with open(self.path, 'r') as f:
             for line in f:
-                is_comment_line = line.startswith(burt.LINE_COMMENT)
-                is_blank_line = not line.strip()
-
-                if is_comment_line or is_blank_line:
+                if _skippable_line(line):
                     pass
 
                 else:
-                    # Slice inline comments.
-                    if burt.LINE_COMMENT in line:
-                        line = line[:line.find(burt.LINE_COMMENT)]
+                    line = _clean_line(line)
 
                     is_readonly = line.strip().startswith(burt.READONLY_SPECIFIER)
                     pv_name = line.split()[1].strip() if is_readonly else line.strip()
@@ -121,57 +116,65 @@ class SnapParser:
         with open(self.path, 'r') as f:
             file_string = f.read()
 
-            is_bottom_burt_header_present = burt.HEADER_END in file_string
-            if not is_bottom_burt_header_present:
+            are_burt_headers_present = (burt.HEADER_END in file_string) and (burt.HEADER_START in file_string)
+            if not are_burt_headers_present:
                 raise ParserException(
-                    "Malformed .snap header: Bottom BURT header is missing.")
+                    "Malformed .snap header: Missing BURT header.")
 
-            header, body = [part.strip() for part in file_string.split(burt.HEADER_END)]
+            try:
+                header, body = [part.strip() for part in file_string.split(burt.HEADER_END)]
+            except ValueError:
+                raise ParserException("Malformed .snap header: Duplicate BURT headers.")
+
             header_lines = header.splitlines()
             body_lines = body.splitlines()
 
-            is_top_burt_header_present = (header_lines[0] == burt.HEADER_START)
-            if not is_top_burt_header_present:
-                raise ParserException(
-                    "Malformed .snap header: Top BURT header is missing.")
-            header_lines = header_lines[1:]
+            is_burt_header_malformed = (len(header_lines) <= 1) or (header_lines[0] != burt.HEADER_START) or \
+                                       ((len(header_lines) - 1) != len(self._HEADER_ATTRIBUTES))
 
-            expected_header_line_count = len(self._HEADER_ATTRIBUTES)
-            if len(header_lines) != expected_header_line_count:
+            if is_burt_header_malformed:
                 raise ParserException(
-                    "Malformed .snap header: Missing prefix/value pairs in BURT header.")
+                    "Malformed .snap header: Top BURT header and/or prefixes are missing.")
 
-            self._parse_header(header_lines)
+            header_lines_without_top_burt_header = header_lines[1:]
+            self._parse_header(header_lines_without_top_burt_header)
             self._parse_body(body_lines)
 
     def _parse_header(self, header_lines):
         """Parses the header portion of a .snap file.
+    
+        Args:
+            header_lines (list): A newline delimited list of lines in a the .snap header.
         """
         for line in header_lines:
             # Ugly wart of .snap files. Directory line doesn't have a colon.
-            if burt.COLON in line:
-                key, value = (part.strip() for part in line.split(burt.COLON, 1))
+            if ":" in line:
+                key, value = (part.strip() for part in line.split(":", 1))
             else:
                 key, value = (part.strip() for part in line.split(None, 1))
-            setattr(self, SnapParser._HEADER_ATTRIBUTES[key], value)
+
+            try:
+                setattr(self, SnapParser._HEADER_ATTRIBUTES[key], value)
+            except KeyError:
+                raise ParserException("Malformed .snap header: Invalid prefix.")
 
     def _parse_body(self, body_lines):
         """Parses the body portion of a .snap file.
+    
+        Args:
+            body_lines (list): A newline delimited list of lines in a the .snap body.
         """
         for line in body_lines:
-            is_comment_line = line.startswith(burt.LINE_COMMENT)
-            is_blank_line = not line.strip()
-
-            if is_comment_line or is_blank_line:
+            if _skippable_line(line):
                 pass
 
             else:
-                # Slice inline comments.
-                if burt.LINE_COMMENT in line:
-                    line = line[:line.find(burt.LINE_COMMENT)]
+                line = _clean_line(line)
 
                 pv_snapshot = line.strip().split()
-                assert len(pv_snapshot) >= 3
+
+                if len(pv_snapshot) < 3:
+                    raise ParserException("Malformed .snap body: Too few elements.")
 
                 is_readonly = (pv_snapshot[0].strip() == burt.READONLY_SPECIFIER)
                 pv_name_index = 1 if is_readonly else 0
@@ -179,10 +182,9 @@ class SnapParser:
                 vals_index = dtype_index + 1
 
                 pv_name = pv_snapshot[pv_name_index].strip()
-                dtype_len = pv_snapshot[dtype_index].strip()
                 vals = pv_snapshot[vals_index:]
 
-                pv = PV(pv_name, vals, is_readonly, int(dtype_len))
+                pv = PV(pv_name, vals, is_readonly)
                 self.pv_snapshots.append(pv)
 
 
@@ -190,3 +192,32 @@ class ParserException(Exception):
     """ Raised when the parsers run into unexpected malformed formats.
     """
     pass
+
+
+def _skippable_line(line):
+    """Determines if a line should be skipped.
+
+    Args:
+        line (str): The line currently being parsed.
+
+    Returns
+        bool: If the line should be skipped, or not.
+    """
+    is_comment_line = line.strip().startswith('#')
+    is_blank_line = not line.strip()
+    return is_comment_line or is_blank_line
+
+
+def _clean_line(line):
+    """Preprocesses the line for parsing.
+
+    Args:
+        line (str): The line currently being parsed.
+
+    Returns
+        str: The cleaned line.
+    """
+    if '#' in line:
+        line = line[:line.find('#')]
+
+    return line.strip()

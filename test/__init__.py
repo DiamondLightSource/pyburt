@@ -1,20 +1,23 @@
-""" Shared globals used by the python tests."""
-BLANK_REQ_FILE = "test/testables/blank.req"
-BLANK_SNAP_FILE = "test/testables/blank.snap"
-REQ_FILE_WITH_INLINE_COMMENTS = "test/testables/req_with_inline_comments.req"
-REQ_FILE_1 = "test/testables/test_1.req"
-REQ_FILE_2 = "test/testables/test_2.req"
-SNAP_FILE_1 = "test/testables/test_1.snap"
-SNAP_FILE_2 = "test/testables/test_2.snap"
-WRONG_HEADER = "test/testables/missing_bottom_burt_header.snap"
-BLANK_HEADER_CONTENTS = "test/testables/only_header.snap"
+"""test package."""
+# Shared test files
+ARRAYS_AND_SCALARS_SNAP = "test/testables/arrays_and_scalars.snap"
+BLANK_REQ = "test/testables/blank.req"
+BLANK_SNAP = "test/testables/blank.snap"
+DUPLICATE_BURT_HEADERS_SNAP = "test/testables/duplicate_burt_headers.snap"
+INLINE_COMMENTS_REQ = "test/testables/inline_comments.req"
+INLINE_COMMENTS_SNAP = "test/testables/inline_comments.snap"
+MALFORMED_REQ = "test/testables/malformed.req"
+MALFORMED_BODY_SNAP = "test/testables/malformed_body.snap"
+MALFORMED_HEADER_COLONS_SNAP = "test/testables/malformed_header_missing_colons.snap"
+MALFORMED_HEADER_ENTRIES_SNAP = "test/testables/malformed_header_strange_entries.snap"
+MALFORMED_HEADER_TYPO_SNAP = "test/testables/malformed_header_typo_prefixes.snap"
+MISORDERED_BURT_HEADER_SNAP = "test/testables/misordered_burt_headers.snap"
+MISORDERED_HEADER_PREFIXES_SNAP = "test/testables/misordered_header_prefixes.snap"
+MISSING_BOTTOM_HEADER_SNAP = "test/testables/missing_bottom_burt_header.snap"
+MISSING_TOP_HEADER_SNAP = "test/testables/missing_top_burt_header.snap"
+NORMAL_REQ = "test/testables/normal.req"
+ONLY_HEADER_SNAP = "test/testables/only_header.snap"
+SCALARS_SNAP = "test/testables/scalars.snap"
 
-# Sample PVs to test against
-PV_SCALAR_1 = "SR01C-DI-COL-01:POS1"
-PV_WITH_CA_ARR = "SR-DI-PICO-01:BUCKETS"
-
-# The local running PV initialized with the test_ioc.py script. Note: it is a PV of a ca array with five float32
-# elements.
-IOC_LOCAL_PV = "SR-CS-TEST-01:TESTPV"
-IOC_SNAP_FILE_1 = "test/testables/test_ioc_restore_1.snap"  # ca array
-IOC_SNAP_FILE_2 = "test/testables/test_ioc_restore_2.snap"  # scalar
+# Tmp snap file to be deleted after a test run
+TMP_BURT_OUT = "test/testables/tmp.snap"

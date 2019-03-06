@@ -1,7 +1,6 @@
-"""Pyburt package."""
+"""burt package."""
 
 # Various symbols found in .req and .snap files.
-LINE_COMMENT = '#'
 HEADER_START = "--- Start BURT header"
 HEADER_END = "--- End BURT header"
 TIME_PREFIX = "Time"
@@ -14,7 +13,6 @@ TYPE_PREFIX = "Type"
 TYPE_DEFAULT_VAL = "Absolute"  # The Type in a BURT header seems to be always this value, may need to revisit.
 DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
-COLON = ":"
 READONLY_SPECIFIER = "RO"
 
 # .req and .snap file extensions.

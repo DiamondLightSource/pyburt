@@ -1,6 +1,7 @@
 """ Various parsers which read BURT related input/output files and encapsulates the information."""
 import burt
 import cothread
+import os
 from pkg_resources import require
 
 require('cothread')
@@ -13,26 +14,25 @@ class PV:
 
     Attributes:
         name (str): The name of the PV.
-        vals (list): A list of floats containing the PV values. This will be a singleton list if the data type of the
+        vals (list): A list of strings containing the PV values. This will be a singleton list if the data type of the
             PV is not a CA array.
         is_readonly (bool): Whether the PV is read only, or not. If so, it is not restored by pyburt.restore()
         dtype_len (int): The length of the PV reading. If it is a CA array, this will be set to the length of the array,
             otherwise it is set to 1.
     """
 
-    def __init__(self, name, vals=None, is_readonly=False, dtype_len=1):
+    def __init__(self, name, vals=None, is_readonly=False):
         """ Constructor.
 
         Args:
             name (str): The name of the PV.
             vals (list): A list of floats containing the PV values.
             is_readonly (bool): Whether the PV is read only, or not.
-            dtype_len (int): The length of the PV reading.
         """
         self.name = name
         self.vals = vals
         self.is_readonly = is_readonly
-        self.dtype_len = dtype_len
+        self.dtype_len = 1 if vals is None else len(vals)
 
     def __eq__(self, other):
         """ Equality operator override
@@ -46,12 +46,36 @@ class PV:
         eq = False
 
         if type(other) is type(self):
-            eq = self.name == other.name
-            eq = self.vals == other.vals
-            eq = self.is_readonly == other.is_readonly
-            eq = self.dtype_len == other.dtype_len
+            eq = (self.name == other.name)
+            eq = (self.vals == other.vals)
+            eq = (self.is_readonly == other.is_readonly)
+            eq = (self.dtype_len == other.dtype_len)
+            return eq
+        else:
+            return NotImplemented
 
-        return eq
+    def __ne__(self, other):
+        """ Non equality operator override (unnecessary in Python 3).
+
+        Args:
+            other (PV): PV object to compare
+
+        Returns:
+            bool: If other is not equal to self or not
+
+        """
+        if (self == other) is not NotImplemented:
+            return not (self == other)
+        else:
+            return NotImplemented
+
+    def __hash__(self):
+        """ Hash table entry override.
+
+        Returns:
+            int: The hash table entry.
+        """
+        return hash((self.name, self.vals, self.is_readonly, self.dtype_len))
 
     def snapshot(self):
         """ Takes a snapshot of the PV's current state, and stores the values as a formatted string to be placed in a
@@ -70,7 +94,7 @@ class PV:
             ca_reading_len = len(ca_reading)
 
             # Raw string format looks like '[ 1 2 \n ... x y \n ]'
-            ca_reading_str = ca_reading_str[1:len(ca_reading_str) - 1].replace('\n', ' ')
+            ca_reading_str = ca_reading_str[1:len(ca_reading_str) - 1].replace(os.linesep, ' ').strip()
 
         snapshot_entry = ""
         if self.is_readonly:

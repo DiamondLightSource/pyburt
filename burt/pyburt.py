@@ -4,15 +4,12 @@ Provides methods to save from a .req file to a .snap file, and the reverse. Uses
 channel access operations.
 """
 import burt
-import cothread
 import os
 import errno
 import time
 import pwd
-from pkg_resources import require
 
-require('cothread')
-from cothread.catools import caget, caput
+from burt.parser import ReqParser, SnapParser
 from collections import OrderedDict
 
 
@@ -65,8 +62,8 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
 
         # 10 space alignment from the left after the prefix for the non special cases.
         else:
-            left_padding = " " * (10 - len(burt.COLON) - len(prefix))
-            header += prefix + burt.COLON + left_padding + str(header_elements[prefix]) + os.linesep
+            left_padding = " " * (10 - len(":") - len(prefix))
+            header += prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
 
     return header
 
@@ -87,8 +84,7 @@ def _gen_snap_footer(req_parser):
 
     for pv in pvs:
         snapshot_entry = pv.snapshot()
-        footer += snapshot_entry
-        footer += os.linesep
+        footer += snapshot_entry + os.linesep
 
     return footer
 
@@ -112,7 +108,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
         raise ValueError("Invalid .snap file destination.")
 
-    req_parser = burt.parser.ReqParser(req_file)
+    req_parser = ReqParser(req_file)
     req_parser.parse()
 
     burt_header = _gen_burt_header(req_parser, snap_file, comments, keywords)
@@ -141,7 +137,7 @@ def restore(snap_file):
     if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (not os.path.isfile(snap_file)):
         raise ValueError("Invalid .snap file.")
 
-    snap_parser = burt.parser.SnapParser(snap_file)
+    snap_parser = SnapParser(snap_file)
     snap_parser.parse()
 
     pv_snapshots = snap_parser.pv_snapshots

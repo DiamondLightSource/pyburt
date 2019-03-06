@@ -12,7 +12,7 @@ from burt import pyburt
 pyburt.take_snapshot("/path/to/.req/file.req",
     "/path/to/.snap/file.snap", "comment", "keywords")
 
-# Restores PV values in the .snap file.
+# Restores PV values in a .snap file.
 pyburt.restore("/path/to/.snap/file.snap")
 ```
 
@@ -32,12 +32,16 @@ The generated pages are in `docs/_build/html`.
 To run the core pytest tests:
 
 ```bash
+$ pwd
+.../pyburt
+
 $ pipenv shell
-$ pytest -v test
+(pyburt) $ pytest -v test
 ```
 
-There are separate integration tests for testing the `restore` functionality of pyburt. See
-`integration/README.md` for instructions.
+Note: the tests should be run from the root project directory.
+
+There are separate integration tests for pyburt. See `integration/README.md` for instructions.
 
 Note that running pytest against `integration` without running the test IOC first,
 as described in `integration/README.md`, will cause the tests to

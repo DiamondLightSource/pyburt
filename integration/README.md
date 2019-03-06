@@ -29,8 +29,10 @@ Type "help", "copyright", "credits" or "license" for more information.
 (InteractiveConsole)
 >>> 
 ```
-2.) In a separate terminal, run the pytest integration tests. Observe the output and check that
-all tests pass:
+2.) In a separate terminal, run the pytest integration tests. This will perform some BURT restore
+calls on the test IOC server, as well as comparison tests against vanilla BURT.
+
+Observe the output and check that all tests pass. This may take several seconds to complete:
 
 ```bash
 $ pwd

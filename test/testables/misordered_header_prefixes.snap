@@ -1,0 +1,15 @@
+--- Start BURT header
+Keywords: hello world
+Req File: /home/ops/burt/requestFiles/SR-DI.req
+Type:     Absolute
+Group ID: 37245
+Time:     Tue Sep 21 15:07:59 2010
+Login ID: ops-cc83 (Chris Christou)
+Eff  UID: 37245
+Comments: Nominal optics\nInjection efficiency with IDs closed to 5mm is 80%\nResidual kick less than 1mm peak to peak\nOnly changed injection magnets\nRF phasing 94/180 voltage 0.8/1.4
+Directory /home/ops/burt/backupFiles
+--- End BURT header
+SR01C-DI-COL-01:POS1 1 3.259328000000000e+00
+SR01C-DI-COL-01:POS2 1 -3.276854000000000e+00
+SR01C-DI-COL-02:POS1 1 -1.200000000000000e+01
+SR01C-DI-COL-02:POS2 1 1.200000000000000e+01
