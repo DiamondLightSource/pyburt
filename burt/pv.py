@@ -78,29 +78,37 @@ class PV:
         return hash((self.name, self.vals, self.is_readonly, self.dtype_len))
 
     def snapshot(self):
-        """ Takes a snapshot of the PV's current state, and stores the values as a formatted string to be placed in a
+        """ Takes a snapshot of the PV's current state by storing the values as a formatted string to be placed in a
         .snap file.
+
+        The .snap file PV entries require a 15 width precision number(s) in scientific notation.
 
         Returns:
             str: The .snap file entry for the PV.
         """
-        ca_reading = caget(self.name)
+        ca_reading = caget(self.name, datatype=cothread.catools.DBR_ENUM_STR)
 
         # caget returns either a scalar or a ca array, and the pv entry in the .snap file requires the type length.
         ca_reading_len = 1
-        ca_reading_str = str(ca_reading)
+        ca_reading_str = ""
 
         if type(ca_reading) is cothread.dbr.ca_array:
             ca_reading_len = len(ca_reading)
+            # Flattening ca_array
+            ca_reading_str = " ".join(["{:.15e}".format(reading) for reading in ca_reading])
 
-            # Raw string format looks like '[ 1 2 \n ... x y \n ]'
-            ca_reading_str = ca_reading_str[1:len(ca_reading_str) - 1].replace(os.linesep, ' ').strip()
+        # A DBR enum, e.g. "DIAD".
+        elif type(ca_reading) is cothread.dbr.ca_str:
+            ca_reading_str = str(ca_reading)
+
+        else:
+            ca_reading_str = "{:.15e}".format(ca_reading)
 
         snapshot_entry = ""
         if self.is_readonly:
-            snapshot_entry = "{} {} {} {}".format(burt.READONLY_SPECIFIER, self.name, ca_reading_len, ca_reading_str)
-        else:
-            snapshot_entry = "{} {} {}".format(self.name, ca_reading_len, ca_reading_str)
+            snapshot_entry += burt.READONLY_SPECIFIER + " "
+
+        snapshot_entry += "{} {} {}".format(self.name, ca_reading_len, ca_reading_str)
 
         return snapshot_entry
 

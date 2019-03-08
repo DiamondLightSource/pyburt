@@ -46,7 +46,7 @@ def test_burt_vanilla_rb():
     # Without shell=True raises an exception on Python 2.7
     process = subprocess.Popen(burt_rb_cmd, shell=True)
     process.wait()
-    print("BURT process return code: " + str(process.returncode))
+    assert process.returncode == 0
 
     pyburt.take_snapshot(integration.NORMAL_REQ, pyburt_tmp_out, comment, keyword)
 

@@ -14,6 +14,7 @@ TYPE_DEFAULT_VAL = "Absolute"  # The Type in a BURT header seems to be always th
 DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
 READONLY_SPECIFIER = "RO"
+READONLY_NOTIFY_SPECIFIER = "RON"
 
 # .req and .snap file extensions.
 REQ_FILE_EXT = '.req'

@@ -34,8 +34,8 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
     keywords = "" if keywords is None else keywords
     comments = "" if comments is None else comments
     type = burt.TYPE_DEFAULT_VAL
-    directory = os.path.dirname(snap_file)
-    req_file = os.path.basename(req_parser.path)
+    directory = os.getcwd()
+    req_file = req_parser.path
 
     header_elements = OrderedDict([
         (burt.HEADER_START, ''),

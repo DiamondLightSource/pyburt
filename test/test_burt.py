@@ -26,8 +26,8 @@ def test_blank_snapshot():
     assert not snap_parser.keywords
     assert not snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
-    assert "test/testables" == snap_parser.directory
-    assert os.path.basename(test.BLANK_REQ) == snap_parser.req_file
+    assert os.getcwd() == snap_parser.directory
+    assert test.BLANK_REQ == snap_parser.req_file
     assert not snap_parser.pv_snapshots
 
     # cleanup
@@ -75,8 +75,8 @@ def test_snapshot_1_normal():
     assert test_keywords == snap_parser.keywords
     assert test_comment == snap_parser.comments
     assert burt.TYPE_DEFAULT_VAL == snap_parser.type
-    assert "test/testables" == snap_parser.directory
-    assert os.path.basename(test.NORMAL_REQ) == snap_parser.req_file
+    assert os.getcwd() == snap_parser.directory
+    assert test.NORMAL_REQ == snap_parser.req_file
 
     # Known scalar PV
     scalar_pv_snapshot = snap_parser.pv_snapshots[0]
