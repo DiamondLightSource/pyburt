@@ -1,0 +1,10 @@
+rhel7_job:
+  tags:
+    - rhel7
+  script:
+    - virtualenv --python dls-python venv
+    - source venv/bin/activate
+    - pip install pytest
+    - pip install pytest-cov
+    - pip install cothread
+    - python -m pytest --cov=burt test
