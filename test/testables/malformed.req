@@ -1,0 +1,11 @@
+SR01C-DI-COL-01:GAP SR01C-DI-COL-01:CENTRE SR01C-DI-COL-01:MAL % Multiple PV's in one line.
+WO SR01C-DI-COL-01:CENTRE % Bad prefix, only RO or RON expected
+Lorem ipsum Lorem ipsum
+\n\t\nSR01C-DI-COL-01:CENTRE\n\t % Extraenous chars
+!"$£"""^$@::}{[]09=|\/.,><~;''_- % Weird entry
+
+%%%%%
+
+%%
+
+%% TODO: this test .req file needs to be broken up into separate files to isolate the different cases

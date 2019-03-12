@@ -1,0 +1,18 @@
+--- Start BURT header
+Time:     Tue Sep 21 15:07:59 2010
+Login ID: ops-cc83 (Chris Christou)
+Eff  UID: 37245
+Group ID: 37245
+Keywords: hello world
+Comments: Nominal optics\nInjection efficiency with IDs closed to 5mm is 80%\nResidual kick less than 1mm peak to peak\nOnly changed injection magnets\nRF phasing 94/180 voltage 0.8/1.4
+Type:     Absolute
+Directory /home/ops/burt/backupFiles
+Req File: /home/ops/burt/requestFiles/SR-DI.req
+--- End BURT header
+SR01C-DI-COL-01:POS1 1 3.259328000000000e+00 % Inline comments
+SR01C-DI-COL-01:POS2 2 -3.276854000000000e+00 333
+SR01C-DI-COL-02:POS1 1 -1.200000000000000e+01 % Inline comments % Duplicated percent % Duplicated hash 2
+%%%  %%%
+%SR01C-DI-COL-02:POS2 1 1.200000000000000e+01 % This PV should be ignored due to percent in front.
+          %SR01C-DI-COL-02:POS2 1 1.200000000000000e+01 % Comment line with whitespace.
+SR01C-DI-COL-03:POS3 1 666

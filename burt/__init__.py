@@ -1,6 +1,6 @@
-"""Pyburt package."""
+"""burt package."""
+
 # Various symbols found in .req and .snap files.
-LINE_COMMENT = '#'
 HEADER_START = "--- Start BURT header"
 HEADER_END = "--- End BURT header"
 TIME_PREFIX = "Time"
@@ -10,6 +10,17 @@ GROUPID_PREFIX = "Group ID"
 KEYWORDS_PREFIX = "Keywords"
 COMMENTS_PREFIX = "Comments"
 TYPE_PREFIX = "Type"
+TYPE_DEFAULT_VAL = "Absolute"  # The Type in a BURT header seems to be always this value, may need to revisit.
 DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
-PREFIX_DELIMITER = ":"
+READONLY_SPECIFIER = "RO"
+READONLY_NOTIFY_SPECIFIER = "RON"
+INLINE_COMMENT = "%"
+
+# .req and .snap file extensions.
+REQ_FILE_EXT = '.req'
+SNAP_FILE_EXT = '.snap'
+
+# Place after globals as imported modules below make use of globals defined above.
+from burt.snap import take_snapshot
+from burt.restore import restore

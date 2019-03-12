@@ -1,0 +1,6 @@
+SR01C-DI-COL-01:CENTRE % This inline comment should be handled.
+SR01C-DI-COL-01:GAP % This inline comment should be handled. % Another percent sign. % And another.
+%SR01C-DI-COL-02:CENTRE % This PV should be ignored due to percent sign in front.
+                      %SR01C-DI-COL-02:CENTRE % Comment line with whitespace.
+% Comment
+SR01C-DI-COL-01:LEFT
