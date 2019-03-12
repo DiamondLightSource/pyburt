@@ -10,3 +10,11 @@
 
 # Python backup files
 *.pyc
+
+# Testing files
+/.pytest_cache/
+/.coverage
+/htmlcov/
+
+# Virtualenvs
+/venv*/
