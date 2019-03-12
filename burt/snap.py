@@ -7,6 +7,7 @@ import os
 import errno
 import time
 import pwd
+import getpass
 
 from burt.parser import ReqParser, SnapParser
 from collections import OrderedDict
@@ -26,19 +27,10 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
     current_time = time.ctime()
 
     # Username (Lastname, Initials (Firstname)) format
-    curr_user = "test"
-    try:
-        curr_user = os.getlogin()
-    except OSError:
-        print("osgetlogin: ")
-
-    try:
-        curr_user = pwd.getpwuid(os.getuid())[4]
-    except OSError:
-        print("curr_user: ")
-
+    curr_user = getpass.getuser() + " (" + pwd.getpwuid(os.getuid())[4] + ")"
+    
     uid = os.getuid()
-    groupid = pwd.getpwnam(os.getlogin()).pw_gid
+    groupid = pwd.getpwnam(getpass.getuser()).pw_gid
     keywords = "" if keywords is None else keywords
     comments = "" if comments is None else comments
     type = burt.TYPE_DEFAULT_VAL
