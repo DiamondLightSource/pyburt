@@ -26,7 +26,16 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
     current_time = time.ctime()
 
     # Username (Lastname, Initials (Firstname)) format
-    curr_user = os.getlogin() + " (" + pwd.getpwuid(os.getuid())[4] + ")"
+    curr_user = "test"
+    try:
+        curr_user = os.getlogin()
+    except OSError:
+        print("osgetlogin: ")
+
+    try:
+        curr_user = pwd.getpwuid(os.getuid())[4]
+    except OSError:
+        print("curr_user: ")
 
     uid = os.getuid()
     groupid = pwd.getpwnam(os.getlogin()).pw_gid
