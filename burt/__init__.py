@@ -21,5 +21,6 @@ INLINE_COMMENT = "%"
 REQ_FILE_EXT = '.req'
 SNAP_FILE_EXT = '.snap'
 
+# Place after globals as imported modules below make use of globals defined above.
 from burt.snap import take_snapshot
 from burt.restore import restore

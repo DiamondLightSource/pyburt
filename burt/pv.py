@@ -85,10 +85,7 @@ class PV:
         Returns:
             str: The class representation.
         """
-        return "<PV name:{} vals:{} readonly?:{} readonly_notify?:{} dtype_len:{}>".format(self.name, self.vals,
-                                                                                           self.is_readonly,
-                                                                                           self.is_readonly_notify,
-                                                                                           self.dtype_len)
+        return str(self.__class__) + ": " + str(self.__dict__)
 
     def __str__(self):
         """ To string override.
