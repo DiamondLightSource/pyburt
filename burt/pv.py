@@ -17,11 +17,12 @@ class PV:
         vals (list): A list of strings containing the PV values. This will be a singleton list if the data type of the
             PV is not a CA array.
         is_readonly (bool): Whether the PV is read only, or not. If so, it is not restored by pyburt.restore()
+        is_readonly_notify (bool): Whether the PV is a read-only-notify type.
         dtype_len (int): The length of the PV reading. If it is a CA array, this will be set to the length of the array,
             otherwise it is set to 1.
     """
 
-    def __init__(self, name, vals=None, is_readonly=False):
+    def __init__(self, name, vals=None, is_readonly=False, is_readonly_notify=False):
         """ Constructor.
 
         Args:
@@ -32,6 +33,7 @@ class PV:
         self.name = name
         self.vals = vals
         self.is_readonly = is_readonly
+        self.is_readonly_notify = is_readonly_notify
         self.dtype_len = 1 if vals is None else len(vals)
 
     def __eq__(self, other):
@@ -46,10 +48,10 @@ class PV:
         eq = False
 
         if type(other) is type(self):
-            eq = (self.name == other.name)
-            eq = (self.vals == other.vals)
-            eq = (self.is_readonly == other.is_readonly)
-            eq = (self.dtype_len == other.dtype_len)
+            eq = (self.name == other.name) and (self.vals == other.vals) and (
+                    self.is_readonly == other.is_readonly) and (
+                         self.is_readonly_notify == other.is_readonly_notify) and (
+                         self.dtype_len == other.dtype_len)
             return eq
         else:
             return NotImplemented
@@ -75,7 +77,26 @@ class PV:
         Returns:
             int: The hash table entry.
         """
-        return hash((self.name, self.vals, self.is_readonly, self.dtype_len))
+        return hash((self.name, self.vals, self.is_readonly, self.is_readonly_notify, self.dtype_len))
+
+    def __repr__(self):
+        """ Class representation override.
+
+        Returns:
+            str: The class representation.
+        """
+        return "<PV name:{} vals:{} readonly?:{} readonly_notify?:{} dtype_len:{}>".format(self.name, self.vals,
+                                                                                           self.is_readonly,
+                                                                                           self.is_readonly_notify,
+                                                                                           self.dtype_len)
+
+    def __str__(self):
+        """ To string override.
+
+        Returns:
+            str: The string representation of the class.
+        """
+        return self.__repr__()
 
     def snapshot(self):
         """ Takes a snapshot of the PV's current state by storing the values as a formatted string to be placed in a
@@ -107,6 +128,8 @@ class PV:
         snapshot_entry = ""
         if self.is_readonly:
             snapshot_entry += burt.READONLY_SPECIFIER + " "
+        elif self.is_readonly_notify:
+            snapshot_entry += burt.READONLY_NOTIFY_SPECIFIER + " "
 
         snapshot_entry += "{} {} {}".format(self.name, ca_reading_len, ca_reading_str)
 
@@ -115,5 +138,9 @@ class PV:
     def restore(self):
         """ Restores a PV to its saved state. If the PV is specified as read only, do nothing.
         """
-        if not self.is_readonly:
+        if not self.is_readonly or not self.is_readonly_notify:
             caput(self.name, self.vals)
+
+        # TODO: write to the no write snapshot file
+        if self.is_readonly_notify:
+            pass

@@ -3,14 +3,14 @@
 import pytest
 import test
 import burt
-from burt import pyburt, parser
+from burt import parser
 import os
 
 
 def test_blank_snapshot():
     """Runs the burt snapshot against a blank .req file.
     """
-    pyburt.take_snapshot(test.BLANK_REQ, test.TMP_BURT_OUT)
+    burt.take_snapshot(test.BLANK_REQ, test.TMP_BURT_OUT)
 
     assert os.path.isfile(test.TMP_BURT_OUT)
     assert os.stat(test.TMP_BURT_OUT).st_size != 0
@@ -38,19 +38,19 @@ def test_bad_file_arguments():
     """Runs the burt script against a case where the file arguments are malformed.
     """
     with pytest.raises(ValueError):
-        pyburt.take_snapshot("", "")
+        burt.take_snapshot("", "")
     with pytest.raises(ValueError):
-        pyburt.take_snapshot("goodbyeworld", "helloworld")
+        burt.take_snapshot("goodbyeworld", "helloworld")
     with pytest.raises(ValueError):
-        pyburt.take_snapshot("goodbyeworld.req", "helloworld.snap")
+        burt.take_snapshot("goodbyeworld.req", "helloworld.snap")
     with pytest.raises(ValueError):
-        pyburt.take_snapshot(test.BLANK_REQ, "helloworld.txt")
+        burt.take_snapshot(test.BLANK_REQ, "helloworld.txt")
     with pytest.raises(ValueError):
-        pyburt.restore("")
+        burt.restore("")
     with pytest.raises(ValueError):
-        pyburt.restore("goodbyeworld")
+        burt.restore("goodbyeworld")
     with pytest.raises(ValueError):
-        pyburt.restore("helloworld.snap")
+        burt.restore("helloworld.snap")
 
 
 def test_snapshot_1_normal():
@@ -59,7 +59,7 @@ def test_snapshot_1_normal():
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    pyburt.take_snapshot(test.NORMAL_REQ, test.TMP_BURT_OUT, test_comment, test_keywords)
+    burt.take_snapshot(test.NORMAL_REQ, test.TMP_BURT_OUT, test_comment, test_keywords)
 
     assert os.path.isfile(test.TMP_BURT_OUT)
     assert os.stat(test.TMP_BURT_OUT).st_size != 0
@@ -98,4 +98,4 @@ def test_blank_restore():
     """Runs burt restore against a blank .snap file.
     """
     with pytest.raises(parser.ParserException):
-        pyburt.restore(test.BLANK_SNAP)
+        burt.restore(test.BLANK_SNAP)

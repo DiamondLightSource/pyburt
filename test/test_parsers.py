@@ -116,8 +116,8 @@ def test_malformed_files():
 def test_req_parser_normal():
     """Runs the .req parser against a basic case.
     """
-    correct_pv_list = [PV("SR01C-DI-COL-01:CENTRE"), PV("SR01C-DI-PICO-01:BUCKETS"), PV("SR01C-DI-COL-02:CENTRE"),
-                       PV("SR01C-DI-COL-02:GAP"), PV("SR01C-DI-COL-01:POS1", is_readonly=True),
+    correct_pv_list = [PV("SR01C-DI-COL-01:CENTRE"), PV("SR-DI-PICO-01:BUCKETS"), PV("SR01C-DI-COL-02:CENTRE"),
+                       PV("SR01C-DI-COL-02:GAP"), PV("SR01C-DI-COL-01:POS1", is_readonly_notify=True),
                        PV("SR01C-DI-COL-01:POS2", is_readonly=True), PV("SR01C-DI-COL-02:POS1", is_readonly=True),
                        PV("SR01C-DI-COL-02:POS2", is_readonly=True), PV("SR-CS-RING-01:MODE")]
     req_parser = parser.ReqParser(test.NORMAL_REQ)

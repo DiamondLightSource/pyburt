@@ -2,7 +2,7 @@
 Time:     blablabla
 Login ID:        whitespace           \n\n\n           \t                        ops-cc83 (Chris Christou)
 Eff  UID: not a number
-Group ID                     : 37245 # Random comment and colon has extraneous whitespace
+Group ID                     : 37245 % Random comment and colon has extraneous whitespace
 Keywords: _/#"1asd-323430==_`¬~@"0872983\|/.,m';][}{`,.';:` kw
 Comments:
 Type:     Absolute

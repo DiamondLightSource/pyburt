@@ -5,7 +5,7 @@ import integration
 import subprocess
 import os
 import filecmp
-from burt import pyburt, parser
+import burt
 
 from pkg_resources import require
 
@@ -19,14 +19,14 @@ def test_restore_integration():
     This test needs to be run manually after the test IOC is set up and running.
     """
     # CA array PV.
-    pyburt.restore(integration.IOC_SNAP_FILE_1)
+    burt.restore(integration.IOC_SNAP_FILE_1)
     ca_arr = caget(integration.IOC_LOCAL_PV)
     assert abs(ca_arr[0] - 3.259328000000000e+00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
 
     # Scalar PV.
-    pyburt.restore(integration.IOC_SNAP_FILE_2)
+    burt.restore(integration.IOC_SNAP_FILE_2)
     ca_arr = caget(integration.IOC_LOCAL_PV)
     assert ca_arr[0] == 2
 
@@ -48,7 +48,7 @@ def test_burt_vanilla_rb():
     process.wait()
     assert process.returncode == 0
 
-    pyburt.take_snapshot(integration.NORMAL_REQ, pyburt_tmp_out, comment, keyword)
+    burt.take_snapshot(integration.NORMAL_REQ, pyburt_tmp_out, comment, keyword)
 
     assert filecmp.cmp(burt_tmp_out, pyburt_tmp_out)
 

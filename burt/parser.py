@@ -1,6 +1,7 @@
 """ Various parsers which read BURT related input/output files and encapsulates the information."""
 import burt
 from burt.pv import PV
+from . import TIME_PREFIX
 
 
 class ReqParser:
@@ -40,10 +41,18 @@ class ReqParser:
                 else:
                     line = _clean_line(line)
 
-                    is_readonly = line.strip().startswith(burt.READONLY_SPECIFIER)
-                    pv_name = line.split()[1].strip() if is_readonly else line.strip()
+                    line_portions = line.split()
+                    if len(line_portions) > 3:
+                        raise ParserException(
+                            "Malformed .req file: Too many elements in line.")
 
-                    pv = PV(pv_name, is_readonly=is_readonly)
+                    is_readonly = line_portions[0].strip() == burt.READONLY_SPECIFIER
+                    is_readonly_notify = line_portions[0].strip() == burt.READONLY_NOTIFY_SPECIFIER
+                    pv_name = line_portions[1].strip() if (is_readonly or is_readonly_notify) else line
+
+                    # TODO: handle third element in .req file (max array count to save from PV)
+
+                    pv = PV(pv_name, is_readonly=is_readonly, is_readonly_notify=is_readonly_notify)
                     self.pvs.append(pv)
 
 
@@ -203,7 +212,7 @@ def _skippable_line(line):
     Returns
         bool: If the line should be skipped, or not.
     """
-    is_comment_line = line.strip().startswith('#')
+    is_comment_line = line.strip().startswith(burt.INLINE_COMMENT)
     is_blank_line = not line.strip()
     return is_comment_line or is_blank_line
 
@@ -217,7 +226,7 @@ def _clean_line(line):
     Returns
         str: The cleaned line.
     """
-    if '#' in line:
-        line = line[:line.find('#')]
+    if burt.INLINE_COMMENT in line:
+        line = line[:line.find(burt.INLINE_COMMENT)]
 
     return line.strip()

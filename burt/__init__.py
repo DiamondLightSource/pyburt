@@ -15,7 +15,11 @@ DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
 READONLY_SPECIFIER = "RO"
 READONLY_NOTIFY_SPECIFIER = "RON"
+INLINE_COMMENT = "%"
 
 # .req and .snap file extensions.
 REQ_FILE_EXT = '.req'
 SNAP_FILE_EXT = '.snap'
+
+from burt.snap import take_snapshot
+from burt.restore import restore

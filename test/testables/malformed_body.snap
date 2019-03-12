@@ -9,12 +9,12 @@ Type:     Absolute
 Directory /home/ops/burt/backupFiles
 Req File: /home/ops/burt/requestFiles/SR-DI.req
 --- End BURT header
-SR01C-DI-COL-01:POS2 # Malformed PVs below
+SR01C-DI-COL-01:POS2 % Malformed PVs below
 SR01C-DI-COL-02:POS1 -1.200000000000000e+01
 SR01C-DI-COL-01:POS4
 WO SR01C-DI-COL-01:POS5 1 1
 random SR01C-DI-COL-01:POS6 1 1
 nonexistent_pvSRO1C-DI-COL-02:POS99 2 1 1
 
-SR01C-DI-COL-02:POS2 1 1.200000000000000e+01 # The PVs below are not malformed.
+SR01C-DI-COL-02:POS2 1 1.200000000000000e+01 % The PVs below are not malformed.
 SR01C-DI-COL-03:POS3 3 666 111 222

@@ -6,14 +6,14 @@
 ## Usage
 
 ```python
-from burt import pyburt
+import burt
 
 # Saves PV values in a .req file into a .snap file along with some additional metadata.
-pyburt.take_snapshot("/path/to/.req/file.req",
+burt.take_snapshot("/path/to/.req/file.req",
     "/path/to/.snap/file.snap", "comment", "keywords")
 
 # Restores PV values in a .snap file.
-pyburt.restore("/path/to/.snap/file.snap")
+burt.restore("/path/to/.snap/file.snap")
 ```
 
 ## Build
