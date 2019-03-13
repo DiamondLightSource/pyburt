@@ -76,8 +76,12 @@ def test_malformed_files():
     """Runs the .snap parser against the malformed .snap files.
     """
     with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.MALFORMED_REQ)
-        snap_parser.parse()
+        req_parser = parser.ReqParser(test.MALFORMED_REQ)
+        req_parser.parse()
+
+    with pytest.raises(parser.ParserException):
+        req_parser = parser.ReqParser(test.MALFORMED_SAVE_LEN_NON_INT_REQ)
+        req_parser.parse()
 
     with pytest.raises(parser.ParserException):
         snap_parser = parser.SnapParser(test.MISSING_BOTTOM_HEADER_SNAP)
@@ -124,6 +128,10 @@ def test_req_parser_normal():
                        PV("SR01C-DI-COL-02:CENTRE"),
                        PV("SR01C-DI-COL-02:GAP"),
                        PV("SR-DI-PICO-01:BUCKETS", save_len=5),
+                       PV("SR-DI-PICO-01:BUCKETS", is_readonly=True,
+                          save_len=10),
+                       PV("SR-DI-PICO-01:BUCKETS", is_readonly_notify=True,
+                          save_len=25),
                        PV("SR01C-DI-COL-01:POS1", is_readonly_notify=True),
                        PV("SR01C-DI-COL-01:POS2", is_readonly=True),
                        PV("SR01C-DI-COL-02:POS1", is_readonly=True),
@@ -135,7 +143,7 @@ def test_req_parser_normal():
 
     req_parser.parse()
     assert test.NORMAL_REQ == req_parser.path
-    assert 10 == len(req_parser.pvs)
+    assert 12 == len(req_parser.pvs)
     assert correct_pv_list == req_parser.pvs
 
 

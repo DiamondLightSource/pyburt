@@ -53,7 +53,7 @@ def test_bad_file_arguments():
         burt.restore("helloworld.snap")
 
 
-def test_snapshot_1_normal():
+def test_snapshot_normal():
     """Runs the burt script against a take snapshot test of a normal .req file with scalars and ca array pvs.
     """
     test_comment = "Hello World"
@@ -68,7 +68,7 @@ def test_snapshot_1_normal():
     # Reverse parsing should have the correct contents for the independent properties, e.g. keywords, directory, etc.
     snap_parser = parser.SnapParser(test.TMP_BURT_OUT)
     snap_parser.parse()
-    assert 10 == len(snap_parser.pv_snapshots)
+    assert 12 == len(snap_parser.pv_snapshots)
     assert snap_parser.time
     assert snap_parser.login_id
     assert snap_parser.u_id
@@ -83,16 +83,40 @@ def test_snapshot_1_normal():
     scalar_pv_snapshot = snap_parser.pv_snapshots[0]
     assert scalar_pv_snapshot.name == "SR01C-DI-COL-01:CENTRE"
     assert len(scalar_pv_snapshot.vals) == 1
-    assert len(scalar_pv_snapshot.vals) == 1
 
     # Known ca array PV
     snapshot_ca_arr_pv = snap_parser.pv_snapshots[1]
     assert snapshot_ca_arr_pv.name == "SR-DI-PICO-01:BUCKETS"
     assert len(snapshot_ca_arr_pv.vals) == 936
-    assert len(snapshot_ca_arr_pv.vals) == 936
+
+    # The PVs below have a known specified max save length (see
+    # testables/normal.req) and readonly modifiers.
+    snapshot_save_length_spec_1 = snap_parser.pv_snapshots[4]
+    assert snapshot_save_length_spec_1.name == "SR-DI-PICO-01:BUCKETS"
+    assert len(snapshot_save_length_spec_1.vals) == 5
+
+    snapshot_save_length_spec_2 = snap_parser.pv_snapshots[5]
+    assert snapshot_save_length_spec_2.name == "SR-DI-PICO-01:BUCKETS"
+    assert len(snapshot_save_length_spec_2.vals) == 10
+    assert snapshot_save_length_spec_2.is_readonly
+
+    snapshot_save_length_spec_3 = snap_parser.pv_snapshots[6]
+    assert snapshot_save_length_spec_3.name == "SR-DI-PICO-01:BUCKETS"
+    assert len(snapshot_save_length_spec_3.vals) == 25
+    assert snapshot_save_length_spec_3.is_readonly_notify
 
     # cleanup
     os.remove(test.TMP_BURT_OUT)
+
+
+def test_snapshot_invalid_save_len():
+    """
+    Try to save a PV with a length specified that is greater than the PV
+    data size. This is a case which would not be  caught by the parser.
+    """
+    with pytest.raises(ValueError):
+        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ,
+                           test.TMP_BURT_OUT)
 
 
 def test_blank_restore():

@@ -153,10 +153,10 @@ class SnapParser:
         with open(self.path, 'r') as f:
             file_string = f.read()
 
-            are_burt_headers_present = (
-                    (burt.HEADER_END in file_string) and
-                    (burt.HEADER_START in file_string)
-            )
+            are_burt_headers_present = \
+                (burt.HEADER_END in file_string) and (burt.HEADER_START in
+                                                      file_string)
+
             if not are_burt_headers_present:
                 raise ParserException(
                     "Malformed .snap header: Missing BURT header.")
@@ -230,7 +230,7 @@ class SnapParser:
                 is_readonly_notify = pv_snapshot[0].strip(
                 ) == burt.READONLY_NOTIFY_SPECIFIER
 
-                pv_name_index = 1 if is_readonly else 0
+                pv_name_index = 1 if (is_readonly or is_readonly_notify) else 0
                 dtype_index = pv_name_index + 1
                 vals_index = dtype_index + 1
 

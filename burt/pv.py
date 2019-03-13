@@ -41,9 +41,9 @@ class PV:
         """
         self.name = name
         self.vals = vals
+        self.save_len = save_len
         self.is_readonly = is_readonly
         self.is_readonly_notify = is_readonly_notify
-        self.save_len = save_len
 
     def __eq__(self, other):
         """ Equality operator override

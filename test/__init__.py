@@ -11,6 +11,10 @@ MALFORMED_BODY_SNAP = "test/testables/malformed_body.snap"
 MALFORMED_HEADER_COLONS_SNAP = "test/testables/malformed_header_missing_colons.snap"
 MALFORMED_HEADER_ENTRIES_SNAP = "test/testables/malformed_header_strange_entries.snap"
 MALFORMED_HEADER_TYPO_SNAP = "test/testables/malformed_header_typo_prefixes.snap"
+MALFORMED_SAVE_LEN_NON_INT_REQ = \
+    "test/testables/malformed_save_len_non_int.req"
+MALFORMED_SAVE_LEN_TOO_LARGE_REQ = \
+    "test/testables/malformed_save_len_too_large.req"
 MISORDERED_BURT_HEADER_SNAP = "test/testables/misordered_burt_headers.snap"
 MISORDERED_HEADER_PREFIXES_SNAP = "test/testables/misordered_header_prefixes.snap"
 MISSING_BOTTOM_HEADER_SNAP = "test/testables/missing_bottom_burt_header.snap"
