@@ -10,7 +10,8 @@ GROUPID_PREFIX = "Group ID"
 KEYWORDS_PREFIX = "Keywords"
 COMMENTS_PREFIX = "Comments"
 TYPE_PREFIX = "Type"
-TYPE_DEFAULT_VAL = "Absolute"  # The Type in a BURT header seems to be always this value, may need to revisit.
+# The Type in a BURT header seems to be always this value, may need to revisit.
+TYPE_DEFAULT_VAL = "Absolute"
 DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
 READONLY_SPECIFIER = "RO"
@@ -21,6 +22,7 @@ INLINE_COMMENT = "%"
 REQ_FILE_EXT = '.req'
 SNAP_FILE_EXT = '.snap'
 
-# Place after globals as imported modules below make use of globals defined above.
-from burt.snap import take_snapshot
+# Place after globals as imported modules below make use of globals
+# defined above.
 from burt.restore import restore
+from burt.snap import take_snapshot

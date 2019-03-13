@@ -6,8 +6,9 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 sphinx = "*"
-
-[packages]
+pycodestyle = "*"
 
 [requires]
 python_version = "3.7"
+
+[packages]
