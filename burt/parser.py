@@ -2,7 +2,6 @@
 the information."""
 import burt
 from burt.pv import PV
-from . import TIME_PREFIX
 
 
 class ReqParser:
@@ -49,18 +48,37 @@ class ReqParser:
                         raise ParserException(
                             "Malformed .req file: Too many elements in line.")
 
-                    is_readonly = line_portions[0].strip(
-                    ) == burt.READONLY_SPECIFIER
-                    is_readonly_notify = line_portions[0].strip(
-                    ) == burt.READONLY_NOTIFY_SPECIFIER
-                    pv_name = line_portions[1].strip() if (
-                            is_readonly or is_readonly_notify) else line
+                    is_readonly = \
+                        line_portions[0].strip() == burt.READONLY_SPECIFIER
+                    is_readonly_notify = \
+                        line_portions[0].strip() == \
+                        burt.READONLY_NOTIFY_SPECIFIER
 
-                    # TODO: handle third element in .req file (max array count
-                    # to save from PV)
+                    save_len_index = None
+                    if is_readonly or is_readonly_notify:
+                        pv_name = line_portions[1]
+
+                        if len(line_portions) == 3:
+                            save_len_index = 2
+                    else:
+                        pv_name = line_portions[0]
+
+                        if len(line_portions) == 2:
+                            save_len_index = 1
+
+                    save_len = None
+                    if save_len_index:
+                        try:
+                            save_len = int(line_portions[save_len_index])
+                        except ValueError:
+                            raise ParserException(
+                                "Malformed .req file: save length "
+                                "(third tuple element) must be an "
+                                "integer")
 
                     pv = PV(pv_name, is_readonly=is_readonly,
-                            is_readonly_notify=is_readonly_notify)
+                            is_readonly_notify=is_readonly_notify,
+                            save_len=save_len)
                     self.pvs.append(pv)
 
 
@@ -209,6 +227,9 @@ class SnapParser:
 
                 is_readonly = (pv_snapshot[0].strip()
                                == burt.READONLY_SPECIFIER)
+                is_readonly_notify = (pv_snapshot[0].strip()
+                                      == burt.READONLY_NOTIFY_SPECIFIER)
+
                 pv_name_index = 1 if is_readonly else 0
                 dtype_index = pv_name_index + 1
                 vals_index = dtype_index + 1
@@ -216,7 +237,8 @@ class SnapParser:
                 pv_name = pv_snapshot[pv_name_index].strip()
                 vals = pv_snapshot[vals_index:]
 
-                pv = PV(pv_name, vals, is_readonly)
+                pv = PV(pv_name, vals, is_readonly=is_readonly,
+                        is_readonly_notify=is_readonly_notify)
                 self.pv_snapshots.append(pv)
 
 

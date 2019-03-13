@@ -39,12 +39,15 @@ def test_inline_comments():
     """Runs the parsers against a problematic case with inline comments next to PVs.
     """
 
-    correct_pv_list_req = [PV("SR01C-DI-COL-01:CENTRE"), PV("SR01C-DI-COL-01:GAP"), PV("SR01C-DI-COL-01:LEFT")]
+    correct_pv_list_req = [PV("SR01C-DI-COL-01:CENTRE"),
+                           PV("SR01C-DI-COL-01:GAP"),
+                           PV("SR01C-DI-COL-01:LEFT")]
 
-    correct_pv_snapshots = [PV("SR01C-DI-COL-01:POS1", ["3.259328000000000e+00"]),
-                            PV("SR01C-DI-COL-01:POS2", ["-3.276854000000000e+00", "333"]),
-                            PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01"]),
-                            PV("SR01C-DI-COL-03:POS3", ["666"])]
+    correct_pv_snapshots = [
+        PV("SR01C-DI-COL-01:POS1", ["3.259328000000000e+00"]),
+        PV("SR01C-DI-COL-01:POS2", ["-3.276854000000000e+00", "333"]),
+        PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01"]),
+        PV("SR01C-DI-COL-03:POS3", ["666"])]
 
     req_parser = parser.ReqParser(test.INLINE_COMMENTS_REQ)
     req_parser.parse()
@@ -116,27 +119,34 @@ def test_malformed_files():
 def test_req_parser_normal():
     """Runs the .req parser against a basic case.
     """
-    correct_pv_list = [PV("SR01C-DI-COL-01:CENTRE"), PV("SR-DI-PICO-01:BUCKETS"), PV("SR01C-DI-COL-02:CENTRE"),
-                       PV("SR01C-DI-COL-02:GAP"), PV("SR01C-DI-COL-01:POS1", is_readonly_notify=True),
-                       PV("SR01C-DI-COL-01:POS2", is_readonly=True), PV("SR01C-DI-COL-02:POS1", is_readonly=True),
-                       PV("SR01C-DI-COL-02:POS2", is_readonly=True), PV("SR-CS-RING-01:MODE")]
+    correct_pv_list = [PV("SR01C-DI-COL-01:CENTRE"),
+                       PV("SR-DI-PICO-01:BUCKETS"),
+                       PV("SR01C-DI-COL-02:CENTRE"),
+                       PV("SR01C-DI-COL-02:GAP"),
+                       PV("SR-DI-PICO-01:BUCKETS", save_len=5),
+                       PV("SR01C-DI-COL-01:POS1", is_readonly_notify=True),
+                       PV("SR01C-DI-COL-01:POS2", is_readonly=True),
+                       PV("SR01C-DI-COL-02:POS1", is_readonly=True),
+                       PV("SR01C-DI-COL-02:POS2", is_readonly=True),
+                       PV("SR-CS-RING-01:MODE")]
     req_parser = parser.ReqParser(test.NORMAL_REQ)
     assert test.NORMAL_REQ == req_parser.path
     assert not req_parser.pvs
 
     req_parser.parse()
     assert test.NORMAL_REQ == req_parser.path
-    assert 9 == len(req_parser.pvs)
+    assert 10 == len(req_parser.pvs)
     assert correct_pv_list == req_parser.pvs
 
 
 def test_snap_parser_scalars():
     """Runs the .snap parser against a basic case with only PV scalars.
     """
-    correct_pv_snapshots = [PV("SR01C-DI-COL-01:POS1", ["3.259328000000000e+00"]),
-                            PV("SR01C-DI-COL-01:POS2", ["-3.276854000000000e+00"]),
-                            PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01"]),
-                            PV("SR01C-DI-COL-02:POS2", ["1.200000000000000e+01"])]
+    correct_pv_snapshots = [
+        PV("SR01C-DI-COL-01:POS1", ["3.259328000000000e+00"]),
+        PV("SR01C-DI-COL-01:POS2", ["-3.276854000000000e+00"]),
+        PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01"]),
+        PV("SR01C-DI-COL-02:POS2", ["1.200000000000000e+01"])]
 
     snap_parser = parser.SnapParser(test.SCALARS_SNAP)
     assert test.SCALARS_SNAP == snap_parser.path
@@ -171,9 +181,12 @@ def test_snap_parser_ca_arr():
     """Runs the .snap parser against a case with ca arrays.
     """
     correct_pv_snapshots = [
-        PV("SR01C-DI-COL-01:POS1", ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"]),
+        PV("SR01C-DI-COL-01:POS1",
+           ["3.259328000000000e+00", "3.259328000000000e+00",
+            "3.259328000000000e+00"]),
         PV("SR01C-DI-COL-01:POS2", ["-3.276854000000000e+00"]),
-        PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01", "-1.200000000000000e+01"]),
+        PV("SR01C-DI-COL-02:POS1",
+           ["-1.200000000000000e+01", "-1.200000000000000e+01"]),
         PV("SR01C-DI-COL-02:POS2", ["1.200000000000000e+01"])]
 
     snap_parser = parser.SnapParser(test.ARRAYS_AND_SCALARS_SNAP)
