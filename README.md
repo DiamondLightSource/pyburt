@@ -17,7 +17,7 @@ burt.restore("/path/to/.snap/file.snap")
 ```
 
 ## Build
-
+ 
 To build the Sphinx documentation:
 
 ```bash

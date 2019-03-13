@@ -7,4 +7,6 @@ rhel7_job:
     - pip install pytest
     - pip install pytest-cov
     - pip install cothread
+    - pip install pycodestyle
     - python -m pytest --cov=burt test
+    - pycodestyle --show-source --show-pep8 burt

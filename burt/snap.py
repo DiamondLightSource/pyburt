@@ -1,6 +1,7 @@
 """BURT snapshot implementation.
 
-Reads a .req file, stores the requested PV states, and saves the values into a .snap file.
+Reads a .req file, stores the requested PV states, and saves the values into a
+.snap file.
 """
 import burt
 import os
@@ -14,11 +15,13 @@ from collections import OrderedDict
 
 
 def _gen_burt_header(req_parser, snap_file, comments, keywords):
-    """Generates the .snap file BURT header as a string. This will precede the list of PVs in the .snap file and will
-    contain some meta information such as the current time, user id, etc.
+    """Generates the .snap file BURT header as a string. This will precede the
+    list of PVs in the .snap file and will contain some meta information
+    such as the current time, user id, etc.
 
     Args:
-        req_parser (ReqParser): The .req file parser object which contains the PVs and other necessary information.
+        req_parser (ReqParser): The .req file parser object which contains the
+        PVs and other necessary information.
 
     Returns:
         str: The .snap file BURT header as a string.
@@ -28,7 +31,7 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
 
     # Username (Lastname, Initials (Firstname)) format
     curr_user = getpass.getuser() + " (" + pwd.getpwuid(os.getuid())[4] + ")"
-    
+
     uid = os.getuid()
     groupid = pwd.getpwnam(getpass.getuser()).pw_gid
     keywords = "" if keywords is None else keywords
@@ -60,20 +63,23 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
         elif prefix == burt.DIRECTORY_PREFIX:
             header += "{} {}\n".format(prefix, header_elements[prefix])
 
-        # 10 space alignment from the left after the prefix for the non special cases.
+        # 10 space alignment from the left after the prefix for the non special
+        # cases.
         else:
             left_padding = " " * (10 - len(":") - len(prefix))
-            header += prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
+            header += prefix + ":" + left_padding + str(
+                header_elements[prefix]) + os.linesep
 
     return header
 
 
 def _gen_snap_footer(req_parser):
-    """Generates the .snap file footer as a string. This will be the sequence of PVs followed by their reading length
-    and current values.
+    """Generates the .snap file footer as a string. This will be the sequence
+    of PVs followed by their reading length and current values.
 
     Args:
-        req_parser (ReqParser): The .req file parser object which contains the PVs and other necessary information.
+        req_parser (ReqParser): The .req file parser object which contains the
+        PVs and other necessary information.
 
     Returns:
         str: The .snap file footer as a string.
@@ -90,19 +96,22 @@ def _gen_snap_footer(req_parser):
 
 
 def take_snapshot(req_file, snap_file, comments=None, keywords=None):
-    """Saves the PVs and their state to the specified snap file, prefaced with the BURT header.
+    """Saves the PVs and their state to the specified snap file, prefaced with
+        the BURT header.
 
     Args:
         req_file (str): The path to the existing .req file.
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
-        keywords(str): A delimited string of keywords to append to the BURT header.
+        keywords(str): A delimited string of keywords to append to the BURT
+            header.
 
     Raises:
-        ValueError: If the request file or snap file arguments have an invalid extension, or if the  .req file does not
-        exist.
+        ValueError: If the request file or snap file arguments have an invalid
+            extension, or if the  .req file does not exist.
     """
-    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (not os.path.isfile(req_file)):
+    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (
+            not os.path.isfile(req_file)):
         raise ValueError("Invalid .req file input.")
 
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
