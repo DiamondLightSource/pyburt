@@ -6,8 +6,6 @@ Uses the cothread.catools library to perform channel access operations.
 import burt
 import os
 
-from burt.parser import SnapParser
-
 
 def restore(snap_file):
     """Restores the state of the PVs in the .snap file, if not specified as
@@ -24,9 +22,9 @@ def restore(snap_file):
             not os.path.isfile(snap_file)):
         raise ValueError("Invalid .snap file.")
 
-    snap_parser = SnapParser(snap_file)
+    snap_parser = burt.SnapParser(snap_file)
     snap_parser.parse()
 
     pv_snapshots = snap_parser.pv_snapshots
     for pv in pv_snapshots:
-        pv.restore()
+        pv.restore_values()

@@ -26,3 +26,5 @@ SNAP_FILE_EXT = '.snap'
 # defined above.
 from burt.restore import restore
 from burt.snap import take_snapshot
+from burt.parsers.req_parser import ReqParser
+from burt.parsers.snap_parser import SnapParser

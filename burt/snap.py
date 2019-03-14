@@ -10,7 +10,6 @@ import time
 import pwd
 import getpass
 
-from burt.parser import ReqParser, SnapParser
 from collections import OrderedDict
 
 
@@ -34,8 +33,13 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
 
     uid = os.getuid()
     groupid = pwd.getpwnam(getpass.getuser()).pw_gid
-    keywords = "" if keywords is None else keywords
-    comments = "" if comments is None else comments
+
+    # Carriage returns and newlines malform the BURT header.
+    keywords = "" if keywords is None else \
+        keywords.replace('\r', '').replace('\n', '')
+    comments = "" if comments is None else \
+        comments.replace('\r', '').replace('\n', '')
+
     type = burt.TYPE_DEFAULT_VAL
     directory = os.getcwd()
     req_file = req_parser.path
@@ -89,7 +93,7 @@ def _gen_snap_footer(req_parser):
     pvs = req_parser.pvs
 
     for pv in pvs:
-        snapshot_entry = pv.snapshot()
+        snapshot_entry = pv.gen_snapshot_entry()
         footer += snapshot_entry + os.linesep
 
     return footer
@@ -117,7 +121,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
         raise ValueError("Invalid .snap file destination.")
 
-    req_parser = ReqParser(req_file)
+    req_parser = burt.ReqParser(req_file)
     req_parser.parse()
 
     burt_header = _gen_burt_header(req_parser, snap_file, comments, keywords)

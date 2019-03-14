@@ -2,7 +2,7 @@
 import pytest
 import test
 import burt
-from burt import parser
+from burt.parsers import ParserException
 from burt.pv import PV
 
 
@@ -10,7 +10,7 @@ def test_base_case_parsers():
     """Runs the .req parser against mostly blank files.
     """
 
-    req_parser = parser.ReqParser(test.BLANK_REQ)
+    req_parser = burt.ReqParser(test.BLANK_REQ)
     assert test.BLANK_REQ == req_parser.path
     assert not req_parser.pvs
 
@@ -18,7 +18,7 @@ def test_base_case_parsers():
     assert test.BLANK_REQ == req_parser.path
     assert 0 == len(req_parser.pvs)
 
-    snap_parser = parser.SnapParser(test.BLANK_SNAP)
+    snap_parser = burt.SnapParser(test.BLANK_SNAP)
     assert test.BLANK_SNAP == snap_parser.path
     assert not snap_parser.pv_snapshots
     assert "" == snap_parser.time
@@ -31,7 +31,7 @@ def test_base_case_parsers():
     assert "" == snap_parser.directory
     assert "" == snap_parser.req_file
 
-    with pytest.raises(parser.ParserException):
+    with pytest.raises(ParserException):
         snap_parser.parse()
 
 
@@ -49,13 +49,13 @@ def test_inline_comments():
         PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01"]),
         PV("SR01C-DI-COL-03:POS3", ["666"])]
 
-    req_parser = parser.ReqParser(test.INLINE_COMMENTS_REQ)
+    req_parser = burt.ReqParser(test.INLINE_COMMENTS_REQ)
     req_parser.parse()
     assert test.INLINE_COMMENTS_REQ == req_parser.path
     assert 3 == len(req_parser.pvs)
     assert correct_pv_list_req == req_parser.pvs
 
-    snap_parser = parser.SnapParser(test.INLINE_COMMENTS_SNAP)
+    snap_parser = burt.SnapParser(test.INLINE_COMMENTS_SNAP)
     snap_parser.parse()
     assert test.INLINE_COMMENTS_SNAP == snap_parser.path
     assert 4 == len(snap_parser.pv_snapshots)
@@ -75,48 +75,52 @@ def test_inline_comments():
 def test_malformed_files():
     """Runs the .snap parser against the malformed .snap files.
     """
-    with pytest.raises(parser.ParserException):
-        req_parser = parser.ReqParser(test.MALFORMED_REQ)
+    with pytest.raises(ParserException):
+        req_parser = burt.ReqParser(test.MALFORMED_REQ)
         req_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        req_parser = parser.ReqParser(test.MALFORMED_SAVE_LEN_NON_INT_REQ)
+    with pytest.raises(ParserException):
+        req_parser = burt.ReqParser(test.MALFORMED_SAVE_LEN_NEG_INT_REQ)
         req_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.MISSING_BOTTOM_HEADER_SNAP)
+    with pytest.raises(ParserException):
+        req_parser = burt.ReqParser(test.MALFORMED_SAVE_LEN_NON_INT_REQ)
+        req_parser.parse()
+
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.MISSING_BOTTOM_HEADER_SNAP)
         snap_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.MISSING_TOP_HEADER_SNAP)
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.MISSING_TOP_HEADER_SNAP)
         snap_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.MISORDERED_BURT_HEADER_SNAP)
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.MISORDERED_BURT_HEADER_SNAP)
         snap_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.ONLY_HEADER_SNAP)
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.ONLY_HEADER_SNAP)
         snap_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.DUPLICATE_BURT_HEADERS_SNAP)
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.DUPLICATE_BURT_HEADERS_SNAP)
         snap_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.MALFORMED_HEADER_TYPO_SNAP)
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.MALFORMED_HEADER_TYPO_SNAP)
         snap_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.MALFORMED_BODY_SNAP)
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.MALFORMED_BODY_SNAP)
         snap_parser.parse()
 
-    with pytest.raises(parser.ParserException):
-        snap_parser = parser.SnapParser(test.MALFORMED_HEADER_COLONS_SNAP)
+    with pytest.raises(ParserException):
+        snap_parser = burt.SnapParser(test.MALFORMED_HEADER_COLONS_SNAP)
         snap_parser.parse()
 
     # Entries should still be parsed fine as header is valid, but values could be problematic.
-    snap_parser = parser.SnapParser(test.MALFORMED_HEADER_ENTRIES_SNAP)
+    snap_parser = burt.SnapParser(test.MALFORMED_HEADER_ENTRIES_SNAP)
     snap_parser.parse()
 
 
@@ -137,7 +141,7 @@ def test_req_parser_normal():
                        PV("SR01C-DI-COL-02:POS1", is_readonly=True),
                        PV("SR01C-DI-COL-02:POS2", is_readonly=True),
                        PV("SR-CS-RING-01:MODE")]
-    req_parser = parser.ReqParser(test.NORMAL_REQ)
+    req_parser = burt.ReqParser(test.NORMAL_REQ)
     assert test.NORMAL_REQ == req_parser.path
     assert not req_parser.pvs
 
@@ -156,7 +160,7 @@ def test_snap_parser_scalars():
         PV("SR01C-DI-COL-02:POS1", ["-1.200000000000000e+01"]),
         PV("SR01C-DI-COL-02:POS2", ["1.200000000000000e+01"])]
 
-    snap_parser = parser.SnapParser(test.SCALARS_SNAP)
+    snap_parser = burt.SnapParser(test.SCALARS_SNAP)
     assert test.SCALARS_SNAP == snap_parser.path
     assert not snap_parser.pv_snapshots
     assert "" == snap_parser.time
@@ -197,7 +201,7 @@ def test_snap_parser_ca_arr():
            ["-1.200000000000000e+01", "-1.200000000000000e+01"]),
         PV("SR01C-DI-COL-02:POS2", ["1.200000000000000e+01"])]
 
-    snap_parser = parser.SnapParser(test.ARRAYS_AND_SCALARS_SNAP)
+    snap_parser = burt.SnapParser(test.ARRAYS_AND_SCALARS_SNAP)
     snap_parser.parse()
 
     assert test.ARRAYS_AND_SCALARS_SNAP == snap_parser.path

@@ -106,7 +106,7 @@ class PV:
         """
         return self.__repr__()
 
-    def snapshot(self):
+    def gen_snapshot_entry(self):
         """ Takes a snapshot of the PV's current state by storing the values as
             a formatted string to be placed in a .snap file.
 
@@ -157,7 +157,7 @@ class PV:
 
         return snapshot_entry
 
-    def restore(self):
+    def restore_values(self):
         """ Restores a PV to its saved state. If the PV is specified as read
             only, do nothing.
         """

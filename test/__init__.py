@@ -1,27 +1,54 @@
-"""test package."""
-# Shared test files
-ARRAYS_AND_SCALARS_SNAP = "test/testables/arrays_and_scalars.snap"
-BLANK_REQ = "test/testables/blank.req"
-BLANK_SNAP = "test/testables/blank.snap"
-DUPLICATE_BURT_HEADERS_SNAP = "test/testables/duplicate_burt_headers.snap"
-INLINE_COMMENTS_REQ = "test/testables/inline_comments.req"
-INLINE_COMMENTS_SNAP = "test/testables/inline_comments.snap"
-MALFORMED_REQ = "test/testables/malformed.req"
-MALFORMED_BODY_SNAP = "test/testables/malformed_body.snap"
-MALFORMED_HEADER_COLONS_SNAP = "test/testables/malformed_header_missing_colons.snap"
-MALFORMED_HEADER_ENTRIES_SNAP = "test/testables/malformed_header_strange_entries.snap"
-MALFORMED_HEADER_TYPO_SNAP = "test/testables/malformed_header_typo_prefixes.snap"
+"""The test package."""
+'''
+Shared test .req files.
+'''
+BLANK_REQ = \
+    "test/testables/req/blank.req"
+INLINE_COMMENTS_REQ = \
+    "test/testables/req/inline_comments.req"
+MALFORMED_REQ = \
+    "test/testables/req/malformed.req"
+MALFORMED_SAVE_LEN_NEG_INT_REQ = \
+    "test/testables/req/malformed_save_len_neg_int.req"
 MALFORMED_SAVE_LEN_NON_INT_REQ = \
-    "test/testables/malformed_save_len_non_int.req"
+    "test/testables/req/malformed_save_len_non_int.req"
 MALFORMED_SAVE_LEN_TOO_LARGE_REQ = \
-    "test/testables/malformed_save_len_too_large.req"
-MISORDERED_BURT_HEADER_SNAP = "test/testables/misordered_burt_headers.snap"
-MISORDERED_HEADER_PREFIXES_SNAP = "test/testables/misordered_header_prefixes.snap"
-MISSING_BOTTOM_HEADER_SNAP = "test/testables/missing_bottom_burt_header.snap"
-MISSING_TOP_HEADER_SNAP = "test/testables/missing_top_burt_header.snap"
-NORMAL_REQ = "test/testables/normal.req"
-ONLY_HEADER_SNAP = "test/testables/only_header.snap"
-SCALARS_SNAP = "test/testables/scalars.snap"
+    "test/testables/req/malformed_save_len_too_large.req"
+NORMAL_REQ = "test/testables/req/normal.req"
 
-# Tmp snap file to be deleted after a test run
-TMP_BURT_OUT = "test/testables/tmp.snap"
+'''
+Shared test .snap files.
+'''
+ARRAYS_AND_SCALARS_SNAP = \
+    "test/testables/snap/arrays_and_scalars.snap"
+BLANK_SNAP = \
+    "test/testables/snap/blank.snap"
+DUPLICATE_BURT_HEADERS_SNAP = \
+    "test/testables/snap/duplicate_burt_headers.snap"
+INLINE_COMMENTS_SNAP = \
+    "test/testables/snap/inline_comments.snap"
+MALFORMED_BODY_SNAP = \
+    "test/testables/snap/malformed_body.snap"
+MALFORMED_HEADER_COLONS_SNAP = \
+    "test/testables/snap/malformed_header_missing_colons.snap"
+MALFORMED_HEADER_ENTRIES_SNAP = \
+    "test/testables/snap/malformed_header_strange_entries.snap"
+MALFORMED_HEADER_TYPO_SNAP = \
+    "test/testables/snap/malformed_header_typo_prefixes.snap"
+MISORDERED_BURT_HEADER_SNAP = \
+    "test/testables/snap/misordered_burt_headers.snap"
+MISORDERED_HEADER_PREFIXES_SNAP = \
+    "test/testables/snap/misordered_header_prefixes.snap"
+MISSING_BOTTOM_HEADER_SNAP = \
+    "test/testables/snap/missing_bottom_burt_header.snap"
+MISSING_TOP_HEADER_SNAP = \
+    "test/testables/snap/missing_top_burt_header.snap"
+ONLY_HEADER_SNAP = \
+    "test/testables/snap/only_header.snap"
+SCALARS_SNAP = \
+    "test/testables/snap/scalars.snap"
+
+'''
+Tmp snap file to be deleted after a test run.
+'''
+TMP_PYBURT_OUT = "test/testables/tmp.snap"

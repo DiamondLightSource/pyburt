@@ -1,84 +1,6 @@
-""" Various parsers which read BURT related input/output files and encapsulates
-the information."""
-import burt
+""" Snap parser class which stores in the information of a .snap BURT file."""
+from . import *
 from burt.pv import PV
-
-
-class ReqParser:
-    """ Stores the information of a .req BURT file.
-
-    The format of a .req file is:
-
-        <Optional RO specifier> <PV 1>
-        ...
-        # File comments are preceded by a hash sign.
-        <Optional RO specifier> <PV N>
-
-    See test/testables for examples.
-
-    Attributes:
-        path (str): The absolute path to a .req file.
-        pvs (list): A list of PV objects representing pvs contained in a .req
-            file.
-    """
-
-    def __init__(self, path):
-        """Constructor.
-
-        Args:
-            path (str): The absolute path to the .req file.
-        """
-        self.path = path
-        self.pvs = []
-
-    def parse(self):
-        """Parses the .req file located at self.path and stores the information
-            in self.pvs.
-        """
-        with open(self.path, 'r') as f:
-            for line in f:
-                if _skippable_line(line):
-                    pass
-
-                else:
-                    line = _clean_line(line)
-
-                    line_portions = line.split()
-                    if len(line_portions) > 3:
-                        raise ParserException(
-                            "Malformed .req file: Too many elements in line.")
-
-                    is_readonly = line_portions[0].strip(
-                    ) == burt.READONLY_SPECIFIER
-                    is_readonly_notify = line_portions[0].strip(
-                    ) == burt.READONLY_NOTIFY_SPECIFIER
-
-                    save_len_index = None
-                    if is_readonly or is_readonly_notify:
-                        pv_name = line_portions[1]
-
-                        if len(line_portions) == 3:
-                            save_len_index = 2
-                    else:
-                        pv_name = line_portions[0]
-
-                        if len(line_portions) == 2:
-                            save_len_index = 1
-
-                    save_len = None
-                    if save_len_index:
-                        try:
-                            save_len = int(line_portions[save_len_index])
-                        except ValueError:
-                            raise ParserException(
-                                "Malformed .req file: save length "
-                                "(third tuple element) must be an "
-                                "integer")
-
-                    pv = PV(pv_name, is_readonly=is_readonly,
-                            is_readonly_notify=is_readonly_notify,
-                            save_len=save_len)
-                    self.pvs.append(pv)
 
 
 class SnapParser:
@@ -171,11 +93,10 @@ class SnapParser:
             header_lines = header.splitlines()
             body_lines = body.splitlines()
 
-            is_burt_header_malformed = (len(header_lines) <= 1) or \
-                                       (header_lines[0] !=
-                                        burt.HEADER_START) or \
-                                       ((len(header_lines) - 1) !=
-                                        len(self._HEADER_ATTRIBUTES))
+            is_burt_header_malformed = \
+                len(header_lines) <= 1 or \
+                header_lines[0] != burt.HEADER_START or \
+                len(header_lines) - 1 != len(self._HEADER_ATTRIBUTES)
 
             if is_burt_header_malformed:
                 raise ParserException(
@@ -214,11 +135,11 @@ class SnapParser:
                 .snap body.
         """
         for line in body_lines:
-            if _skippable_line(line):
+            if skippable_line(line):
                 pass
 
             else:
-                line = _clean_line(line)
+                line = clean_line(line)
 
                 pv_snapshot = line.strip().split()
 
@@ -240,38 +161,3 @@ class SnapParser:
                 pv = PV(pv_name, vals, is_readonly=is_readonly,
                         is_readonly_notify=is_readonly_notify)
                 self.pv_snapshots.append(pv)
-
-
-class ParserException(Exception):
-    """ Raised when the parsers run into unexpected malformed formats.
-    """
-    pass
-
-
-def _skippable_line(line):
-    """Determines if a line should be skipped.
-
-    Args:
-        line (str): The line currently being parsed.
-
-    Returns
-        bool: If the line should be skipped, or not.
-    """
-    is_comment_line = line.strip().startswith(burt.INLINE_COMMENT)
-    is_blank_line = not line.strip()
-    return is_comment_line or is_blank_line
-
-
-def _clean_line(line):
-    """Preprocesses the line for parsing.
-
-    Args:
-        line (str): The line currently being parsed.
-
-    Returns
-        str: The cleaned line.
-    """
-    if burt.INLINE_COMMENT in line:
-        line = line[:line.find(burt.INLINE_COMMENT)]
-
-    return line.strip()
