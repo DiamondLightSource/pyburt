@@ -116,13 +116,14 @@ def test_snapshot_normal():
 
 def test_snapshot_newlines_in_args():
     """Runs a take snapshot test with the problematic case of newlines in user
-    supplied meta data. The newlines should be stripped.
+    supplied meta data. The newlines should appear as is in the .snap file,
+    with the help of an extra backslash, and not interpreted.
     """
-    test_comment = "\nHello\t\n \nWorld\r\n\t"
-    test_keywords = "\t\ncool\n,\r\nsnap,file\n\t\r"
+    test_comment = "\nHello\r\n \nWorld\r\n\r"
+    test_keywords = "\r\ncool\n,\r\nsnap,file\n\r\r"
 
-    expected_snap_comment = "Hello\t World"
-    expected_snap_keywords = "cool,snap,file"
+    expected_snap_comment = "\\nHello\\r\\n \\nWorld\\r\\n\\r"
+    expected_snap_keywords = "\\r\\ncool\\n,\\r\\nsnap,file\\n\\r\\r"
 
     burt.take_snapshot(test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment,
                        test_keywords)

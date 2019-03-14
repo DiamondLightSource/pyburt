@@ -34,18 +34,20 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
     uid = os.getuid()
     groupid = pwd.getpwnam(getpass.getuser()).pw_gid
 
-    # Carriage returns and newlines malform the BURT header.
+    # Carriage returns and newlines from user input can malform the BURT header
+    # so write to the snap file as escaped symbols. This is the behaviour of
+    # the old BURT.
     keywords = "" if keywords is None else \
-        keywords.replace('\r', '').replace('\n', '')
+        keywords.replace('\r', '\\r').replace('\n', '\\n')
     comments = "" if comments is None else \
-        comments.replace('\r', '').replace('\n', '')
+        comments.replace('\r', '\\r').replace('\n', '\\n')
 
     type = burt.TYPE_DEFAULT_VAL
     directory = os.getcwd()
     req_file = req_parser.path
 
     header_elements = OrderedDict([
-        (burt.HEADER_START, ''),
+        (burt.SNAP_HEADER_START, ''),
         (burt.TIME_PREFIX, current_time),
         (burt.LOGINID_PREFIX, curr_user),
         (burt.UID_PREFIX, uid),
@@ -55,12 +57,13 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
         (burt.TYPE_PREFIX, type),
         (burt.DIRECTORY_PREFIX, directory),
         (burt.REQ_FILE_PREFIX, req_file),
-        (burt.HEADER_END, '')
+        (burt.SNAP_HEADER_END, '')
     ])
 
-    header = ""
+    header = r""
     for prefix in header_elements:
-        if (prefix == burt.HEADER_START) or (prefix == burt.HEADER_END):
+        if (prefix == burt.SNAP_HEADER_START) or (
+                prefix == burt.SNAP_HEADER_END):
             header += prefix + os.linesep
 
         # Special case with no colon.

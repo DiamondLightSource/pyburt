@@ -76,8 +76,8 @@ class SnapParser:
             file_string = f.read()
 
             are_burt_headers_present = \
-                (burt.HEADER_END in file_string) and (burt.HEADER_START in
-                                                      file_string)
+                (burt.SNAP_HEADER_END in file_string) and \
+                (burt.SNAP_HEADER_START in file_string)
 
             if not are_burt_headers_present:
                 raise ParserException(
@@ -85,7 +85,8 @@ class SnapParser:
 
             try:
                 header, body = [part.strip()
-                                for part in file_string.split(burt.HEADER_END)]
+                                for part in
+                                file_string.split(burt.SNAP_HEADER_END)]
             except ValueError:
                 raise ParserException(
                     "Malformed .snap header: Duplicate BURT headers.")
@@ -95,7 +96,7 @@ class SnapParser:
 
             is_burt_header_malformed = \
                 len(header_lines) <= 1 or \
-                header_lines[0] != burt.HEADER_START or \
+                header_lines[0] != burt.SNAP_HEADER_START or \
                 len(header_lines) - 1 != len(self._HEADER_ATTRIBUTES)
 
             if is_burt_header_malformed:
@@ -131,7 +132,7 @@ class SnapParser:
         """Parses the body portion of a .snap file.
 
         Args:
-            body_lines (list): A newline delimited list of lines in a the
+            body_lines (list): A newline delimited list of lines in a
                 .snap body.
         """
         for line in body_lines:

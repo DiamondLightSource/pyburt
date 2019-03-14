@@ -1,5 +1,4 @@
-""" Various parsers which read BURT related input/output files and
-encapsulates the information."""
+""" Represents a PV in a BURT file."""
 import burt
 import cothread
 from pkg_resources import require

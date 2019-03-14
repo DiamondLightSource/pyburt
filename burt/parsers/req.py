@@ -1,5 +1,4 @@
-""" Request parser class which stores in the information of a .req BURT
-file."""
+""" Request parser class which stores the information of a .req BURT file."""
 from . import *
 from burt.pv import PV
 
