@@ -20,7 +20,7 @@ class SnapParser:
 
     Where <CA ARRAY LENGTH> is 1 if the PV readings are scalar.
 
-    See test/testables for examples.
+    See pyburt/testables for examples.
 
     Attributes:
         path (str): The absolute path to a .snap file.

@@ -18,7 +18,7 @@ class RgrParser:
         <.check file path n>
         <.snap file path n>
 
-    See test/testables for examples.
+    See pyburt/testables for examples.
 
     Attributes:
         path (str): The absolute path to a .rgr file.

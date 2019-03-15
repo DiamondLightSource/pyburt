@@ -9,11 +9,11 @@ NORMAL_REQ = "integration/testables/req/normal.req"
 '''
 Shared test .snap files.
 '''
-ARR_SNAP = "integration/testables/snap/test_ioc_restore_1.snap"
-SCALAR_SNAP = "integration/testables/snap/test_ioc_restore_2.snap"
+ARR_SNAP = "integration/testables/snap/ioc_restore_array.snap"
+SCALAR_SNAP = "integration/testables/snap/ioc_restore_scalar.snap"
 
 '''
-The local running PV initialized with the test_ioc.py script.
+The local running PV initialized with the local_ioc.py script.
 
 Note: it is a PV of containing a ca array datatype with five float32 elements.
 '''

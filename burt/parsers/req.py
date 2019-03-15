@@ -13,7 +13,7 @@ class ReqParser:
         # File comments are preceded by a hash sign.
         <Optional RO specifier> <PV N>
 
-    See test/testables for examples.
+    See pyburt/testables for examples.
 
     Attributes:
         path (str): The absolute path to a .req file.

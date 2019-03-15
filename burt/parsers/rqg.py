@@ -13,7 +13,7 @@ class RqgParser:
         ...
         <.req file path n>
 
-    See test/testables for examples.
+    See pyburt/testables for examples.
 
     Attributes:
         path (str): The absolute path to a .rqg file.

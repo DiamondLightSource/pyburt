@@ -41,8 +41,11 @@ $ pipenv shell
 
 Note: the tests should be run from the root project directory.
 
-There are separate integration tests for pyburt. See `integration/README.md` for instructions.
+There are separate DLS integration tests for pyburt. See 
+`dls-integration/README
+.md` for instructions.
 
-Note that running pytest against `integration` without running the test IOC first,
-as described in `integration/README.md`, will cause the tests to
+Note that running pytest against `dls-integration` without running the test IOC
+ first,
+as described in `dls-integration/README.md`, will cause the tests to
 fail.
