@@ -1,7 +1,11 @@
-"""BURT restore implementation.
+"""BURT restore python implementation.
 
-Provides methods to save from a .req file to a .snap file, and the reverse.
-Uses the cothread.catools library to perform channel access operations.
+A BURT restore triggers a revert of the PVs specified in a .snap file to the
+snapshot values that are in a .snap file. This involves channel access
+put operations.
+
+A restore group .rgr file is just a collection of paths to .snap files, and
+is used for bulk restore operations.
 """
 import burt
 import os

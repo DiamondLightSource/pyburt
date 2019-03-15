@@ -1,4 +1,4 @@
-""" Restore group parser class which stores the information of a .rgr BURT
+""" Restore group parser class which reads the information from a .rgr BURT
 file."""
 from . import *
 from burt.pv import PV

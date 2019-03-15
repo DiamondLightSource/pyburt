@@ -1,7 +1,11 @@
-"""BURT snapshot implementation.
+"""BURT snapshot python implementation.
 
-Reads a .req file, stores the requested PV states, and saves the values into a
-.snap file.
+A BURT snapshot creates a snapshot (.snap) file from a request (.req) file, the
+former of which contains some metadata and PVs with their saved values, and the
+latter specifies the PVs to save.
+
+A request group .rqg file contains a collection of paths to .req files, and is
+used to create bulk snapshots.
 """
 import burt
 import os

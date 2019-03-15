@@ -1,4 +1,4 @@
-""" Snap parser class which stores in the information of a .snap BURT file."""
+""" Snap parser class which reads the information from a .snap BURT file."""
 from . import *
 from burt.pv import PV
 
