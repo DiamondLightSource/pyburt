@@ -8,8 +8,10 @@ pytest = "*"
 sphinx = "*"
 pycodestyle = "*"
 pytest-cov = "*"
+mock = "*"
 
 [requires]
 python_version = "3.7"
 
 [packages]
+cothread = "*"
