@@ -22,10 +22,11 @@ class PV:
         is_readonly (bool): Whether the PV is read only, or not. If so, it is
             not restored by pyburt.restore()
         is_readonly_notify (bool): Whether the PV is a read-only-notify type.
+        is_writeonly (bool): Whether the PV is a write-only type.
     """
 
     def __init__(self, name, vals=None, save_len=None, is_readonly=False,
-                 is_readonly_notify=False):
+                 is_readonly_notify=False, is_writeonly=False):
         """ Constructor.
 
         Args:
@@ -37,12 +38,14 @@ class PV:
                 ca array. Only relevant if the PV's datatype is a ca array.
             is_readonly (bool): Whether the PV is read only, or not.
             is_readonly_notify (bool): Whether the PV is read only notify type.
+            is_writeonly (bool): Whether the PV is a write-only type.
         """
         self.name = name
         self.vals = vals
         self.save_len = save_len
         self.is_readonly = is_readonly
         self.is_readonly_notify = is_readonly_notify
+        self.is_writeonly = is_writeonly
 
     def __eq__(self, other):
         """ Equality operator override
@@ -60,6 +63,7 @@ class PV:
                  (self.vals == other.vals) and \
                  (self.is_readonly == other.is_readonly) and \
                  (self.is_readonly_notify == other.is_readonly_notify) and \
+                 (self.is_writeonly == other.is_writeonly) and \
                  (self.save_len == other.save_len)
             return eq
         else:
@@ -87,7 +91,8 @@ class PV:
             int: The hash table entry.
         """
         return hash((self.name, self.vals, self.is_readonly,
-                     self.is_readonly_notify, self.save_len))
+                     self.is_readonly_notify, self.is_writeonly,
+                     self.save_len))
 
     def __repr__(self):
         """ Class representation override.
@@ -150,6 +155,8 @@ class PV:
             snapshot_entry += burt.READONLY_SPECIFIER + " "
         elif self.is_readonly_notify:
             snapshot_entry += burt.READONLY_NOTIFY_SPECIFIER + " "
+        elif self.is_writeonly:
+            snapshot_entry += burt.WRITEONLY_SPECIFIER + " "
 
         snapshot_entry += "{} {} {}".format(self.name, ca_reading_len,
                                             ca_reading_str)
@@ -161,7 +168,12 @@ class PV:
             only, do nothing.
         """
         if not self.is_readonly or not self.is_readonly_notify:
-            caput(self.name, self.vals)
+
+            if self.is_writeonly:
+                # TODO: write the "correct" value, not the saved ones.
+                pass
+            else:
+                caput(self.name, self.vals)
 
         # TODO: write to the no write snapshot file
         if self.is_readonly_notify:

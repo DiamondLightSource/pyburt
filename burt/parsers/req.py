@@ -51,9 +51,11 @@ class ReqParser:
                     ) == burt.READONLY_SPECIFIER
                     is_readonly_notify = line_portions[0].strip(
                     ) == burt.READONLY_NOTIFY_SPECIFIER
+                    is_writeonly = line_portions[0].strip(
+                    ) == burt.WRITEONLY_SPECIFIER
 
                     save_len_index = None
-                    if is_readonly or is_readonly_notify:
+                    if is_readonly or is_readonly_notify or is_writeonly:
                         pv_name = line_portions[1]
 
                         if len(line_portions) == 3:

@@ -6,7 +6,7 @@ Common BURT file constants.
 INLINE_COMMENT = "%"
 
 '''
-.snap file globals.
+.req and .snap file globals.
 '''
 SNAP_HEADER_START = "--- Start BURT header"
 SNAP_HEADER_END = "--- End BURT header"
@@ -23,6 +23,7 @@ DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
 READONLY_SPECIFIER = "RO"
 READONLY_NOTIFY_SPECIFIER = "RON"
+WRITEONLY_SPECIFIER = "WO"
 
 '''
 .rgr file globals.
@@ -35,13 +36,17 @@ BURT file extensions.
 '''
 REQ_FILE_EXT = '.req'
 SNAP_FILE_EXT = '.snap'
-REQ_G_FILE_EXT = '.rqg'
-RESTORE_G_FILE_EXT = '.rgr'
+RQG_FILE_EXT = '.rqg'
+RGR_FILE_EXT = '.rgr'
 CHECK_FILE_EXT = '.check'
 
-# Place after globals as imported modules below make use of globals
-# defined above.
+'''
+Place after globals as imported modules below make use of globals defined 
+above.
+'''
 from burt.restore import restore
 from burt.snapshot import take_snapshot
 from burt.parsers.req import ReqParser
 from burt.parsers.snap import SnapParser
+from burt.parsers.rgr import RgrParser
+from burt.parsers.rqg import RqgParser

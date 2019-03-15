@@ -1,4 +1,4 @@
-"""BURT snapshot python implementation.
+""" BURT snapshot python implementation.
 
 A BURT snapshot creates a snapshot (.snap) file from a request (.req) file, the
 former of which contains some metadata and PVs with their saved values, and the
@@ -18,9 +18,9 @@ from collections import OrderedDict
 
 
 def _gen_burt_header(req_parser, snap_file, comments, keywords):
-    """Generates the .snap file BURT header as a string. This will precede the
-    list of PVs in the .snap file and will contain some meta information
-    such as the current time, user id, etc.
+    """ Generates the .snap file BURT header as a string. This will precede the
+        list of PVs in the .snap file and will contain some meta information
+        such as the current time, user id, etc.
 
     Args:
         req_parser (ReqParser): The .req file parser object which contains the
@@ -85,8 +85,8 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
 
 
 def _gen_snap_footer(req_parser):
-    """Generates the .snap file footer as a string. This will be the sequence
-    of PVs followed by their reading length and current values.
+    """ Generates the .snap file footer as a string. This will be the sequence
+        of PVs followed by their reading length and current values.
 
     Args:
         req_parser (ReqParser): The .req file parser object which contains the
@@ -107,7 +107,7 @@ def _gen_snap_footer(req_parser):
 
 
 def take_snapshot(req_file, snap_file, comments=None, keywords=None):
-    """Saves the PVs and their state to the specified snap file, prefaced with
+    """ Saves the PVs and their state to the specified snap file, prefaced with
         the BURT header.
 
     Args:
@@ -141,5 +141,31 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
             if exc.errno != errno.EEXIST:
                 raise
 
-    with open(snap_file, "w") as f:
+    with open(snap_file, "w+") as f:
         f.write(burt_header + snap_footer)
+
+
+def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
+    """ Performs a BURT snapshot for each request file in the .rqg file.
+
+    Args:
+        rqg_file (str): The path to the existing .rqg file.
+        snap_file (str): The path to the new .snap file.
+        comments (str): Comments to append to the BURT header.
+        keywords(str): A delimited string of keywords to append to the BURT
+            header.
+    Returns:
+
+    """
+    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (
+            not os.path.isfile(rqg_file)):
+        raise ValueError("Invalid .rqg file input.")
+
+    if not snap_file.endswith(burt.SNAP_FILE_EXT):
+        raise ValueError("Invalid .snap file destination.")
+
+    rqg_parser = burt.RqgParser(rqg_file)
+    rqg_parser.parse()
+
+    for req_file in rqg_parser.reqs:
+        take_snapshot(req_file, snap_file, comments, keywords)

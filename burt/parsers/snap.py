@@ -151,6 +151,8 @@ class SnapParser:
                 is_readonly = pv_snapshot[0].strip() == burt.READONLY_SPECIFIER
                 is_readonly_notify = pv_snapshot[0].strip(
                 ) == burt.READONLY_NOTIFY_SPECIFIER
+                is_writeonly = pv_snapshot[0].strip(
+                ) == burt.WRITEONLY_SPECIFIER
 
                 pv_name_index = 1 if (is_readonly or is_readonly_notify) else 0
                 dtype_index = pv_name_index + 1
@@ -160,5 +162,6 @@ class SnapParser:
                 vals = pv_snapshot[vals_index:]
 
                 pv = PV(pv_name, vals, is_readonly=is_readonly,
-                        is_readonly_notify=is_readonly_notify)
+                        is_readonly_notify=is_readonly_notify,
+                        is_writeonly=is_writeonly)
                 self.pv_snapshots.append(pv)
