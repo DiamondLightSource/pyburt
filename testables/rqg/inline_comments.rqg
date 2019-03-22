@@ -1,0 +1,18 @@
+/home/ops/burt/checkFiles/tune-FFWD.check % comment
+% comment
+
+% /home/ops/burt/checkFiles/fastchic.check
+             %/home/ops/burt/requestFiles/LI-PC.req %%%
+%       /home/ops/burt/requestFiles/LI-DI.req
+%%%%%%%%%%%%%%%%
+/home/ops/burt/requestFiles/LI-RF.req %
+/home/ops/burt/requestFiles/LI-TI.req   % % %
+/home/ops/burt/requestFiles/LB-PC.req
+/home/ops/burt/requestFiles/LB-DI.req
+/home/ops/burt/requestFiles/BR-DI.req
+/home/ops/burt/requestFiles/BR-RF.req
+/home/ops/burt/requestFiles/BR01C-TI.req
+/home/ops/burt/requestFiles/BR02C-TI.req
+/home/ops/burt/requestFiles/BR03C-TI.req
+/home/ops/burt/requestFiles/BR-PC.req
+/home/ops/burt/requestFiles/BR-MP.req

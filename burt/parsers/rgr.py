@@ -22,7 +22,7 @@ class RgrParser:
 
     Attributes:
         path (str): The absolute path to a .rgr file.
-        comment (str): The comment stored in a .rgr file.
+        comments (str): The comment stored in a .rgr file.
         snaps (list): A list of paths to the .snap files contained in the .rgr
             file.
         checks (list): A list of paths to the .check files contained in the
@@ -36,7 +36,7 @@ class RgrParser:
             path (str): The absolute path to the .rgr file.
         """
         self.path = path
-        self.comment = ""
+        self.comments = ""
         self.snaps = []
         self.checks = []
 
@@ -85,7 +85,13 @@ class RgrParser:
         Args:
             comment_line (str): The comment line found in a .rgr file.
         """
-        self.comment = comment_line.split(":")[1]
+        comments = comment_line.split(":", 1)
+
+        if len(comments) == 2:
+            self.comments = comments[1].strip()
+        else:
+            raise ParserException(
+                "Malformed .rgr header: Comments prefix malformed. ")
 
     def _parse_body(self, body_lines):
         """Parses the body portion of a .snap file.

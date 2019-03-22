@@ -1,1 +1,1 @@
-""" Various tests for the parser classes."""
+""" Package for various tests for the parser classes."""

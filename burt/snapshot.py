@@ -17,14 +17,13 @@ import getpass
 from collections import OrderedDict
 
 
-def _gen_burt_header(req_parser, snap_file, comments, keywords):
+def _gen_burt_header(req_path, comments, keywords):
     """ Generates the .snap file BURT header as a string. This will precede the
         list of PVs in the .snap file and will contain some meta information
         such as the current time, user id, etc.
 
     Args:
-        req_parser (ReqParser): The .req file parser object which contains the
-        PVs and other necessary information.
+        req_path (str): The path to the .req file.
 
     Returns:
         str: The .snap file BURT header as a string.
@@ -48,7 +47,7 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
 
     type = burt.TYPE_DEFAULT_VAL
     directory = os.getcwd()
-    req_file = req_parser.path
+    req_file = req_path
 
     header_elements = OrderedDict([
         (burt.SNAP_HEADER_START, ''),
@@ -84,20 +83,17 @@ def _gen_burt_header(req_parser, snap_file, comments, keywords):
     return header
 
 
-def _gen_snap_footer(req_parser):
+def _gen_snap_footer(pvs):
     """ Generates the .snap file footer as a string. This will be the sequence
         of PVs followed by their reading length and current values.
 
     Args:
-        req_parser (ReqParser): The .req file parser object which contains the
-        PVs and other necessary information.
+        pvs (List): A list of PV objects.
 
     Returns:
         str: The .snap file footer as a string.
     """
     footer = ""
-
-    pvs = req_parser.pvs
 
     for pv in pvs:
         snapshot_entry = pv.gen_snapshot_entry()
@@ -131,8 +127,8 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     req_parser = burt.ReqParser(req_file)
     req_parser.parse()
 
-    burt_header = _gen_burt_header(req_parser, snap_file, comments, keywords)
-    snap_footer = _gen_snap_footer(req_parser)
+    burt_header = _gen_burt_header(req_parser.path, comments, keywords)
+    snap_footer = _gen_snap_footer(req_parser.pvs)
 
     if not os.path.exists(os.path.dirname(snap_file)):
         try:
@@ -141,7 +137,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
             if exc.errno != errno.EEXIST:
                 raise
 
-    with open(snap_file, "w+") as f:
+    with open(snap_file, "w") as f:
         f.write(burt_header + snap_footer)
 
 
@@ -167,5 +163,24 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
     rqg_parser = burt.RqgParser(rqg_file)
     rqg_parser.parse()
 
+    req_paths = ""
+    pvs = []
     for req_file in rqg_parser.reqs:
-        take_snapshot(req_file, snap_file, comments, keywords)
+        req_parser = burt.ReqParser(req_file)
+        req_parser.parse()
+
+        req_paths += req_parser.path + ","
+        pvs.extend(req_parser.pvs)
+
+    burt_header = _gen_burt_header(req_paths.rstrip(","), comments, keywords)
+    snap_footer = _gen_snap_footer(pvs)
+
+    if not os.path.exists(os.path.dirname(snap_file)):
+        try:
+            os.makedirs(os.path.dirname(snap_file))
+        except OSError as exc:
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(snap_file, "w") as f:
+        f.write(burt_header + snap_footer)

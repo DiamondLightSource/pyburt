@@ -102,7 +102,7 @@ class SnapParser:
             if is_burt_header_malformed:
                 raise ParserException(
                     "Malformed .snap header: Top BURT header and/or prefixes"
-                    "are missing.")
+                    " are missing.")
 
             header_lines_without_top_burt_header = header_lines[1:]
             self._parse_header(header_lines_without_top_burt_header)

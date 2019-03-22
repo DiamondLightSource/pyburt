@@ -45,7 +45,9 @@ Place after globals as imported modules below make use of globals defined
 above.
 '''
 from burt.restore import restore
+from burt.restore import restore_group
 from burt.snapshot import take_snapshot
+from burt.snapshot import take_snapshot_group
 from burt.parsers.req import ReqParser
 from burt.parsers.snap import SnapParser
 from burt.parsers.rgr import RgrParser
