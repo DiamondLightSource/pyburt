@@ -41,7 +41,7 @@ RGR_FILE_EXT = '.rgr'
 CHECK_FILE_EXT = '.check'
 
 '''
-Place after globals as imported modules below make use of globals defined 
+Place after globals as imported modules below make use of globals defined
 above.
 '''
 from burt.restore import restore
