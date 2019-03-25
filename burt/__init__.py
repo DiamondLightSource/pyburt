@@ -1,8 +1,15 @@
 """burt package."""
 
-# Various symbols found in .req and .snap files.
-HEADER_START = "--- Start BURT header"
-HEADER_END = "--- End BURT header"
+'''
+Common BURT file constants.
+'''
+INLINE_COMMENT = "%"
+
+'''
+.req and .snap file globals.
+'''
+SNAP_HEADER_START = "--- Start BURT header"
+SNAP_HEADER_END = "--- End BURT header"
 TIME_PREFIX = "Time"
 LOGINID_PREFIX = "Login ID"
 UID_PREFIX = "Eff  UID"  # The two spaces are intentional from the old BURT
@@ -16,13 +23,32 @@ DIRECTORY_PREFIX = "Directory"
 REQ_FILE_PREFIX = "Req File"
 READONLY_SPECIFIER = "RO"
 READONLY_NOTIFY_SPECIFIER = "RON"
-INLINE_COMMENT = "%"
+WRITEONLY_SPECIFIER = "WO"
 
-# .req and .snap file extensions.
+'''
+.rgr file globals.
+'''
+RGR_HEADER_START = "--- Start Restore Group header"
+RGR_HEADER_END = "--- End Restore Group header"
+
+'''
+BURT file extensions.
+'''
 REQ_FILE_EXT = '.req'
 SNAP_FILE_EXT = '.snap'
+RQG_FILE_EXT = '.rqg'
+RGR_FILE_EXT = '.rgr'
+CHECK_FILE_EXT = '.check'
 
-# Place after globals as imported modules below make use of globals
-# defined above.
+'''
+Place after globals as imported modules below make use of globals defined
+above.
+'''
 from burt.restore import restore
-from burt.snap import take_snapshot
+from burt.restore import restore_group
+from burt.snapshot import take_snapshot
+from burt.snapshot import take_snapshot_group
+from burt.parsers.req import ReqParser
+from burt.parsers.snap import SnapParser
+from burt.parsers.rgr import RgrParser
+from burt.parsers.rqg import RqgParser

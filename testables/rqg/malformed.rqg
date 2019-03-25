@@ -1,0 +1,7 @@
+/home/ops/burt/checkFiles/tune-FFWD.badextension
+/home/ops/burt/checkFiles/fastchic.check /another.check
+abcdefg
+nonexisting/nonexistent.check
+nonexisting/nonexistent.req
+
+% TODO: break into separate cases to isolate.

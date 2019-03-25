@@ -1,12 +1,14 @@
-# Integration tests for pyburt
+# DLS integration tests for pyburt
 
-Listed below are a set of instructions for running the integration tests for the **snapshot** and
+Listed below are a set of instructions for running the DLS integration tests 
+for the **snapshot** and
 **restore** functionality of **pyburt**.
 
 It involves running an IOC server which hosts a dummy PV `SR-CS-TEST-01:TESTPV` and performing restore
 operations on some `.snap` files which write to this PV. It also involves
 doing some comparison tests against the vanilla BURT outputs, which requires running BURT on a set of
-`.req` and `.snap` files.
+`.req` and `.snap` files. Finally, it also runs snapshot tests against DLS 
+PV's.
 
 ## Test Steps
 
@@ -16,7 +18,7 @@ doing some comparison tests against the vanilla BURT outputs, which requires run
 $ pwd
 .../pyburt
 
-$ test/integration/test_ioc.py
+$ integration/local_ioc.py
 Starting iocInit
 ############################################################################
 ## EPICS R3.14.12.3 $Date: Mon 2012-12-17 14:11:47 -0600$
@@ -30,7 +32,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 >>> 
 ```
 2.) In a separate terminal, run the pytest integration tests. This will perform some BURT restore
-calls on the test IOC server, as well as comparison tests against vanilla BURT.
+calls on the test IOC server, some snapshot tests on real PVs at DLS, as well
+ as comparison tests against vanilla BURT.
 
 Observe the output and check that all tests pass. This may take several seconds to complete:
 
@@ -39,13 +42,19 @@ $ pwd
 .../pyburt
 
 $ pytest -v integration
-============================= test session starts ==============================
-platform linux2 -- Python 2.7.13, pytest-3.2.1, py-1.4.34, pluggy-0.4.0 -- /dls_sw/prod/tools/RHEL7-x86_64/Python/2-7-13/prefix/bin/python
-cachedir: .cache
+=============================================================================================== test session starts ===============================================================================================
+platform linux2 -- Python 2.7.13, pytest-4.3.1, py-1.8.0, pluggy-0.9.0 -- /scratch/tph19377/EPICS_REPOS/pyburt/venv/bin/dls-python
+cachedir: .pytest_cache
 rootdir: /scratch/tph19377/EPICS_REPOS/pyburt, inifile:
-collected 1 item                                                                
+plugins: cov-2.6.1
+collected 6 items                                                                                                                                                                                                 
 
-integration/test_integration.py::test_restore_integration PASSED
+integration/burt/test_restore.py::test_restore PASSED                                                                                                                                                       [ 16%]
+integration/burt/test_restore.py::test_restore_group PASSED                                                                                                                                                 [ 33%]
+integration/burt/test_snapshot.py::test_snapshot_normal PASSED                                                                                                                                              [ 50%]
+integration/burt/test_snapshot.py::test_snapshot_group_normal PASSED                                                                                                                                        [ 66%]
+integration/burt/test_snapshot.py::test_snapshot_invalid_save_len PASSED                                                                                                                                    [ 83%]
+integration/burt/test_snapshot.py::test_burt_vanilla_rb PASSED                                                                                                                                              [100%]
 
-=========================== 1 passed in 0.24 seconds ===========================
+============================================================================================ 6 passed in 19.62 seconds ============================================================================================
 ```

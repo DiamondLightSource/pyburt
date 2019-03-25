@@ -1,0 +1,16 @@
+--- Start Restore Group header
+Comments: LOCO applied for skews only, vertical emittance corrected to 8pm. Magnets not cycled yet.
+--- End Restore Group header
+/home/ops/burt/checkFiles/tune-FFWD.check
+/home/ops/burt/checkFiles/fastchic.check
+% Line comment, with blank line below.
+
+/home/ops/burt/checkFiles/misc.check
+/home/ops/burt/backupFiles/SR-MP/SR-rtf26_190226_164119.snap
+/home/ops/burt/backupFiles/SR-MP-DDBA/SR-rtf26_190226_164119.snap
+/home/ops/burt/backupFiles/SR01A-TI/SR-rtf26_190226_164119.snap
+/home/ops/burt/backupFiles/BS-PC/SR-rtf26_190226_164119.snap
+/home/ops/burt/backupFiles/SR-PC/SR-rtf26_190226_164119.snap
+/home/ops/burt/backupFiles/SR-DI/SR-rtf26_190226_164119.snap
+/home/ops/burt/backupFiles/SR01A-PC/SR-rtf26_190226_164119.snap
+/home/ops/burt/backupFiles/SR02A-PC-DDBA/SR-rtf26_190226_164119.snap

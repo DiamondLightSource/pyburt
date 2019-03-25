@@ -5,6 +5,12 @@ SR01C-DI-COL-02:GAP
 % Comments are prefixed with a percent signs.
 % Arbitrary newlines may also exist.
 
+% Save the first five elements only.
+SR-DI-PICO-01:BUCKETS 5
+
+RO SR-DI-PICO-01:BUCKETS 10
+RON SR-DI-PICO-01:BUCKETS 25
+
 RON SR01C-DI-COL-01:POS1
 RO SR01C-DI-COL-01:POS2
 RO SR01C-DI-COL-02:POS1
