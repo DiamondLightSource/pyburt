@@ -1,0 +1,8 @@
+--- Start Restore Group header
+Comments: LOCO applied for skews only, vertical emittance corrected to 8pm. Magnets not cycled yet.
+--- End Restore Group header
+/home/ops/burt/checkFiles/tune-FFWD.check
+/home/ops/burt/checkFiles/fastchic.check
+% Line comment, with blank line below.
+
+testables/snap/ioc_restore_array.snap

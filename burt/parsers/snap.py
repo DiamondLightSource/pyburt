@@ -1,68 +1,6 @@
-""" Various parsers which read BURT related input/output files and encapsulates
-the information."""
-import burt
+""" Snap parser class which reads the information from a .snap BURT file."""
+from . import *
 from burt.pv import PV
-from . import TIME_PREFIX
-
-
-class ReqParser:
-    """ Stores the information of a .req BURT file.
-
-    The format of a .req file is:
-
-        <Optional RO specifier> <PV 1>
-        ...
-        # File comments are preceded by a hash sign.
-        <Optional RO specifier> <PV N>
-
-    See test/testables for examples.
-
-    Attributes:
-        path (str): The absolute path to a .req file.
-        pvs (list): A list of PV objects representing pvs contained in a .req
-            file.
-    """
-
-    def __init__(self, path):
-        """Constructor.
-
-        Args:
-            path (str): The absolute path to the .req file.
-        """
-        self.path = path
-        self.pvs = []
-
-    def parse(self):
-        """Parses the .req file located at self.path and stores the information
-            in self.pvs.
-        """
-        with open(self.path, 'r') as f:
-            for line in f:
-                if _skippable_line(line):
-                    pass
-
-                else:
-                    line = _clean_line(line)
-
-                    line_portions = line.split()
-                    if len(line_portions) > 3:
-                        raise ParserException(
-                            "Malformed .req file: Too many elements in line.")
-
-                    is_readonly = line_portions[0].strip(
-                    ) == burt.READONLY_SPECIFIER
-                    is_readonly_notify = line_portions[0].strip(
-                    ) == burt.READONLY_NOTIFY_SPECIFIER
-                    pv_name = line_portions[1].strip() if (
-                        is_readonly or is_readonly_notify
-                    ) else line
-
-                    # TODO: handle third element in .req file (max array count
-                    # to save from PV)
-
-                    pv = PV(pv_name, is_readonly=is_readonly,
-                            is_readonly_notify=is_readonly_notify)
-                    self.pvs.append(pv)
 
 
 class SnapParser:
@@ -82,7 +20,7 @@ class SnapParser:
 
     Where <CA ARRAY LENGTH> is 1 if the PV readings are scalar.
 
-    See test/testables for examples.
+    See pyburt/testables for examples.
 
     Attributes:
         path (str): The absolute path to a .snap file.
@@ -137,17 +75,18 @@ class SnapParser:
         with open(self.path, 'r') as f:
             file_string = f.read()
 
-            are_burt_headers_present = (
-                (burt.HEADER_END in file_string) and
-                (burt.HEADER_START in file_string)
-            )
+            are_burt_headers_present = \
+                (burt.SNAP_HEADER_END in file_string) and \
+                (burt.SNAP_HEADER_START in file_string)
+
             if not are_burt_headers_present:
                 raise ParserException(
                     "Malformed .snap header: Missing BURT header.")
 
             try:
                 header, body = [part.strip()
-                                for part in file_string.split(burt.HEADER_END)]
+                                for part in
+                                file_string.split(burt.SNAP_HEADER_END)]
             except ValueError:
                 raise ParserException(
                     "Malformed .snap header: Duplicate BURT headers.")
@@ -155,16 +94,15 @@ class SnapParser:
             header_lines = header.splitlines()
             body_lines = body.splitlines()
 
-            is_burt_header_malformed = (len(header_lines) <= 1) or \
-                                       (header_lines[0] !=
-                                        burt.HEADER_START) or \
-                                       ((len(header_lines) - 1) !=
-                                        len(self._HEADER_ATTRIBUTES))
+            is_burt_header_malformed = \
+                len(header_lines) <= 1 or \
+                header_lines[0] != burt.SNAP_HEADER_START or \
+                len(header_lines) - 1 != len(self._HEADER_ATTRIBUTES)
 
             if is_burt_header_malformed:
                 raise ParserException(
                     "Malformed .snap header: Top BURT header and/or prefixes"
-                    "are missing.")
+                    " are missing.")
 
             header_lines_without_top_burt_header = header_lines[1:]
             self._parse_header(header_lines_without_top_burt_header)
@@ -194,15 +132,15 @@ class SnapParser:
         """Parses the body portion of a .snap file.
 
         Args:
-            body_lines (list): A newline delimited list of lines in a the
+            body_lines (list): A newline delimited list of lines in a
                 .snap body.
         """
         for line in body_lines:
-            if _skippable_line(line):
+            if skippable_line(line):
                 pass
 
             else:
-                line = _clean_line(line)
+                line = clean_line(line)
 
                 pv_snapshot = line.strip().split()
 
@@ -210,50 +148,20 @@ class SnapParser:
                     raise ParserException(
                         "Malformed .snap body: Too few elements.")
 
-                is_readonly = (
-                    pv_snapshot[0].strip() == burt.READONLY_SPECIFIER
-                )
-                pv_name_index = 1 if is_readonly else 0
+                is_readonly = pv_snapshot[0].strip() == burt.READONLY_SPECIFIER
+                is_readonly_notify = pv_snapshot[0].strip(
+                ) == burt.READONLY_NOTIFY_SPECIFIER
+                is_writeonly = pv_snapshot[0].strip(
+                ) == burt.WRITEONLY_SPECIFIER
+
+                pv_name_index = 1 if (is_readonly or is_readonly_notify) else 0
                 dtype_index = pv_name_index + 1
                 vals_index = dtype_index + 1
 
                 pv_name = pv_snapshot[pv_name_index].strip()
                 vals = pv_snapshot[vals_index:]
 
-                pv = PV(pv_name, vals, is_readonly)
+                pv = PV(pv_name, vals, is_readonly=is_readonly,
+                        is_readonly_notify=is_readonly_notify,
+                        is_writeonly=is_writeonly)
                 self.pv_snapshots.append(pv)
-
-
-class ParserException(Exception):
-    """ Raised when the parsers run into unexpected malformed formats.
-    """
-    pass
-
-
-def _skippable_line(line):
-    """Determines if a line should be skipped.
-
-    Args:
-        line (str): The line currently being parsed.
-
-    Returns
-        bool: If the line should be skipped, or not.
-    """
-    is_comment_line = line.strip().startswith(burt.INLINE_COMMENT)
-    is_blank_line = not line.strip()
-    return is_comment_line or is_blank_line
-
-
-def _clean_line(line):
-    """Preprocesses the line for parsing.
-
-    Args:
-        line (str): The line currently being parsed.
-
-    Returns
-        str: The cleaned line.
-    """
-    if burt.INLINE_COMMENT in line:
-        line = line[:line.find(burt.INLINE_COMMENT)]
-
-    return line.strip()
