@@ -19,7 +19,7 @@ def test_base_case():
 
 
 def test_inline_comments():
-    """Runs the parsers against a case with inline comments next to
+    """Runs the parser against a case with inline comments next to
     PVs.
     """
     correct_pv_list_req = [PV("SR01C-DI-COL-01:CENTRE"),
@@ -40,7 +40,7 @@ def test_inline_comments():
 
 
 def test_malformed_files():
-    """Runs the .snap parser against the malformed .snap files.
+    """Runs the parser against the malformed .req files.
     """
     with pytest.raises(ParserException):
         req_parser = burt.ReqParser(test.MALFORMED_REQ)

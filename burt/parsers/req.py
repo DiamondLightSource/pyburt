@@ -8,15 +8,15 @@ class ReqParser:
 
     The format of a .req file is:
 
-        <Optional RO specifier> <PV 1>
+        <Optional prefix> <PV 1>
         ...
-        # File comments are preceded by a hash sign.
-        <Optional RO specifier> <PV N>
+        % File comments are preceded by a percentage sign.
+        <Optional prefix> <PV N>
 
-    See pyburt/testables for examples.
+    See the testables folder for examples.
 
     Attributes:
-        path (str): The absolute path to a .req file.
+        path (str): The path to a .req file.
         pvs (list): A list of PV objects representing pvs contained in a .req
             file.
     """

@@ -49,8 +49,7 @@ $ pipenv shell
 Note: the unit tests should be run from the root project directory.
 
 There are separate DLS integration tests for pyburt. See 
-`integration/README
-.md` for instructions.
+`integration/README.md` for instructions.
 
 Note that running pytest against `integration` without running the test IOC
  first,
