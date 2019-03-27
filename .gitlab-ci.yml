@@ -9,5 +9,6 @@ rhel7_job:
     - pip install cothread
     - pip install pycodestyle
     - pip install mock
+    - pip install overrides
     - python -m pytest --cov=burt --cov-report term-missing --cov-fail-under 90 test
     - pycodestyle --show-source --show-pep8 burt

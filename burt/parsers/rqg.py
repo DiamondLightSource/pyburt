@@ -1,10 +1,11 @@
 """ Request group parser class which reads the information from a .rqg BURT
 file."""
+import burt
 from . import *
-from burt.pv import PV
+from overrides import overrides
 
 
-class RqgParser:
+class RqgParser(BurtParser):
     """ Stores the information of a .rqg BURT file.
 
     The format of a .rqg file is:
@@ -15,43 +16,25 @@ class RqgParser:
         <.req file path n>
         <.check file path n>
 
-    See pyburt/testables for examples.
+    See the testables folder for examples.
 
     Attributes:
         path (str): The absolute path to a .rqg file.
-        reqs (list): A list of paths to the .req files contained in the .rqg
-            file.
-        checks (list): A list of paths to the .check files contained in the
-        .rqg file.
     """
 
     def __init__(self, path):
-        """Constructor.
+        """ Constructor.
 
         Args:
-            path (str): The absolute path to the .rqg file.
+            path (str): The path to the .rgr file.
         """
-        self.path = path
-        self.reqs = []
-        self.checks = []
+        super(RqgParser, self).__init__(path)
 
-    def parse(self):
-        """Parses the .rqg file located at self.path and stores the information
-            in self.reqs.
-        """
-        with open(self.path, 'r') as f:
-            for line in f:
-                if skippable_line(line):
-                    pass
+    @overrides
+    def read_body_line(self, line):
+        if not line.endswith(burt.REQ_FILE_EXT) or not line.endswith(
+                burt.CHECK_FILE_EXT):
+            raise ParserException("Malformed .rgr file: invalid .req or"
+                                  ".check file specified.")
 
-                else:
-                    line = clean_line(line)
-
-                    if line.endswith(burt.REQ_FILE_EXT):
-                        self.reqs.append(line)
-                    elif line.endswith(burt.CHECK_FILE_EXT):
-                        self.checks.append(line)
-                    else:
-                        raise ParserException("Malformed .rqg file: "
-                                              "invalid .req or .check "
-                                              "file specified.")
+        return line
