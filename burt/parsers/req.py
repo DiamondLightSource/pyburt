@@ -1,7 +1,5 @@
 """ Request parser class which reads the information from a .req BURT file."""
-import burt
 from . import *
-from burt.parsers.burt import BurtParser
 from collections import namedtuple
 from overrides import overrides
 

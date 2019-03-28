@@ -1,6 +1,5 @@
 """ Restore group parser class which reads the information from a .rgr BURT
 file."""
-import burt
 from . import *
 from burt.parsers.snap import SnapParser
 from overrides import overrides

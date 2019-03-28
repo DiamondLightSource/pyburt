@@ -1,6 +1,5 @@
 """ Request group parser class which reads the information from a .rqg BURT
 file."""
-import burt
 from . import *
 from overrides import overrides
 
