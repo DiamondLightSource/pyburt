@@ -2,17 +2,15 @@
 import pytest
 import test
 import burt
+from burt import RqgParser as rp
 from burt.parsers import ParserException
 
 
 def test_base_case():
     """Runs the .rqg parser against mostly blank files.
     """
-    rgr_parser = burt.RgrParser(test.BLANK_RGR)
-    assert test.BLANK_RGR == rgr_parser.path
-    assert "" == rgr_parser.comments
-    assert not rgr_parser.snaps
-    assert not rgr_parser.checks
+    rgr_parser = burt.RgrParser(test.BLANK_RQG)
+    assert test.BLANK_RQG == rgr_parser.path
 
     with pytest.raises(ParserException):
         rgr_parser.parse()
@@ -37,13 +35,12 @@ def test_inline_comments():
         "/home/ops/burt/requestFiles/BR-PC.req",
         "/home/ops/burt/requestFiles/BR-MP.req", ]
 
-    rqg_parser = burt.RqgParser(test.INLINE_COMMENTS_RQG)
-    rqg_parser.parse()
+    rqg_parser = rp(test.INLINE_COMMENTS_RQG)
+    _, body = rqg_parser.parse()
     assert test.INLINE_COMMENTS_RQG == rqg_parser.path
-    assert 1 == len(rqg_parser.checks)
-    assert 11 == len(rqg_parser.reqs)
-    assert correct_checks == rqg_parser.checks
-    assert correct_reqs == rqg_parser.reqs
+    assert 12 == len(body)
+    assert correct_checks == body[:1]
+    assert correct_reqs == body[1:]
 
 
 def test_malformed_files():
@@ -76,10 +73,9 @@ def normal_case():
         "/home/ops/burt/requestFiles/BR-PC.req",
         "/home/ops/burt/requestFiles/BR-MP.req", ]
 
-    rqg_parser = burt.RqgParser(test.NORMAL_RQG)
-    rqg_parser.parse()
+    rqg_parser = rp(test.NORMAL_RQG)
+    _, body = rqg_parser.parse()
     assert test.NORMAL_RQG == rqg_parser.path
-    assert 3 == len(rqg_parser.checks)
-    assert 13 == len(rqg_parser.reqs)
-    assert correct_checks == rqg_parser.checks
-    assert correct_reqs == rqg_parser.reqs
+    assert 19 == len(body)
+    assert correct_checks == body[:2]
+    assert correct_reqs == body[2:]

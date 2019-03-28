@@ -1,9 +1,10 @@
 """ Snap parser class which reads the information from a .snap BURT file."""
 from . import *
-from burt.pv import PV
+from collections import namedtuple
+from overrides import overrides
 
 
-class SnapParser:
+class SnapParser(BurtParser):
     """ Stores the information of a .snap BURT file
 
     The format of the .snap file is:
@@ -13,155 +14,82 @@ class SnapParser:
         ...
         <PREFIX N> <VALUE>
         <END BURT HEADER>
-        <Optional RO specifier> <PV 1> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
+        <Optional specifier> <PV 1> <DATATYPE LENGTH> <CA ARRAY or other>
         ...
-        # File comments are preceded by a hash sign.
-        <Optional RO specifier> <PV N> <CA ARRAY LENGTH> <CA ARRAY or FLOAT>
+        % File comments are preceded by a percent sign.
+        <Optional specifier> <PV N> <DATATYPE LENGTH> <CA ARRAY or other>
 
-    Where <CA ARRAY LENGTH> is 1 if the PV readings are scalar.
+    Where <DATATYPE LENGTH> is 1 if the PV readings are scalar.
 
-    See pyburt/testables for examples.
+    See the testables folder for examples.
 
     Attributes:
-        path (str): The absolute path to a .snap file.
-        pv_snapshots (list): A list of PV objects representing pvs stored in a
-            .snap file.
-        time (str): The time stored in the BURT header.
-        login_id (str): The login ID stored in the BURT header.
-        u_id (str): The UID stored in the BURT header.
-        group_id (str): The group ID stored in the BURT header.
-        keywords (str): The keyword line stored in the BURT header.
-        comments (str): The comment line stored in the BURT header.
-        type (str): The type stored in the BURT header.
-        directory (str): The .snap file directory stored in the BURT header.
-        req_file (str): The .req file to restore that is stored in the BURT
-            header.
+        path (str): The path to the .snap file.
     """
+    SNAP_HEADER_START = "--- Start BURT header"
+    SNAP_HEADER_END = "--- End BURT header"
+    TIME_PREFIX = "Time"
+    LOGINID_PREFIX = "Login ID"
+    UID_PREFIX = "Eff  UID"  # The two spaces are intentional from the old BURT
+    GROUPID_PREFIX = "Group ID"
+    KEYWORDS_PREFIX = "Keywords"
+    COMMENTS_PREFIX = "Comments"
+    TYPE_PREFIX = "Type"
+    # The Type in a BURT header seems to be always this value (revisit?).
+    TYPE_DEFAULT_VAL = "Absolute"
+    DIRECTORY_PREFIX = "Directory"
+    REQ_FILE_PREFIX = "Req File"
 
-    _HEADER_ATTRIBUTES = {
-        burt.TIME_PREFIX: 'time',
-        burt.LOGINID_PREFIX: 'login_id',
-        burt.UID_PREFIX: 'u_id',
-        burt.GROUPID_PREFIX: 'group_id',
-        burt.KEYWORDS_PREFIX: 'keywords',
-        burt.COMMENTS_PREFIX: 'comments',
-        burt.TYPE_PREFIX: 'type',
-        burt.DIRECTORY_PREFIX: 'directory',
-        burt.REQ_FILE_PREFIX: 'req_file'
-    }
+    SNAP_PV = namedtuple('SNAP_PV', 'name dtype_len vals modifier')
 
     def __init__(self, path):
-        """Constructor.
+        """ Constructor.
 
         Args:
-            path (str): The absolute path to the .snap file.
+            path (str): The path to the .snap file.
         """
-        self.path = path
-        self.pv_snapshots = []
-        self.time = ''
-        self.login_id = ''
-        self.u_id = ''
-        self.group_id = ''
-        self.keywords = ''
-        self.comments = ''
-        self.type = ''
-        self.directory = ''
-        self.req_file = ''
+        super(SnapParser, self).__init__(path)
 
-    def parse(self):
-        """Parses the .snap file located at self.path and stores the
-            information in class attributes.
-        """
-        with open(self.path, 'r') as f:
-            file_string = f.read()
+    @overrides
+    def get_header(self):
+        return super(SnapParser, self).HEADER(self.SNAP_HEADER_START,
+                                              (self.TIME_PREFIX,
+                                               self.LOGINID_PREFIX,
+                                               self.UID_PREFIX,
+                                               self.GROUPID_PREFIX,
+                                               self.KEYWORDS_PREFIX,
+                                               self.COMMENTS_PREFIX,
+                                               self.TYPE_PREFIX,
+                                               self.DIRECTORY_PREFIX,
+                                               self.REQ_FILE_PREFIX),
+                                              self.SNAP_HEADER_END)
 
-            are_burt_headers_present = \
-                (burt.SNAP_HEADER_END in file_string) and \
-                (burt.SNAP_HEADER_START in file_string)
+    @overrides
+    def read_body_line(self, line):
+        pv_snapshot = [segment.strip() for segment in line.split()]
 
-            if not are_burt_headers_present:
-                raise ParserException(
-                    "Malformed .snap header: Missing BURT header.")
+        if len(pv_snapshot) < 3:
+            raise ParserException(
+                "Malformed .snap body: Too few elements for a PV.")
 
-            try:
-                header, body = [part.strip()
-                                for part in
-                                file_string.split(burt.SNAP_HEADER_END)]
-            except ValueError:
-                raise ParserException(
-                    "Malformed .snap header: Duplicate BURT headers.")
+        is_modifier_specified = pv_snapshot[0] in (
+            burt.READONLY_SPECIFIER,
+            burt.READONLY_NOTIFY_SPECIFIER,
+            burt.WRITEONLY_SPECIFIER)
 
-            header_lines = header.splitlines()
-            body_lines = body.splitlines()
+        pv_name_index = 1 if is_modifier_specified else 0
+        dtype_len_index = pv_name_index + 1
+        vals_index = dtype_len_index + 1
 
-            is_burt_header_malformed = \
-                len(header_lines) <= 1 or \
-                header_lines[0] != burt.SNAP_HEADER_START or \
-                len(header_lines) - 1 != len(self._HEADER_ATTRIBUTES)
+        pv_name = pv_snapshot[pv_name_index].strip()
+        vals = pv_snapshot[vals_index:]
+        modifier = pv_snapshot[0] if is_modifier_specified else None
 
-            if is_burt_header_malformed:
-                raise ParserException(
-                    "Malformed .snap header: Top BURT header and/or prefixes"
-                    " are missing.")
+        dtype_len = pv_snapshot[dtype_len_index]
+        try:
+            dtype_len = int(dtype_len)
+        except ValueError:
+            raise ParserException(
+                "Malformed .snap file: data type length is a non integer.")
 
-            header_lines_without_top_burt_header = header_lines[1:]
-            self._parse_header(header_lines_without_top_burt_header)
-            self._parse_body(body_lines)
-
-    def _parse_header(self, header_lines):
-        """Parses the header portion of a .snap file.
-
-        Args:
-            header_lines (list): A newline delimited list of lines in a the
-                .snap header.
-        """
-        for line in header_lines:
-            # Ugly wart of .snap files. Directory line doesn't have a colon.
-            if ":" in line:
-                key, value = (part.strip() for part in line.split(":", 1))
-            else:
-                key, value = (part.strip() for part in line.split(None, 1))
-
-            try:
-                setattr(self, SnapParser._HEADER_ATTRIBUTES[key], value)
-            except KeyError:
-                raise ParserException(
-                    "Malformed .snap header: Invalid prefix.")
-
-    def _parse_body(self, body_lines):
-        """Parses the body portion of a .snap file.
-
-        Args:
-            body_lines (list): A newline delimited list of lines in a
-                .snap body.
-        """
-        for line in body_lines:
-            if skippable_line(line):
-                pass
-
-            else:
-                line = clean_line(line)
-
-                pv_snapshot = line.strip().split()
-
-                if len(pv_snapshot) < 3:
-                    raise ParserException(
-                        "Malformed .snap body: Too few elements.")
-
-                is_readonly = pv_snapshot[0].strip() == burt.READONLY_SPECIFIER
-                is_readonly_notify = pv_snapshot[0].strip(
-                ) == burt.READONLY_NOTIFY_SPECIFIER
-                is_writeonly = pv_snapshot[0].strip(
-                ) == burt.WRITEONLY_SPECIFIER
-
-                pv_name_index = 1 if (is_readonly or is_readonly_notify) else 0
-                dtype_index = pv_name_index + 1
-                vals_index = dtype_index + 1
-
-                pv_name = pv_snapshot[pv_name_index].strip()
-                vals = pv_snapshot[vals_index:]
-
-                pv = PV(pv_name, vals, is_readonly=is_readonly,
-                        is_readonly_notify=is_readonly_notify,
-                        is_writeonly=is_writeonly)
-                self.pv_snapshots.append(pv)
+        return self.SNAP_PV(pv_name, dtype_len, vals, modifier)

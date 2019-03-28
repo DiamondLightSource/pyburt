@@ -8,7 +8,7 @@ import subprocess
 import os
 import filecmp
 
-from burt.parsers import ParserException
+from burt import SnapParser as sp
 
 
 def test_snapshot_normal():
@@ -28,43 +28,43 @@ def test_snapshot_normal():
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
     snap_parser = burt.SnapParser(integration.TMP_PYBURT_OUT)
-    snap_parser.parse()
-    assert 12 == len(snap_parser.pv_snapshots)
-    assert snap_parser.time
-    assert snap_parser.login_id
-    assert snap_parser.u_id
-    assert snap_parser.group_id
-    assert test_keywords == snap_parser.keywords
-    assert test_comment == snap_parser.comments
-    assert burt.TYPE_DEFAULT_VAL == snap_parser.type
-    assert os.getcwd() == snap_parser.directory
-    assert test.NORMAL_REQ == snap_parser.req_file
+    header, body = snap_parser.parse()
+    assert 12 == len(body)
+    assert header[sp.TIME_PREFIX]
+    assert header[sp.LOGINID_PREFIX]
+    assert header[sp.UID_PREFIX]
+    assert header[sp.GROUPID_PREFIX]
+    assert test_keywords == header[sp.KEYWORDS_PREFIX]
+    assert test_comment == header[sp.COMMENTS_PREFIX]
+    assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
+    assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
+    assert test.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
 
     # Known scalar PV
-    scalar_pv_snapshot = snap_parser.pv_snapshots[0]
+    scalar_pv_snapshot = body[0]
     assert scalar_pv_snapshot.name == "SR01C-DI-COL-01:CENTRE"
     assert len(scalar_pv_snapshot.vals) == 1
 
     # Known ca array PV
-    snapshot_ca_arr_pv = snap_parser.pv_snapshots[1]
+    snapshot_ca_arr_pv = body[1]
     assert snapshot_ca_arr_pv.name == "SR-DI-PICO-01:BUCKETS"
     assert len(snapshot_ca_arr_pv.vals) == 936
 
     # The PVs below have a known specified max save length (see
     # testables/normal.req) and readonly modifiers.
-    snapshot_save_length_spec_1 = snap_parser.pv_snapshots[4]
+    snapshot_save_length_spec_1 = body[4]
     assert snapshot_save_length_spec_1.name == "SR-DI-PICO-01:BUCKETS"
     assert len(snapshot_save_length_spec_1.vals) == 5
 
-    snapshot_save_length_spec_2 = snap_parser.pv_snapshots[5]
+    snapshot_save_length_spec_2 = body[5]
     assert snapshot_save_length_spec_2.name == "SR-DI-PICO-01:BUCKETS"
     assert len(snapshot_save_length_spec_2.vals) == 10
-    assert snapshot_save_length_spec_2.is_readonly
+    assert snapshot_save_length_spec_2.modifier == "RO"
 
-    snapshot_save_length_spec_3 = snap_parser.pv_snapshots[6]
+    snapshot_save_length_spec_3 = body[6]
     assert snapshot_save_length_spec_3.name == "SR-DI-PICO-01:BUCKETS"
     assert len(snapshot_save_length_spec_3.vals) == 25
-    assert snapshot_save_length_spec_3.is_readonly_notify
+    assert snapshot_save_length_spec_3.modifier == "RON"
 
     # cleanup
     os.remove(integration.TMP_PYBURT_OUT)
@@ -87,17 +87,17 @@ def test_snapshot_group_normal():
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
     snap_parser = burt.SnapParser(integration.TMP_PYBURT_OUT)
-    snap_parser.parse()
-    assert 556 == len(snap_parser.pv_snapshots)
-    assert snap_parser.time
-    assert snap_parser.login_id
-    assert snap_parser.u_id
-    assert snap_parser.group_id
-    assert test_keywords == snap_parser.keywords
-    assert test_comment == snap_parser.comments
-    assert burt.TYPE_DEFAULT_VAL == snap_parser.type
-    assert os.getcwd() == snap_parser.directory
-    assert 13 == len(snap_parser.req_file.split(","))
+    header, body = snap_parser.parse()
+    assert 556 == len(body)
+    assert header[sp.TIME_PREFIX]
+    assert header[sp.LOGINID_PREFIX]
+    assert header[sp.UID_PREFIX]
+    assert header[sp.GROUPID_PREFIX]
+    assert test_keywords == header[sp.KEYWORDS_PREFIX]
+    assert test_comment == header[sp.COMMENTS_PREFIX]
+    assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
+    assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
+    assert 13 == len(header[sp.REQ_FILE_PREFIX].split(","))
 
     # cleanup
     os.remove(integration.TMP_PYBURT_OUT)
@@ -126,7 +126,8 @@ def test_burt_vanilla_rb():
                        comment,
                        keyword)
 
-    assert filecmp.cmp(integration.TMP_BURT_OUT, integration.TMP_PYBURT_OUT)
+    assert filecmp.cmp(integration.TMP_BURT_OUT, integration.TMP_PYBURT_OUT,
+                       shallow=False)
 
     # cleanup
     os.remove(integration.TMP_BURT_OUT)

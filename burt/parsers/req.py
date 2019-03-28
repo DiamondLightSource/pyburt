@@ -1,88 +1,112 @@
 """ Request parser class which reads the information from a .req BURT file."""
 from . import *
-from burt.pv import PV
+from collections import namedtuple
+from overrides import overrides
 
 
-class ReqParser:
+class ReqParser(BurtParser):
     """ Stores the information of a .req BURT file.
 
     The format of a .req file is:
 
-        <Optional RO specifier> <PV 1>
+        <Optional prefix> <PV 1> <Optional save length>
         ...
-        # File comments are preceded by a hash sign.
-        <Optional RO specifier> <PV N>
+        % File comments are preceded by a percentage sign.
+        <Optional prefix> <PV N> <Optional save length>
 
-    See pyburt/testables for examples.
+    See the testables folder for examples.
 
     Attributes:
-        path (str): The absolute path to a .req file.
-        pvs (list): A list of PV objects representing pvs contained in a .req
-            file.
+        path (str): The path to the .req file.
     """
+    REQ_PV = namedtuple('PV', 'name save_len modifier')
 
     def __init__(self, path):
-        """Constructor.
+        """ Constructor.
 
         Args:
-            path (str): The absolute path to the .req file.
+            path (str): The path to the .req file.
         """
-        self.path = path
-        self.pvs = []
+        super(ReqParser, self).__init__(path)
 
-    def parse(self):
-        """Parses the .req file located at self.path and stores the information
-            in self.pvs.
+    @overrides
+    def read_body_line(self, line):
+
+        pv_entry = [segment.strip() for segment in line.split()]
+
+        if len(pv_entry) > 3:
+            raise ParserException(
+                "Malformed .req file: Too many elements in line.")
+
+        pv_name, save_len_index, modifier = \
+            ReqParser._extract_elements(pv_entry)
+
+        save_len = \
+            ReqParser._extract_save_len(pv_entry, save_len_index)
+
+        return self.REQ_PV(pv_name, save_len, modifier)
+
+    @staticmethod
+    def _extract_elements(pv_entry):
+        """ Helper method to retrieve the segments of a PV in a .req file.
+
+        Args:
+            pv_entry: The body line as a space delimited list.
+
+        Returns:
+            str, int, str: The name of the PV, the position of the save length,
+                and the PV modifier, if specified.
         """
-        with open(self.path, 'r') as f:
-            for line in f:
-                if skippable_line(line):
-                    pass
 
-                else:
-                    line = clean_line(line)
+        is_modifier_specified = pv_entry[0] in (
+            burt.READONLY_SPECIFIER,
+            burt.READONLY_NOTIFY_SPECIFIER,
+            burt.WRITEONLY_SPECIFIER)
 
-                    line_portions = line.split()
-                    if len(line_portions) > 3:
-                        raise ParserException(
-                            "Malformed .req file: Too many elements in line.")
+        save_len_index = None
+        if is_modifier_specified:
+            modifier = pv_entry[0]
+            pv_name = pv_entry[1]
+            if len(pv_entry) == 3:
+                save_len_index = 2
+        else:
+            modifier = None
+            pv_name = pv_entry[0]
+            if len(pv_entry) == 2:
+                save_len_index = 1
 
-                    is_readonly = line_portions[0].strip(
-                    ) == burt.READONLY_SPECIFIER
-                    is_readonly_notify = line_portions[0].strip(
-                    ) == burt.READONLY_NOTIFY_SPECIFIER
-                    is_writeonly = line_portions[0].strip(
-                    ) == burt.WRITEONLY_SPECIFIER
+        return pv_name, save_len_index, modifier
 
-                    save_len_index = None
-                    if is_readonly or is_readonly_notify or is_writeonly:
-                        pv_name = line_portions[1]
+    @staticmethod
+    def _extract_save_len(pv_entry, save_len_index):
+        """ Helper method to retrieve the save length from the PV segments in
+            a .req file.
 
-                        if len(line_portions) == 3:
-                            save_len_index = 2
-                    else:
-                        pv_name = line_portions[0]
+        Args:
+            pv_entry: The body line as a space delimited list.
+            save_len_index: The position of the save length in the .req file,
+                or None if there is no save length specified.
 
-                        if len(line_portions) == 2:
-                            save_len_index = 1
+        Returns:
+            int: The save length for the PV.
 
-                    save_len = None
-                    if save_len_index:
-                        try:
-                            save_len = int(line_portions[save_len_index])
-                        except ValueError:
-                            raise ParserException(
-                                "Malformed .req file: save length "
-                                "(third tuple element) must be an "
-                                "integer")
+        Raises:
+            ValueError: If the save length is an invalid number.
+            ParserException: If the BURT file is malformed.
+        """
+        save_len = None
 
-                    if save_len and save_len <= 0:
-                        raise ParserException(
-                            "Malformed .req file: save length "
-                            "(third tuple element) must be a "
-                            "positive integer")
+        if save_len_index:
+            try:
+                save_len = int(pv_entry[save_len_index])
+            except ValueError:
+                raise ParserException(
+                    "Malformed .req file: save length (third tuple element)"
+                    "must be an integer")
 
-                    pv = PV(pv_name, is_readonly=is_readonly,
-                            is_readonly_notify=is_readonly_notify,
-                            save_len=save_len)
-                    self.pvs.append(pv)
+        if save_len and save_len <= 0:
+            raise ParserException(
+                "Malformed .req file: save length (third tuple element) must"
+                "be a positive integer")
+
+        return save_len
