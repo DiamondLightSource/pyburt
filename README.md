@@ -17,10 +17,10 @@ burt.take_snapshot_group("/path/to/.rqg/file.rqg",
     "/path/to/.snap/file.snap", "comment", "keywords")
 
 # Restores PV values in a .snap file.
-burt.restore("/path/to/.snap/file.snap")
+burt.do_restore("/path/to/.snap/file.snap")
 
 # Specify a restore group to restore.
-burt.restore_group("/path/to/.rgr/file.rgr")
+burt.do_restore_group("/path/to/.rgr/file.rgr")
 ```
 
 ## Build

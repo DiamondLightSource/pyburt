@@ -1,5 +1,4 @@
 """parsers package."""
-
 import burt
 from . import *
 from .exception import ParserException
@@ -178,7 +177,7 @@ class BurtParser:
         Returns
             bool: If the line should be skipped, or not.
         """
-        is_comment_line = line.strip().startswith(burt.INLINE_COMMENT)
+        is_comment_line = line.strip().startswith(INLINE_COMMENT)
         is_blank_line = not line.strip()
 
         return is_comment_line or is_blank_line
@@ -194,7 +193,7 @@ class BurtParser:
             str: The cleaned line.
         """
         cleaned_line = line
-        if burt.INLINE_COMMENT in line:
-            cleaned_line = line[:line.find(burt.INLINE_COMMENT)]
+        if INLINE_COMMENT in line:
+            cleaned_line = line[:line.find(INLINE_COMMENT)]
 
         return cleaned_line.strip()

@@ -19,8 +19,8 @@ CHECK_FILE_EXT = '.check'
 '''
 Ignore PEP8 warning as imports below require globals above.
 '''
-from burt.restore import restore
-from burt.restore import restore_group
+from burt.restore import do_restore
+from burt.restore import do_restore_group
 from burt.snapshot import take_snapshot
 from burt.snapshot import take_snapshot_group
 from burt.parsers.req import ReqParser

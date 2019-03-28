@@ -21,7 +21,7 @@ def test_restore():
     caput(integration.IOC_LOCAL_PV, randint(1, 100))
 
     # CA array PV.
-    burt.restore(integration.ARR_SNAP)
+    burt.do_restore(integration.ARR_SNAP)
     ca_arr = caget(integration.IOC_LOCAL_PV)
     assert abs(
         ca_arr[0] - 3.259328000000000e+00) <= 0.2  # Allowed truncation margin
@@ -29,7 +29,7 @@ def test_restore():
     assert ca_arr[2] == -1
 
     # Scalar PV.
-    burt.restore(integration.SCALAR_SNAP)
+    burt.do_restore(integration.SCALAR_SNAP)
     ca_arr = caget(integration.IOC_LOCAL_PV)
     assert ca_arr[0] == 2
 
@@ -43,7 +43,7 @@ def test_restore_group():
     # Randomize IOC start value.
     caput(integration.IOC_LOCAL_PV, randint(1, 100))
 
-    burt.restore_group(test.NORMAL_ALT_RGR)
+    burt.do_restore_group(test.NORMAL_ALT_RGR)
 
     # CA array PV.
     ca_arr = caget(integration.IOC_LOCAL_PV)

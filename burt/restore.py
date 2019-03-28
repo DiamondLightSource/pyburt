@@ -24,7 +24,7 @@ require('cothread')
 from cothread.catools import caput
 
 
-def restore(snap_file):
+def do_restore(snap_file):
     """ Restores the state of the PVs in the .snap file, if not specified as
         read only.
 
@@ -57,7 +57,7 @@ def restore(snap_file):
             pass
 
 
-def restore_group(rgr_file):
+def do_restore_group(rgr_file):
     """ Performs BURT restore for each .snap file contained in the .rgr file.
 
     Args:
@@ -77,4 +77,4 @@ def restore_group(rgr_file):
     for file_path in body:
         # Ignore .check files as pyburt does not need to deal with them.
         if file_path.endswith(burt.SNAP_FILE_EXT):
-            restore(file_path)
+            do_restore(file_path)

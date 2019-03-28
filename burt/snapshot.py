@@ -122,7 +122,7 @@ def _write_to_snap_file(snap_header, snap_footer, snap_file):
                 raise
 
     with open(snap_file, "w") as f:
-        f.write(snap_header + snap_footer)
+        f.write(snap_header + snap_footer + os.linesep)
 
 
 def _gen_snap_header(req_path, comments, keywords):
@@ -203,12 +203,13 @@ def _gen_snap_footer(pvs):
     Returns:
         str: The .snap file footer as a string.
     """
-    footer = ""
+    footer_entries = []
 
     for pv_entry in pvs:
-        snapshot_entry = _gen_snapshot_entry(pv_entry)
+        snapshot = _gen_snapshot_entry(pv_entry)
+        footer_entries.append(snapshot)
 
-    return os.linesep.join(footer)
+    return os.linesep.join(footer_entries)
 
 
 def _gen_snapshot_entry(pv_entry):

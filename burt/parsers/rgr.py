@@ -38,13 +38,14 @@ class RgrParser(BurtParser):
     @overrides
     def get_header(self):
         return super(RgrParser, self).HEADER(self.RGR_HEADER_START,
-                                             (SnapParser.COMMENTS_PREFIX),
+                                             (SnapParser.COMMENTS_PREFIX,),
                                              self.RGR_HEADER_END)
 
     @overrides
     def read_body_line(self, line):
-        if not line.endswith(burt.SNAP_FILE_EXT) or not line.endswith(
+        if not line.endswith(burt.SNAP_FILE_EXT) and not line.endswith(
                 burt.CHECK_FILE_EXT):
+            print(line)
             raise ParserException("Malformed .rgr file: invalid .snap or"
                                   ".check file specified.")
 

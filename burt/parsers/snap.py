@@ -82,8 +82,14 @@ class SnapParser(BurtParser):
         vals_index = dtype_len_index + 1
 
         pv_name = pv_snapshot[pv_name_index].strip()
-        dtype_len = pv_snapshot[dtype_len_index]
         vals = pv_snapshot[vals_index:]
         modifier = pv_snapshot[0] if is_modifier_specified else None
+
+        dtype_len = pv_snapshot[dtype_len_index]
+        try:
+            dtype_len = int(dtype_len)
+        except ValueError:
+            raise ParserException(
+                "Malformed .snap file: data type length is a non integer.")
 
         return self.SNAP_PV(pv_name, dtype_len, vals, modifier)
