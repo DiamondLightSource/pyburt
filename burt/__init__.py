@@ -13,10 +13,10 @@ RGR_FILE_EXT = '.rgr'
 CHECK_FILE_EXT = '.check'
 
 # Ignore PEP8 warning as imports below require globals above.
-from burt.wb import restore  # noqa
-from burt.wb import restore_group  # noqa
-from burt.rb import take_snapshot  # noqa
-from burt.rb import take_snapshot_group  # noqa
+from burt.write import restore  # noqa
+from burt.write import restore_group  # noqa
+from burt.read import take_snapshot  # noqa
+from burt.read import take_snapshot_group  # noqa
 from burt.parsers.req import ReqParser  # noqa
 from burt.parsers.snap import SnapParser  # noqa
 from burt.parsers.rgr import RgrParser  # noqa
