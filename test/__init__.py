@@ -1,7 +1,6 @@
 """The test package."""
-'''
-Shared test .req files.
-'''
+
+# Shared test .req files.
 BLANK_REQ = \
     "testables/req/blank.req"
 INLINE_COMMENTS_REQ = \
@@ -18,9 +17,7 @@ MALFORMED_SAVE_LEN_NON_INT_REQ = \
 MALFORMED_SAVE_LEN_TOO_LARGE_REQ = \
     "testables/req/malformed_save_len_too_large.req"
 
-'''
-Shared test .snap files.
-'''
+# Shared test .snap files.
 ARRAYS_AND_SCALARS_SNAP = \
     "testables/snap/arrays_and_scalars.snap"
 BLANK_SNAP = \
@@ -59,9 +56,7 @@ MISSING_TOP_HEADER_SNAP = \
 ONLY_HEADER_SNAP = \
     "testables/snap/only_header.snap"
 
-'''
-Shared test .rgr files.
-'''
+# Shared test .rgr files.
 BLANK_RGR = \
     "testables/rgr/blank.rgr"
 INLINE_COMMENTS_RGR = \
@@ -90,9 +85,7 @@ MISSING_TOP_HEADER_RGR = \
 ONLY_HEADER_RGR = \
     "testables/rgr/only_header.rgr"
 
-'''
-Shared test .rqg files.
-'''
+# Shared test .rqg files.
 BLANK_RQG = \
     "testables/rqg/blank.rqg"
 INLINE_COMMENTS_RQG = \
@@ -105,7 +98,5 @@ NORMAL_ALT_RQG = \
 MALFORMED_RQG = \
     "testables/rqg/malformed.rqg"
 
-'''
-Tmp snap file to be deleted after a test run.
-'''
+# Tmp snap file to be deleted after a test run.
 TMP_PYBURT_OUT = "test/tmp.snap"

@@ -1,7 +1,7 @@
 """ Request parser class which reads the information from a .req BURT file."""
-from . import *
+import burt
+from . import BurtParser, ParserException
 from collections import namedtuple
-from overrides import overrides
 
 
 class ReqParser(BurtParser):
@@ -29,7 +29,6 @@ class ReqParser(BurtParser):
         """
         super(ReqParser, self).__init__(path)
 
-    @overrides
     def read_body_line(self, line):
 
         pv_entry = [segment.strip() for segment in line.split()]

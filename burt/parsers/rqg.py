@@ -1,7 +1,7 @@
 """ Request group parser class which reads the information from a .rqg BURT
 file."""
-from . import *
-from overrides import overrides
+import burt
+from . import BurtParser, ParserException
 
 
 class RqgParser(BurtParser):
@@ -29,7 +29,6 @@ class RqgParser(BurtParser):
         """
         super(RqgParser, self).__init__(path)
 
-    @overrides
     def read_body_line(self, line):
         if not line.endswith(burt.REQ_FILE_EXT) and not line.endswith(
                 burt.CHECK_FILE_EXT):

@@ -1,7 +1,7 @@
 """ Various tests for the req parser."""
 import pytest
 import test
-from burt.parsers.exception import ParserException
+from burt.parsers import ParserException
 from burt import ReqParser as rp
 
 

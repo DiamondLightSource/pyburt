@@ -1,7 +1,7 @@
 """ Snap parser class which reads the information from a .snap BURT file."""
-from . import *
+import burt
+from . import BurtParser, ParserException
 from collections import namedtuple
-from overrides import overrides
 
 
 class SnapParser(BurtParser):
@@ -50,7 +50,6 @@ class SnapParser(BurtParser):
         """
         super(SnapParser, self).__init__(path)
 
-    @overrides
     def get_header(self):
         return super(SnapParser, self).HEADER(self.SNAP_HEADER_START,
                                               (self.TIME_PREFIX,
@@ -64,7 +63,6 @@ class SnapParser(BurtParser):
                                                self.REQ_FILE_PREFIX),
                                               self.SNAP_HEADER_END)
 
-    @overrides
     def read_body_line(self, line):
         pv_snapshot = [segment.strip() for segment in line.split()]
 

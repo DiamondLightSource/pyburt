@@ -1,13 +1,8 @@
 """parsers package."""
-import burt
-from . import *
-from .exception import ParserException
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
-'''
-Global inline comment prefix.
-'''
+# Global inline comment prefix.
 INLINE_COMMENT = "%"
 
 
@@ -197,3 +192,9 @@ class BurtParser:
             cleaned_line = line[:line.find(INLINE_COMMENT)]
 
         return cleaned_line.strip()
+
+
+class ParserException(Exception):
+    """ Raised when the parsers run into unexpected malformed formats.
+    """
+    pass

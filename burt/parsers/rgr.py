@@ -1,8 +1,8 @@
 """ Restore group parser class which reads the information from a .rgr BURT
 file."""
-from . import *
+import burt
+from . import BurtParser, ParserException
 from burt.parsers.snap import SnapParser
-from overrides import overrides
 
 
 class RgrParser(BurtParser):
@@ -35,13 +35,11 @@ class RgrParser(BurtParser):
         """
         super(RgrParser, self).__init__(path)
 
-    @overrides
     def get_header(self):
         return super(RgrParser, self).HEADER(self.RGR_HEADER_START,
                                              (SnapParser.COMMENTS_PREFIX,),
                                              self.RGR_HEADER_END)
 
-    @overrides
     def read_body_line(self, line):
         if not line.endswith(burt.SNAP_FILE_EXT) and not line.endswith(
                 burt.CHECK_FILE_EXT):
