@@ -67,10 +67,9 @@ class BurtParser:
         """Parse the .* BURT file located at self.path.
 
         Returns:
-            dict, tuple(namedtuple) or tuple(namedtuple): The contents of
-            either both the header and body as a dict, and a tuple of
-            namedtuple objects, respectively, or just the body, if the
-            header does not exist.
+            dict, tuple(namedtuple): The contents of both the header and
+            body as a dict, and a tuple of namedtuple objects, respectively.
+            If there is no header, the dict will be empty.
 
         """
         with open(self.path, 'r') as f:
