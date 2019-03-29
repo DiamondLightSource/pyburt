@@ -1,54 +1,23 @@
 """burt package."""
 
-'''
-Common BURT file constants.
-'''
-INLINE_COMMENT = "%"
-
-'''
-.req and .snap file globals.
-'''
-SNAP_HEADER_START = "--- Start BURT header"
-SNAP_HEADER_END = "--- End BURT header"
-TIME_PREFIX = "Time"
-LOGINID_PREFIX = "Login ID"
-UID_PREFIX = "Eff  UID"  # The two spaces are intentional from the old BURT
-GROUPID_PREFIX = "Group ID"
-KEYWORDS_PREFIX = "Keywords"
-COMMENTS_PREFIX = "Comments"
-TYPE_PREFIX = "Type"
-# The Type in a BURT header seems to be always this value, may need to revisit.
-TYPE_DEFAULT_VAL = "Absolute"
-DIRECTORY_PREFIX = "Directory"
-REQ_FILE_PREFIX = "Req File"
+# Possible PV prefixes.
 READONLY_SPECIFIER = "RO"
 READONLY_NOTIFY_SPECIFIER = "RON"
 WRITEONLY_SPECIFIER = "WO"
 
-'''
-.rgr file globals.
-'''
-RGR_HEADER_START = "--- Start Restore Group header"
-RGR_HEADER_END = "--- End Restore Group header"
-
-'''
-BURT file extensions.
-'''
+# BURT file extensions.
 REQ_FILE_EXT = '.req'
 SNAP_FILE_EXT = '.snap'
 RQG_FILE_EXT = '.rqg'
 RGR_FILE_EXT = '.rgr'
 CHECK_FILE_EXT = '.check'
 
-'''
-Place after globals as imported modules below make use of globals defined
-above.
-'''
-from burt.restore import restore
-from burt.restore import restore_group
-from burt.snapshot import take_snapshot
-from burt.snapshot import take_snapshot_group
-from burt.parsers.req import ReqParser
-from burt.parsers.snap import SnapParser
-from burt.parsers.rgr import RgrParser
-from burt.parsers.rqg import RqgParser
+# Ignore PEP8 warning as imports below require globals above.
+from burt.write import restore  # noqa
+from burt.write import restore_group  # noqa
+from burt.read import take_snapshot  # noqa
+from burt.read import take_snapshot_group  # noqa
+from burt.parsers.req import ReqParser  # noqa
+from burt.parsers.snap import SnapParser  # noqa
+from burt.parsers.rgr import RgrParser  # noqa
+from burt.parsers.rqg import RqgParser  # noqa

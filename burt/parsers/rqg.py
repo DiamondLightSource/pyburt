@@ -1,11 +1,10 @@
-""" Request group parser class which reads the information from a .rqg BURT
-file."""
-from . import *
-from burt.pv import PV
+"""Parser class which reads the information from a .rqg BURT file."""
+import burt
+from . import BurtParser, ParserException
 
 
-class RqgParser:
-    """ Stores the information of a .rqg BURT file.
+class RqgParser(BurtParser):
+    """Store the information of a .rqg BURT file.
 
     The format of a .rqg file is:
 
@@ -15,43 +14,32 @@ class RqgParser:
         <.req file path n>
         <.check file path n>
 
-    See pyburt/testables for examples.
+    See the testables folder for examples.
 
     Attributes:
         path (str): The absolute path to a .rqg file.
-        reqs (list): A list of paths to the .req files contained in the .rqg
-            file.
-        checks (list): A list of paths to the .check files contained in the
-        .rqg file.
+
     """
 
     def __init__(self, path):
         """Constructor.
 
         Args:
-            path (str): The absolute path to the .rqg file.
+            path (str): The path to the .rgr file.
+
         """
-        self.path = path
-        self.reqs = []
-        self.checks = []
+        super(RqgParser, self).__init__(path)
 
-    def parse(self):
-        """Parses the .rqg file located at self.path and stores the information
-            in self.reqs.
+    def read_body_line(self, line):
+        """Check and read a file path in the .rgr file body.
+
+        Returns:
+            str: A file path in the .rqg body.
+
         """
-        with open(self.path, 'r') as f:
-            for line in f:
-                if skippable_line(line):
-                    pass
+        if not line.endswith(burt.REQ_FILE_EXT) and not line.endswith(
+                burt.CHECK_FILE_EXT):
+            raise ParserException("Malformed .rgr file: invalid .req or"
+                                  ".check file specified.")
 
-                else:
-                    line = clean_line(line)
-
-                    if line.endswith(burt.REQ_FILE_EXT):
-                        self.reqs.append(line)
-                    elif line.endswith(burt.CHECK_FILE_EXT):
-                        self.checks.append(line)
-                    else:
-                        raise ParserException("Malformed .rqg file: "
-                                              "invalid .req or .check "
-                                              "file specified.")
+        return line

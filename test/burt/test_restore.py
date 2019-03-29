@@ -1,5 +1,4 @@
 """ Unit tests for the BURT restore functionality."""
-
 import test
 import pytest
 import burt
@@ -8,7 +7,7 @@ import cothread
 from burt.parsers import ParserException
 
 
-@mock.patch('burt.pv.caput')
+@mock.patch('burt.write.caput')
 def test_restore_normal(mock_caput):
     """ Runs BURT restore against a normal case.
     """
@@ -17,7 +16,7 @@ def test_restore_normal(mock_caput):
     burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
 
-@mock.patch('burt.pv.caput')
+@mock.patch('burt.write.caput')
 def test_restore_write_fail(mock_caput):
     """ Runs BURT restore against a write exception case.
     """
@@ -29,7 +28,7 @@ def test_restore_write_fail(mock_caput):
         burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
 
-@mock.patch('burt.pv.caput')
+@mock.patch('burt.write.caput')
 def test_restore_bad_snap(mock_caput):
     """ Runs BURT restore against some bad .snap files.
     """
@@ -64,7 +63,7 @@ def test_restore_bad_snap(mock_caput):
     burt.restore(test.MALFORMED_HEADER_ENTRIES_SNAP)
 
 
-@mock.patch('burt.pv.caput')
+@mock.patch('burt.write.caput')
 def test_bad_file_arguments(mock_caput):
     """Runs the burt script against a case where the file arguments are
     malformed.
@@ -77,7 +76,7 @@ def test_bad_file_arguments(mock_caput):
         burt.restore("helloworld.snap")
 
 
-@mock.patch('burt.pv.caput')
+@mock.patch('burt.write.caput')
 def test_blank_restore(mock_caput):
     """Runs burt restore against a blank .snap file.
     """
@@ -85,7 +84,7 @@ def test_blank_restore(mock_caput):
         burt.restore(test.BLANK_SNAP)
 
 
-@mock.patch('burt.pv.caput')
+@mock.patch('burt.write.caput')
 def test_restore_group_normal(mock_caput):
     """ Runs BURT restore against a normal case.
     """

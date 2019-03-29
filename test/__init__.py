@@ -1,7 +1,6 @@
 """The test package."""
-'''
-Shared test .req files.
-'''
+
+# Shared test .req files.
 BLANK_REQ = \
     "testables/req/blank.req"
 INLINE_COMMENTS_REQ = \
@@ -18,9 +17,7 @@ MALFORMED_SAVE_LEN_NON_INT_REQ = \
 MALFORMED_SAVE_LEN_TOO_LARGE_REQ = \
     "testables/req/malformed_save_len_too_large.req"
 
-'''
-Shared test .snap files.
-'''
+# Shared test .snap files.
 ARRAYS_AND_SCALARS_SNAP = \
     "testables/snap/arrays_and_scalars.snap"
 BLANK_SNAP = \
@@ -29,6 +26,8 @@ SCALARS_SNAP = \
     "testables/snap/scalars.snap"
 INLINE_COMMENTS_SNAP = \
     "testables/snap/inline_comments.snap"
+MODIFIERS_SNAP = \
+    "testables/snap/modifiers.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = \
     "testables/snap/duplicate_burt_headers.snap"
@@ -42,6 +41,10 @@ MALFORMED_HEADER_BURT_TYPO_SNAP = \
     "testables/snap/malformed_header_burt_typo.snap"
 MALFORMED_HEADER_TYPO_SNAP = \
     "testables/snap/malformed_header_typo_prefixes.snap"
+MALFORMED_FOOTER_PREFIX_SNAP = \
+    "testables/snap/malformed_footer_unknown_prefix.snap"
+MALFORMED_FOOTER_NON_INT_LENGTH_SNAP = \
+    "testables/snap/malformed_footer_non_int_length.snap"
 MISORDERED_BURT_HEADER_SNAP = \
     "testables/snap/misordered_burt_headers.snap"
 MISORDERED_HEADER_PREFIXES_SNAP = \
@@ -53,9 +56,7 @@ MISSING_TOP_HEADER_SNAP = \
 ONLY_HEADER_SNAP = \
     "testables/snap/only_header.snap"
 
-'''
-Shared test .rgr files.
-'''
+# Shared test .rgr files.
 BLANK_RGR = \
     "testables/rgr/blank.rgr"
 INLINE_COMMENTS_RGR = \
@@ -69,8 +70,6 @@ DUPLICATE_HEADERS_RGR = \
     "testables/rgr/duplicate_rgr_headers.rgr"
 MALFORMED_BODY_RGR = \
     "testables/rgr/malformed_body.rgr"
-MALFORMED_HEADER_COLONS_RGR = \
-    "testables/rgr/malformed_header_missing_colons.rgr"
 MALFORMED_HEADER_ENTRIES_RGR = \
     "testables/rgr/malformed_header_strange_entries.rgr"
 MALFORMED_HEADER_TYPO_RGR = \
@@ -86,9 +85,7 @@ MISSING_TOP_HEADER_RGR = \
 ONLY_HEADER_RGR = \
     "testables/rgr/only_header.rgr"
 
-'''
-Shared test .rqg files.
-'''
+# Shared test .rqg files.
 BLANK_RQG = \
     "testables/rqg/blank.rqg"
 INLINE_COMMENTS_RQG = \
@@ -101,7 +98,5 @@ NORMAL_ALT_RQG = \
 MALFORMED_RQG = \
     "testables/rqg/malformed.rqg"
 
-'''
-Tmp snap file to be deleted after a test run.
-'''
+# Tmp snap file to be deleted after a test run.
 TMP_PYBURT_OUT = "test/tmp.snap"
