@@ -31,8 +31,9 @@ Type "help", "copyright", "credits" or "license" for more information.
 (InteractiveConsole)
 >>> 
 ```
-2.) In a separate terminal, run the pytest integration tests. This will perform some BURT restore
-calls on the test IOC server, some snapshot tests on real PVs at DLS, as well
+2.) In a separate terminal, run the pytest integration tests via `pytest -vv
+ integration`. This will perform some BURT restore calls on the test IOC 
+ server, some snapshot tests on real PVs at DLS, as well
  as comparison tests against vanilla BURT.
 
 Observe the output and check that all tests pass. This may take several seconds to complete:
@@ -41,7 +42,7 @@ Observe the output and check that all tests pass. This may take several seconds 
 $ pwd
 .../pyburt
 
-$ pytest -v integration
+$ pytest -vv integration
 =============================================================================================== test session starts ===============================================================================================
 platform linux2 -- Python 2.7.13, pytest-4.3.1, py-1.8.0, pluggy-0.9.0 -- /scratch/tph19377/EPICS_REPOS/pyburt/venv/bin/dls-python
 cachedir: .pytest_cache

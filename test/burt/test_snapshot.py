@@ -10,7 +10,7 @@ import numpy
 from burt import SnapParser as sp
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_blank_snapshot(mock_caget):
     """Runs the burt snapshot against a blank .req file.
     """
@@ -25,7 +25,7 @@ def test_blank_snapshot(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_bad_file_arguments(mock_caget):
     """Runs the burt script against a case where the file arguments are
     malformed.
@@ -41,14 +41,14 @@ def test_bad_file_arguments(mock_caget):
     with pytest.raises(ValueError):
         burt.take_snapshot(test.BLANK_REQ, "helloworld.txt")
     with pytest.raises(ValueError):
-        burt.do_restore("")
+        burt.restore("")
     with pytest.raises(ValueError):
-        burt.do_restore("goodbyeworld")
+        burt.restore("goodbyeworld")
     with pytest.raises(ValueError):
-        burt.do_restore("helloworld.snap")
+        burt.restore("helloworld.snap")
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_snapshot_arrays(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked ca array
     return value.
@@ -122,7 +122,7 @@ def test_snapshot_arrays(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_snapshot_enum(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked enum
     return value.
@@ -190,7 +190,7 @@ def test_snapshot_enum(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_snapshot_scalar(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked scalar
     return value.
@@ -256,7 +256,7 @@ def test_snapshot_scalar(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_snapshot_newlines_in_args(mock_caget):
     """Runs a take snapshot test with the problematic case of newlines in user
     supplied meta data. The newlines should appear as is in the .snap file,
@@ -289,7 +289,7 @@ def test_snapshot_newlines_in_args(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_snapshot_invalid_save_len(mock_caget):
     """
     Try to save a PV with a length specified that is greater than the PV
@@ -306,7 +306,7 @@ def test_snapshot_invalid_save_len(mock_caget):
                            test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.snapshot.caget')
+@mock.patch('burt.rb.caget')
 def test_snapshot_group_arrays(mock_caget):
     """Runs a take snapshot group test of a .rqg file with mocked ca array
     return values. The request group file specifies a .req file twice, so

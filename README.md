@@ -17,10 +17,10 @@ burt.take_snapshot_group("/path/to/.rqg/file.rqg",
     "/path/to/.snap/file.snap", "comment", "keywords")
 
 # Restores PV values in a .snap file.
-burt.do_restore("/path/to/.snap/file.snap")
+burt.restore("/path/to/.snap/file.snap")
 
 # Specify a restore group to restore.
-burt.do_restore_group("/path/to/.rgr/file.rgr")
+burt.restore_group("/path/to/.rgr/file.rgr")
 ```
 
 ## Build
@@ -43,7 +43,7 @@ $ pwd
 .../pyburt
 
 $ pipenv shell
-(pyburt) $ pytest -v test
+(pyburt) $ pytest -vv test
 ```
 
 Note: the unit tests should be run from the root project directory.
