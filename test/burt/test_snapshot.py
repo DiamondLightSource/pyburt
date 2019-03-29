@@ -54,8 +54,9 @@ def test_snapshot_arrays(mock_caget):
     return value.
     """
     # Flattened ndarray is a 40 element list.
-    mock_caget.return_value = \
-        cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    mock_caget.return_value = cothread.dbr.ca_array(
+        numpy.array([1, 1, 40])
+    ).flatten()
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -296,8 +297,9 @@ def test_snapshot_invalid_save_len(mock_caget):
     """
     # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
     # The requested save length in the .req file is 937.
-    mock_caget.return_value = \
-        cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
+    mock_caget.return_value = cothread.dbr.ca_array(
+        numpy.array([1, 1, 936])
+    ).flatten()
 
     with pytest.raises(ValueError):
         burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ,
@@ -330,8 +332,8 @@ def test_snapshot_group_arrays(mock_caget):
     assert "" == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert "testables/req/normal.req,testables/req/normal.req" == \
-           header[sp.REQ_FILE_PREFIX]
+    assert "testables/req/normal.req,testables/req/normal.req" == header[
+        sp.REQ_FILE_PREFIX]
 
     assert body[0].name == "SR01C-DI-COL-01:CENTRE"
     assert len(body[0].vals) == 40

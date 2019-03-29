@@ -77,7 +77,7 @@ class BurtParser:
 
             body_vals = self.parse_body(body_lines)
 
-            return header_vals, body_vals if header_vals else body_vals
+            return header_vals, body_vals
 
     def parse_header(self, header_lines):
         """ Parses the header portion of a .* BURT file.

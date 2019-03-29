@@ -37,11 +37,11 @@ class ReqParser(BurtParser):
             raise ParserException(
                 "Malformed .req file: Too many elements in line.")
 
-        pv_name, save_len_index, modifier = \
-            ReqParser._extract_elements(pv_entry)
+        pv_name, save_len_index, modifier = ReqParser._extract_elements(
+            pv_entry
+        )
 
-        save_len = \
-            ReqParser._extract_save_len(pv_entry, save_len_index)
+        save_len = ReqParser._extract_save_len(pv_entry, save_len_index)
 
         return self.REQ_PV(pv_name, save_len, modifier)
 
@@ -60,7 +60,8 @@ class ReqParser(BurtParser):
         is_modifier_specified = pv_entry[0] in (
             burt.READONLY_SPECIFIER,
             burt.READONLY_NOTIFY_SPECIFIER,
-            burt.WRITEONLY_SPECIFIER)
+            burt.WRITEONLY_SPECIFIER
+        )
 
         save_len_index = None
         if is_modifier_specified:

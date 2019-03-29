@@ -114,7 +114,8 @@ def test_snapshot_invalid_save_len():
 
 
 def test_burt_vanilla_rb():
-    """Runs vanilla BURT against pyburt for the rb functionality and checks for differences.
+    """Runs vanilla BURT against pyburt for the rb functionality and checks for
+    differences.
     """
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
