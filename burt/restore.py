@@ -1,4 +1,4 @@
-""" BURT restore python implementation.
+"""BURT restore python implementation.
 
 A BURT restore triggers a revert of the PVs specified in a .snap file to the
 snapshot values that are in the .snap file. A .snap file contains some meta
@@ -25,8 +25,9 @@ from cothread.catools import caput
 
 
 def do_restore(snap_file):
-    """ Restores the state of the PVs in the .snap file, if not specified as
-        read only.
+    """Restores the state of the PVs in the .snap file.
+
+    This function does nothing for PVs marked with RO or RON specifiers.
 
     Args:
         snap_file (str): The path to the .snap file.
@@ -34,6 +35,7 @@ def do_restore(snap_file):
     Raises:
         ValueError: If the snap file has an invalid extension, or if it does
         not exist.
+
     """
     if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (
             not os.path.isfile(snap_file)):
@@ -58,7 +60,7 @@ def do_restore(snap_file):
 
 
 def do_restore_group(rgr_file):
-    """ Performs BURT restore for each .snap file contained in the .rgr file.
+    """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Args:
         rgr_file (str): The path to the .rgr file.
@@ -66,6 +68,7 @@ def do_restore_group(rgr_file):
     Raises:
         ValueError: If the rgr file has an invalid extension, or if it does
         not exist.
+
     """
     if (not rgr_file.endswith(burt.RGR_FILE_EXT)) or (
             not os.path.isfile(rgr_file)):

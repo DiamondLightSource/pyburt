@@ -1,11 +1,11 @@
-""" Request parser class which reads the information from a .req BURT file."""
+"""Request parser class which reads the information from a .req BURT file."""
 import burt
 from . import BurtParser, ParserException
 from collections import namedtuple
 
 
 class ReqParser(BurtParser):
-    """ Stores the information of a .req BURT file.
+    """Store the information of a .req BURT file.
 
     The format of a .req file is:
 
@@ -18,19 +18,28 @@ class ReqParser(BurtParser):
 
     Attributes:
         path (str): The path to the .req file.
+
     """
+
     REQ_PV = namedtuple('PV', 'name save_len modifier')
 
     def __init__(self, path):
-        """ Constructor.
+        """Constructor.
 
         Args:
             path (str): The path to the .req file.
+
         """
         super(ReqParser, self).__init__(path)
 
     def read_body_line(self, line):
+        """Store a PV entry in the .req file into a namedtuple object.
 
+        Returns:
+            namedtuple(REQ_PV): A namedtuple containing the information in a
+                .req body line.
+
+        """
         pv_entry = [segment.strip() for segment in line.split()]
 
         if len(pv_entry) > 3:
@@ -47,7 +56,7 @@ class ReqParser(BurtParser):
 
     @staticmethod
     def _extract_elements(pv_entry):
-        """ Helper method to retrieve the segments of a PV in a .req file.
+        """Retrieve the segments of a PV in a .req file.
 
         Args:
             pv_entry: The body line as a space delimited list.
@@ -55,8 +64,8 @@ class ReqParser(BurtParser):
         Returns:
             str, int, str: The name of the PV, the position of the save length,
                 and the PV modifier, if specified.
-        """
 
+        """
         is_modifier_specified = pv_entry[0] in (
             burt.READONLY_SPECIFIER,
             burt.READONLY_NOTIFY_SPECIFIER,
@@ -79,8 +88,7 @@ class ReqParser(BurtParser):
 
     @staticmethod
     def _extract_save_len(pv_entry, save_len_index):
-        """ Helper method to retrieve the save length from the PV segments in
-            a .req file.
+        """Retrieve the save length from the PV segments in a .req file.
 
         Args:
             pv_entry: The body line as a space delimited list.
@@ -93,6 +101,7 @@ class ReqParser(BurtParser):
         Raises:
             ValueError: If the save length is an invalid number.
             ParserException: If the BURT file is malformed.
+
         """
         save_len = None
 

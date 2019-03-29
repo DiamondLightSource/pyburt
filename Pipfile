@@ -9,6 +9,7 @@ sphinx = "*"
 pycodestyle = "*"
 pytest-cov = "*"
 mock = "*"
+pydocstyle = "*"
 
 [requires]
 python_version = "3.7"

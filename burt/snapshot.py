@@ -1,4 +1,4 @@
-""" BURT snapshot python implementation.
+"""BURT snapshot python implementation.
 
 A BURT snapshot creates a snapshot (.snap) file from a request (.req) file, the
 former of which contains some metadata and PVs with their saved values, and the
@@ -31,8 +31,7 @@ from cothread.catools import caget
 
 
 def take_snapshot(req_file, snap_file, comments=None, keywords=None):
-    """ Saves the PVs and their state to the specified snap file, prefaced with
-        the BURT header.
+    """Save the PVs and their state to the specified snap file, with metadata.
 
     Args:
         req_file (str): The path to the existing .req file.
@@ -44,6 +43,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     Raises:
         ValueError: If the request file or snap file arguments have an invalid
             extension, or if the  .req file does not exist.
+
     """
     if (not req_file.endswith(burt.REQ_FILE_EXT)) or (
             not os.path.isfile(req_file)):
@@ -62,7 +62,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
 
 
 def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
-    """ Performs a BURT snapshot for each request file in the .rqg file.
+    """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
         rqg_file (str): The path to the existing .rqg file.
@@ -74,6 +74,7 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
     Raises:
         ValueError: If the rqg file or snap file arguments have an invalid
             extension, or if the  .rqg file does not exist.
+
     """
     if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (
             not os.path.isfile(rqg_file)):
@@ -103,8 +104,7 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
 
 
 def _write_to_snap_file(snap_header, snap_footer, snap_file):
-    """
-    Writes to the .snap file, making directories if necessary.
+    """Write to the .snap file, making directories if necessary.
 
     Args:
         snap_header: The .snap file header.
@@ -113,6 +113,7 @@ def _write_to_snap_file(snap_header, snap_footer, snap_file):
 
     Raises:
         OSError: If the new snap file path is invalid.
+
     """
     if not os.path.exists(os.path.dirname(snap_file)):
         try:
@@ -126,9 +127,10 @@ def _write_to_snap_file(snap_header, snap_footer, snap_file):
 
 
 def _gen_snap_header(req_path, comments, keywords):
-    """ Generates the .snap file BURT header as a string. This will precede the
-        list of PVs in the .snap file and will contain some meta information
-        such as the current time, user id, etc.
+    """Generate the .snap file BURT header as a string.
+
+    This will precede the list of PVs in the .snap file and will contain
+    some meta information such as the current time, user id, etc.
 
     Args:
         req_path (str): The path to the .req file.
@@ -137,6 +139,7 @@ def _gen_snap_header(req_path, comments, keywords):
 
     Returns:
         str: The .snap file BURT header as a string.
+
     """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
@@ -194,14 +197,17 @@ def _gen_snap_header(req_path, comments, keywords):
 
 
 def _gen_snap_footer(pvs):
-    """ Generates the .snap file footer as a string. This will be the sequence
-        of PVs followed by their reading length and current values.
+    """Generate the .snap file footer as a string.
+
+    This will be the sequence of PVs followed by their reading length and
+    current values.
 
     Args:
         pvs (List): A list of PV named tuple objects.
 
     Returns:
         str: The .snap file footer as a string.
+
     """
     footer_entries = []
 
@@ -213,8 +219,10 @@ def _gen_snap_footer(pvs):
 
 
 def _gen_snapshot_entry(pv_entry):
-    """ Takes a snapshot of the PV's current state by storing the values as
-        a formatted string to be placed in a .snap file.
+    """Take a snapshot of the PV's current state.
+
+    A snapshot is performed by storing the values as a formatted string, which
+    is placed in a .snap file.
 
     The .snap file PV entries require a 15 width precision number(s) in
     scientific notation.
@@ -227,6 +235,7 @@ def _gen_snapshot_entry(pv_entry):
 
     Raises:
         ValueError: If the save length is invalid.
+
     """
     ca_reading = caget(pv_entry.name, datatype=cothread.catools.DBR_ENUM_STR)
     ca_reading_len = 1

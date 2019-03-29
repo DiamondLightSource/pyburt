@@ -1,11 +1,11 @@
-""" Snap parser class which reads the information from a .snap BURT file."""
+"""Snap parser class which reads the information from a .snap BURT file."""
 import burt
 from . import BurtParser, ParserException
 from collections import namedtuple
 
 
 class SnapParser(BurtParser):
-    """ Stores the information of a .snap BURT file
+    """Store the information of a .snap BURT file.
 
     The format of the .snap file is:
 
@@ -25,7 +25,9 @@ class SnapParser(BurtParser):
 
     Attributes:
         path (str): The path to the .snap file.
+
     """
+
     SNAP_HEADER_START = "--- Start BURT header"
     SNAP_HEADER_END = "--- End BURT header"
     TIME_PREFIX = "Time"
@@ -43,14 +45,21 @@ class SnapParser(BurtParser):
     SNAP_PV = namedtuple('SNAP_PV', 'name dtype_len vals modifier')
 
     def __init__(self, path):
-        """ Constructor.
+        """Constructor.
 
         Args:
             path (str): The path to the .snap file.
+
         """
         super(SnapParser, self).__init__(path)
 
     def get_header(self):
+        """Get the .snap file header.
+
+        Returns:
+            namedtuple(super.HEADER): The .snap file header.
+
+        """
         return super(SnapParser, self).HEADER(self.SNAP_HEADER_START,
                                               (self.TIME_PREFIX,
                                                self.LOGINID_PREFIX,
@@ -64,6 +73,13 @@ class SnapParser(BurtParser):
                                               self.SNAP_HEADER_END)
 
     def read_body_line(self, line):
+        """Store a PV in the .snap body into a namedtuple object.
+
+        Returns:
+            namedtuple(SNAP_PV): A namedtuple containing the information in a
+                .snap body line.
+
+        """
         pv_snapshot = [segment.strip() for segment in line.split()]
 
         if len(pv_snapshot) < 3:

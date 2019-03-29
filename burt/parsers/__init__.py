@@ -7,27 +7,32 @@ INLINE_COMMENT = "%"
 
 
 class BurtParser:
-    """ Abstract class that reads from BURT files; the information is stored by
-    the appropriate subclass(es).
+    """Abstract class that reads from BURT files.
+
+    This class must be subclassed by other parser classes which define the
+    structure of the body.
 
     Attributes:
         path (str): The path to the .* BURT file.
+
     """
+
     __metaclass__ = ABCMeta
 
     HEADER = namedtuple('HEADER', 'start_label prefixes end_label')
 
     def __init__(self, path):
-        """ Constructor.
+        """Constructor.
 
         Args:
             path (str): The path to the .* BURT file.
+
         """
         self.path = path
 
     @abstractmethod
     def read_body_line(self, line):
-        """ Stores a line in the body as a namedtuple/tuple or other object.
+        """Store a line in the body as a namedtuple/tuple or other object.
 
         Every BURT parser has a unique format for the body; this method must
         be overridden to return either a namedtuple, a normal tuple, or some
@@ -41,28 +46,32 @@ class BurtParser:
 
         Raises:
             ParserException: If the BURT file is malformed.
+
         """
         pass
 
     def get_header(self):
-        """ Gets the header elements, specified as a namedtuple HEADER
-        object. If there is no header, this shall return an empty tuple, by
-        default.
+        """Get the header elements.
+
+        A header is specified as a namedtuple HEADER object. If there is no
+        header, this shall return an empty tuple, by default.
 
         Returns:
             namedtuple(HEADER): The start, prefix, and end entries in the
                 header, or an empty tuple if there is no header (default).
+
         """
         return ()
 
     def parse(self):
-        """ Parses the .* BURT file located at self.path.
+        """Parse the .* BURT file located at self.path.
 
         Returns:
             dict, tuple(namedtuple) or tuple(namedtuple): The contents of
             either both the header and body as a dict, and a tuple of
             namedtuple objects, respectively, or just the body, if the
             header does not exist.
+
         """
         with open(self.path, 'r') as f:
             file_contents = f.read()
@@ -80,11 +89,12 @@ class BurtParser:
             return header_vals, body_vals
 
     def parse_header(self, header_lines):
-        """ Parses the header portion of a .* BURT file.
+        """Parse the header portion of a .* BURT file.
 
         Args:
             header_lines (list): A newline delimited list of lines in a .*
                 BURT header.
+
         """
         prefix_to_val = {}
         for line in header_lines:
@@ -102,7 +112,7 @@ class BurtParser:
         return prefix_to_val
 
     def parse_body(self, body_lines):
-        """ Parses the body portion of a .* BURT file.
+        """Parse the body portion of a .* BURT file.
 
         Args:
             body_lines (list): A newline delimited list of lines in a
@@ -111,6 +121,7 @@ class BurtParser:
         Returns:
             list (namedtuple or tuple): Contains the child class defined
             tuple objects storing the information of the parsed body.
+
         """
         body_objs = []
         for line in body_lines:
@@ -127,9 +138,7 @@ class BurtParser:
         return body_objs
 
     def _extract_header_and_body(self, file_contents):
-        """
-        Helper method to get the contents from a BURT file with both a header
-        and a footer.
+        """Get the contents from a BURT file with both a header and a footer.
 
         Args:
             file_contents (str): The contents of the BURT file as a str.
@@ -140,6 +149,7 @@ class BurtParser:
 
         Raises:
             ParserException: If the BURT file is malformed.
+
         """
         if not (self.get_header().start_label in file_contents) and \
                 (self.get_header().end_label in file_contents):
@@ -164,13 +174,14 @@ class BurtParser:
 
     @staticmethod
     def _skippable_line(line):
-        """ Determines if a line should be skipped.
+        """Determine if a line should be skipped.
 
         Args:
             line (str): The line currently being parsed.
 
         Returns
             bool: If the line should be skipped, or not.
+
         """
         is_comment_line = line.strip().startswith(INLINE_COMMENT)
         is_blank_line = not line.strip()
@@ -179,13 +190,14 @@ class BurtParser:
 
     @staticmethod
     def _clean_line(line):
-        """ Preprocesses the line for parsing.
+        """Preprocess the line for parsing.
 
         Args:
             line (str): The line currently being parsed.
 
         Returns
             str: The cleaned line.
+
         """
         cleaned_line = line
         if INLINE_COMMENT in line:
@@ -195,6 +207,6 @@ class BurtParser:
 
 
 class ParserException(Exception):
-    """ Raised when the parsers run into unexpected malformed formats.
-    """
+    """Raise when the parsers run into unexpected malformed formats."""
+
     pass
