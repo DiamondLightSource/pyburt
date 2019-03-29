@@ -10,6 +10,8 @@ rhel7_job:
     - pip install pycodestyle
     - pip install pydocstyle
     - pip install mock
+    - pip install sphinx
     - python -m pytest --cov=burt --cov-report term-missing --cov-fail-under 90 test
     - pycodestyle --show-source --show-pep8 burt
     - pydocstyle -e burt
+    - sphinx-build -b html -E -q docs docs/_build/html
