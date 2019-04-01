@@ -23,10 +23,6 @@ import cothread
 
 from collections import OrderedDict
 from burt.parsers.snap import SnapParser as snap
-from pkg_resources import require
-
-require('cothread')
-
 from cothread.catools import caget
 
 

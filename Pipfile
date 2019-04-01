@@ -5,14 +5,16 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-sphinx = "*"
+sphinx = "==1.8.5"
 pycodestyle = "*"
 pytest-cov = "*"
 mock = "*"
+configparser = "*" # Mysteriously needed by python 2.7 for pydocstyle.
 pydocstyle = "*"
+coveralls = "*"
 
 [requires]
 python_version = "3.7"
 
 [packages]
-cothread = "*"
+# cothread = "*" # Leave for now until libca.so and python 3.7 issues fixed.
