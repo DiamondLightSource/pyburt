@@ -17,9 +17,6 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 """
 import burt
 import os
-from pkg_resources import require
-
-require('cothread')
 
 from cothread.catools import caput
 
