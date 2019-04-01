@@ -1,14 +1,20 @@
+[![Build Status](https://travis-ci.com/dls-controls/pyburt.svg?branch=master)](https://travis-ci.com/dls-controls/pyburt)
+[![Coverage Status](https://coveralls.io/repos/github/dls-controls/pyburt/badge.svg?branch=master)](https://coveralls.io/github/dls-controls/pyburt?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/pyburt/badge/?version=latest)](https://pyburt.readthedocs.io/en/latest/?badge=latest)
+
 # pyburt
 
 **pyburt** is the Python version of the Burt EPICS extension. It utilizes the
-[cothread](https://cothread.readthedocs.io/en/latest/) python library for Channel Access.
+[cothread](https://cothread.readthedocs.io/en/latest/) python library for
+Channel Access.
 
 ## Usage
 
 ```python
 import burt
 
-# Saves PV values in a .req file into a .snap file along with some additional metadata.
+# Saves PV values in a .req file into a .snap file along with some additional
+# metadata.
 burt.take_snapshot("/path/to/.req/file.req",
     "/path/to/.snap/file.snap", "comment", "keywords")
     
