@@ -9,7 +9,9 @@ sphinx = "==1.8.5"
 pycodestyle = "*"
 pytest-cov = "*"
 mock = "*"
-pydocstyle = "==3.0.0"
+configparser = "*" # Mysteriously needed by python 2.7 for pydocstyle.
+pydocstyle = "*"
+coveralls = "*"
 
 [requires]
 python_version = "3.7"
