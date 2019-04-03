@@ -17,4 +17,4 @@ coveralls = "*"
 python_version = "3.7"
 
 [packages]
-# cothread = "*" # Leave for now until libca.so and python 3.7 issues fixed.
+cothread = {editable = true,git = "https://github.com/dls-controls/cothread.git",ref = "master"}
