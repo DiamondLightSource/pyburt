@@ -18,3 +18,4 @@ python_version = "3.7"
 
 [packages]
 cothread = {editable = true,git = "https://github.com/dls-controls/cothread.git",ref = "master"}
+pyserial = "==3.4"
