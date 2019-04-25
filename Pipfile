@@ -5,7 +5,6 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-sphinx = "*"
 pycodestyle = "*"
 pytest-cov = "*"
 mock = "*"
@@ -17,4 +16,5 @@ coveralls = "*"
 python_version = "3.7"
 
 [packages]
-cothread = "==2.15"
+cothread = ">=2.15"
+sphinx = "==2.0.1"
