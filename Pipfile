@@ -5,7 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-sphinx = "==1.8.5"
+sphinx = "*"
 pycodestyle = "*"
 pytest-cov = "*"
 mock = "*"
@@ -17,5 +17,4 @@ coveralls = "*"
 python_version = "3.7"
 
 [packages]
-cothread = {editable = true,git = "https://github.com/dls-controls/cothread.git",ref = "master"}
-pyserial = "==3.4"
+cothread = "==2.15"
