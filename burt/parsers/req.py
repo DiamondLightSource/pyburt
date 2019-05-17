@@ -35,6 +35,9 @@ class ReqParser(BurtParser):
     def read_body_line(self, line):
         """Store a PV entry in the .req file into a namedtuple object.
 
+        Args:
+            line: The line being parsed in a .req file.
+
         Returns:
             namedtuple(REQ_PV): A namedtuple containing the information in a
                 .req body line.
