@@ -8,6 +8,10 @@
 [cothread](https://cothread.readthedocs.io/en/latest/) python library for
 Channel Access.
 
+## Documentation
+
+Full documentation is available at [Read the Docs](https://readthedocs.org/projects/pyburt/).
+
 ## Usage
 
 ```python
@@ -29,6 +33,14 @@ burt.restore("/path/to/.snap/file.snap")
 burt.restore_group("/path/to/.rgr/file.rgr")
 ```
 
+## Installation
+
+To install the latest version of pyburt using pip:
+
+```bash
+$ pip install pyburt
+```
+
 ## Build
  
 To build the Sphinx documentation:
@@ -40,8 +52,13 @@ $ make html
 
 The generated pages are in `docs/_build/html`.
 
-## Test
+## Licence
 
+See [LICENSE](). 
+
+## Tests
+
+#### Unit Tests
 To run the core pytest unit tests:
 
 ```bash
@@ -54,10 +71,18 @@ $ pipenv shell
 
 Note: the unit tests should be run from the root project directory.
 
-There are separate DLS integration tests for pyburt. See 
+#### DLS Integration Tests
+
+There are separate DLS integration tests for pyburt. These tests run snapshot
+and restore operations against known Diamond PV's. See 
 `integration/README.md` for instructions.
 
 Note that running pytest against `integration` without running the test IOC
  first,
 as described in `integration/README.md`, will cause the tests to
 fail.
+
+#### Pytac Integration Tests
+
+Similarly, there are integration tests designed for testing against known PV's
+defined in Pytac.
