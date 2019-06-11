@@ -1,0 +1,14 @@
+--- Start BURT checkfile header
+Comments: Aggregate to Set points for backup / zero set points for restore. 
+--- End BURT checkfile header
+SR01A-PC-Q1D-01:OFFSET1.VAL 0
+SR01A-PC-Q2D-02:OFFSET1.VAL 2 1
+SR01A-PC-Q3D-03:OFFSET1.VAL 1 5
+SR01A-PC-Q3B-08:OFFSET1.VAL 1 4
+SR01A-PC-Q2B-09:OFFSET1.VAL 2 3
+SR01A-PC-Q1B-10:OFFSET1.VAL 6
+
+SR03A-PC-Q1B-01:OFFSET1.VAL 5 2
+SR03A-PC-Q2B-02:OFFSET1.VAL 0 0
+
+
