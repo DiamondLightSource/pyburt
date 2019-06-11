@@ -1,0 +1,5 @@
+--- Start BURT checkfile header
+Comments: other parameters to check.
+		bcd limit 20 micron.
+--- End BURT checkfile header
+SR-DI-EBPM-01:BCD_LIMIT 20 0

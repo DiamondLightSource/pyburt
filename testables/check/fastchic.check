@@ -1,0 +1,10 @@
+
+--- Start BURT checkfile header
+Comments: check setpoints on fast chicane are zero. 
+--- End BURT checkfile header
+
+SR09A-PC-FCHIC-01:SETI 0 1E-6
+SR09A-PC-FCHIC-02:SETI 0 1E-6
+SR10S-PC-FCHIC-03:SETI 0 1E-6
+SR10S-PC-FCHIC-04:SETI 0 1E-6
+SR10S-PC-FCHIC-05:SETI 0 1E-6
