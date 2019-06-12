@@ -21,3 +21,4 @@ from burt.parsers.req import ReqParser  # noqa
 from burt.parsers.snap import SnapParser  # noqa
 from burt.parsers.rgr import RgrParser  # noqa
 from burt.parsers.rqg import RqgParser  # noqa
+from burt.parsers.check import CheckParser  # noqa

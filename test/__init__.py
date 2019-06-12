@@ -94,9 +94,28 @@ NORMAL_RQG = \
     "testables/rqg/normal.rqg"
 NORMAL_ALT_RQG = \
     "testables/rqg/normal_alt.rqg"
-
 MALFORMED_RQG = \
     "testables/rqg/malformed.rqg"
+
+# Shared test .check files.
+BAD_PREFIX_CHECK = \
+    "testables/check/bad_prefix.check"
+EXCESS_VALUES_CHECK = \
+    "testables/check/excess_values.check"
+EXTRA_PREFIX_CHECK = \
+    "testables/check/extra_prefix.check"
+MISSING_TARGET_CHECK = \
+    "testables/check/missing_target.check"
+MULTI_LINE_COMMENT_CHECK = \
+    "testables/check/multi_line_comment.check"
+NEG_TOLERANCE_CHECK = \
+    "testables/check/neg_tolerance.check"
+NORMAL_CHECK_1 = \
+    "testables/check/normal_1.check"
+NORMAL_CHECK_2 = \
+    "testables/check/normal_2.check"
+NORMAL_CHECK_3 = \
+    "testables/check/normal_3.check"
 
 # Tmp snap file to be deleted after a test run.
 TMP_PYBURT_OUT = "test/tmp.snap"
