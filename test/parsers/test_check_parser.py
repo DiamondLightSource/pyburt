@@ -11,9 +11,8 @@ def test_base_case():
     check_parser = cp(test.BLANK_REQ)
     assert test.BLANK_REQ == check_parser.path
 
-    _, body = check_parser.parse()
-    assert test.BLANK_REQ == check_parser.path
-    assert 0 == len(body)
+    with pytest.raises(ParserException):
+        check_parser.parse()
 
 
 def test_multiline_comments():
@@ -22,11 +21,8 @@ def test_multiline_comments():
     correct_pv_list = [cp.CHECK_PV("SR-DI-EBPM-01:BCD_LIMIT", 20, 0)]
 
     check_parser = cp(test.MULTI_LINE_COMMENT_CHECK)
-    header, body = check_parser.parse()
-    assert test.MULTI_LINE_COMMENT_CHECK == check_parser.path
-    assert "other parameters to check." == header[cp.COMMENTS_PREFIX]
-    assert 1 == len(body)
-    assert correct_pv_list == body
+    with pytest.raises(ParserException):
+        check_parser.parse()
 
 
 def test_malformed_files():
@@ -34,6 +30,10 @@ def test_malformed_files():
     """
     with pytest.raises(ParserException):
         check_parser = cp(test.BAD_PREFIX_CHECK)
+        check_parser.parse()
+
+    with pytest.raises(ParserException):
+        check_parser = cp(test.BAD_VALUES_CHECK)
         check_parser.parse()
 
     with pytest.raises(ParserException):
