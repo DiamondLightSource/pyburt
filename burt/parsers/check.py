@@ -52,9 +52,7 @@ class CheckParser(BurtParser):
 
         """
         return super(CheckParser, self).HEADER(self.CHECK_HEADER_START,
-                                               (
-                                                   self.COMMENTS_PREFIX
-                                               ),
+                                               (self.COMMENTS_PREFIX,),
                                                self.CHECK_HEADER_END)
 
     def read_body_line(self, line):
@@ -67,14 +65,21 @@ class CheckParser(BurtParser):
         """
         pv_snapshot = [segment.strip() for segment in line.split()]
 
-        if len(pv_snapshot) < 2:
+        if len(pv_snapshot) < 2 or len(pv_snapshot) > 3:
             raise ParserException(
-                "Malformed .check body: Too few elements for a PV.")
+                "Malformed .check body: Unexpected number of elements.")
 
         is_tolerance_specified = (len(pv_snapshot) == 3)
 
         pv_name = pv_snapshot[0].strip()
         target = pv_snapshot[1]
         tolerance = pv_snapshot[2] if is_tolerance_specified else 0
+
+        try:
+            target = float(target)
+            tolerance = float(tolerance)
+        except ValueError:
+            raise ParserException(
+                "Malformed .check file: values must be numbers.")
 
         return self.CHECK_PV(pv_name, target, tolerance)

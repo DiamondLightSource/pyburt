@@ -100,6 +100,8 @@ MALFORMED_RQG = \
 # Shared test .check files.
 BAD_PREFIX_CHECK = \
     "testables/check/bad_prefix.check"
+BAD_VALUES_CHECK = \
+    "testables/check/bad_values.check"
 EXCESS_VALUES_CHECK = \
     "testables/check/excess_values.check"
 EXTRA_PREFIX_CHECK = \
