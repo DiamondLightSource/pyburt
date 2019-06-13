@@ -1,2 +1,1 @@
-"""Utilities for checking against BURT .check file parameters.
-"""
+"""Utilities for checking against BURT .check file parameters."""
