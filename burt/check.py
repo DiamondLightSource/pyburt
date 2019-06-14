@@ -11,6 +11,34 @@ import os
 from cothread.catools import caget
 
 
+class CheckFailedException(Exception):
+    """Raise when a check unexpectedly fails. Encapsulate failed check info.
+
+    Attributes:
+    PV_NAME (str): The name of the failed PV.
+    PV_TARGET(float): The target value.
+    PV_TOLERANCE The tolerance.
+
+    """
+    PV_NAME = ""
+    PV_TARGET = 0
+    PV_TOLERANCE = 0
+
+    def __init__(self, check_pv):
+        """Constructor.
+
+        Args:
+            check_pv: A CHECK_PV named tuple of the PV which failed the check.
+        """
+        PV_NAME = check_pv.name
+        PV_TARGET = check_pv.target
+        PV_TOLERANCE = check_pv.tolerance
+
+        super(CheckFailedException, self).__init__(
+            "{} failed with target {} and tolerance {}.".format(
+                check_pv.name, check_pv.target, check_pv.tolerance))
+
+
 def check(check_file):
     """Checks if the check file conditions are met.
 
@@ -19,12 +47,11 @@ def check(check_file):
     Args:
         check_file (str): The path to the .check file.
 
-    Returns:
-        bool: True if the check succeeds, false otherwise.
-
     Raises:
         ValueError: If the check file has an invalid extension, or if it does
         not exist.
+
+        CheckFailedException: If the check fails.
 
     """
     if (not check_file.endswith(burt.CHECK_FILE_EXT)) or (
@@ -39,6 +66,4 @@ def check(check_file):
         current_pv_val = caget(pv_entry.name)
 
         if abs(current_pv_val - pv_entry.target) > pv_entry.tolerance:
-            return False
-
-    return True
+            raise CheckFailedException(pv_entry)
