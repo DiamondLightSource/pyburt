@@ -20,6 +20,7 @@ class CheckFailedException(Exception):
     PV_TOLERANCE The tolerance.
 
     """
+
     PV_NAME = ""
     PV_TARGET = 0
     PV_TOLERANCE = 0
@@ -41,7 +42,7 @@ class CheckFailedException(Exception):
 
 
 def check(check_file):
-    """Checks if the check file conditions are met.
+    """Check if the check file conditions are met.
 
     A check succeeds if |pv-value - target| < tolerance, else it fails.
 
