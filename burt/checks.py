@@ -24,19 +24,20 @@ class CheckFailedException(Exception):
     PV_TARGET = 0
     PV_TOLERANCE = 0
 
-    def __init__(self, check_pv):
+    def __init__(self, check_pv, msg=""):
         """Constructor.
 
         Args:
             check_pv: A CHECK_PV named tuple of the PV which failed the check.
+            msg (str): Any other message.
         """
         PV_NAME = check_pv.name
         PV_TARGET = check_pv.target
         PV_TOLERANCE = check_pv.tolerance
 
         super(CheckFailedException, self).__init__(
-            "{} failed with target {} and tolerance {}.".format(
-                check_pv.name, check_pv.target, check_pv.tolerance))
+            "{} failed with target {} and tolerance {}. {}".format(
+                check_pv.name, check_pv.target, check_pv.tolerance, msg))
 
 
 def check(check_file):
