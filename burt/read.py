@@ -49,10 +49,10 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
         raise ValueError("Invalid .snap file destination.")
 
     req_parser = burt.ReqParser(req_file)
-    _, pv_entry = req_parser.parse()
+    _, body = req_parser.parse()
 
     snap_header = _gen_snap_header(req_file, comments, keywords)
-    snap_footer = _gen_snap_footer(pv_entry)
+    snap_footer = _gen_snap_footer(body)
 
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
