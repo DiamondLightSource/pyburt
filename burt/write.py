@@ -47,13 +47,13 @@ def restore(snap_file):
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
-                pass
+                print("WO type PVs currently unimplemented.")
             else:
                 caput(pv_entry.name, pv_entry.vals)
 
         if pv_entry == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
-            pass
+            print("RON type PVs currently unimplemented.")
 
 
 def restore_group(rgr_file):
