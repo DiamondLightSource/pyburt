@@ -17,6 +17,7 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 """
 import burt
 import os
+import logging
 
 from cothread.catools import caput
 
@@ -40,6 +41,7 @@ def restore(snap_file):
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
+    logging.debug("Parsed .snap PVs: {}".format(body))
 
     for pv_entry in body:
         if pv_entry.modifier not in (burt.READONLY_NOTIFY_SPECIFIER,
@@ -73,6 +75,7 @@ def restore_group(rgr_file):
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
+    logging.debug("Parsed .snap files: {}".format(body))
 
     for file_path in body:
         # Ignore .check files as pyburt does not need to deal with them.

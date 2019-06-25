@@ -20,6 +20,8 @@ import time
 import pwd
 import getpass
 import cothread
+import logging
+import checks
 
 from collections import OrderedDict
 from burt.parsers.snap import SnapParser as snap
@@ -33,7 +35,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
         req_file (str): The path to the existing .req file.
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
-        keywords(str): A delimited string of keywords to append to the BURT
+        keywords (str): A delimited string of keywords to append to the BURT
             header.
 
     Raises:
@@ -50,9 +52,13 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
 
     req_parser = burt.ReqParser(req_file)
     _, body = req_parser.parse()
+    logging.debug("Parsed PVs: {}".format(body))
 
     snap_header = _gen_snap_header(req_file, comments, keywords)
+    logging.debug("Generated .snap header {}".format(snap_header))
+
     snap_footer = _gen_snap_footer(body)
+    logging.debug("Generated .snap footer {}".format(snap_footer))
 
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
@@ -81,22 +87,19 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
 
     rqg_parser = burt.RqgParser(rqg_file)
     _, body = rqg_parser.parse()
+    logging.debug("Parsed .req files: {}".format(body))
 
-    req_paths = []
-    pvs = []
     for file_path in body:
-        # Ignore .check files as pyburt does not deal with them directly.
-        if file_path.endswith(burt.REQ_FILE_EXT):
-            req_parser = burt.ReqParser(file_path)
-            _, pv_entry = req_parser.parse()
+        if file_path.endswith(burt.CHECK_FILE_EXT):
+            try:
+                checks.check(file_path)
+            except checks.CheckFailedException as e:
+                logging.debug(e)
+                logging.critical("Check {} failed. Exiting".format(file_path))
+                return
 
-            req_paths.append(file_path)
-            pvs.extend(pv_entry)
-
-    snap_header = _gen_snap_header(",".join(req_paths), comments, keywords)
-    snap_footer = _gen_snap_footer(pvs)
-
-    _write_to_snap_file(snap_header, snap_footer, snap_file)
+        elif file_path.endswith(burt.REQ_FILE_EXT):
+            take_snapshot(file_path, snap_file, comments, keywords)
 
 
 def _write_to_snap_file(snap_header, snap_footer, snap_file):
@@ -139,23 +142,36 @@ def _gen_snap_header(req_path, comments, keywords):
     """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
+    logging.debug("Current time: {}".format(current_time))
 
     # Username (Lastname, Initials (Firstname)) format
-    curr_user = getpass.getuser() + " (" + pwd.getpwuid(os.getuid())[4] + ")"
+    username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
+    logging.debug("Current user: {}".format(username))
+    logging.debug("Current user group: {}".format(ugroup))
+    curr_user = username + " (" + ugroup + ")"
 
     uid = os.getuid()
+    logging.debug("uid: {}".format(uid))
+
     gid = pwd.getpwnam(getpass.getuser()).pw_gid
+    logging.debug("gid: {}".format(gid))
 
     # Carriage returns and newlines from user input can malform the BURT header
     # so write to the snap file as escaped symbols. This is the behaviour of
     # the old BURT.
     keywords = "" if keywords is None else \
         keywords.replace('\r', '\\r').replace('\n', '\\n')
+    logging.debug("Keywords: {}".format(keywords))
+
     comments = "" if comments is None else \
         comments.replace('\r', '\\r').replace('\n', '\\n')
+    logging.debug("Comments: {}".format(comments))
 
     type = snap.TYPE_DEFAULT_VAL
+
     directory = os.getcwd()
+    logging.debug("Cwd: {}".format(directory))
+
     req_file = req_path
 
     header_elements = OrderedDict([
@@ -236,6 +252,8 @@ def _gen_snapshot_entry(pv_entry):
     ca_reading = caget(pv_entry.name, datatype=cothread.catools.DBR_ENUM_STR)
     ca_reading_len = 1
     ca_reading_str = ""
+    logging.debug("ca_reading: {}".format(ca_reading))
+    logging.debug("ca_reading type: {}".format(type(ca_reading)))
 
     if isinstance(ca_reading, cothread.dbr.ca_array):
         ca_reading_len = len(ca_reading)

@@ -7,6 +7,7 @@ A check succeeds if |pv-value - target| < tolerance, else it fails.
 """
 import burt
 import os
+import logging
 
 from cothread.catools import caget
 
