@@ -39,7 +39,9 @@ class CheckFailedException(Exception):
 
         super(CheckFailedException, self).__init__(
             "{} failed with target {} and tolerance {}. {}".format(
-                check_pv.name, check_pv.target, check_pv.tolerance, msg))
+                check_pv.name, check_pv.target, check_pv.tolerance, msg
+            )
+        )
 
 
 def check(check_file):
@@ -58,7 +60,8 @@ def check(check_file):
 
     """
     if (not check_file.endswith(burt.CHECK_FILE_EXT)) or (
-            not os.path.isfile(check_file)):
+        not os.path.isfile(check_file)
+    ):
         raise ValueError("Invalid .check file input.")
 
     check_parser = burt.CheckParser(check_file)

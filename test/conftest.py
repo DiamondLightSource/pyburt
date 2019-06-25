@@ -16,15 +16,17 @@ def pytest_sessionstart():
 
     class ca_array(numpy.ndarray):
         """A minimal mock of the cothread ca_array class."""
+
         pass
 
     class ca_str(str):
         """A minimal mock of the cothread ca_str class."""
+
         pass
 
-    cothread = types.ModuleType('cothread')
-    catools = types.ModuleType('catools')
-    dbr = types.ModuleType('dbr')
+    cothread = types.ModuleType("cothread")
+    catools = types.ModuleType("catools")
+    dbr = types.ModuleType("dbr")
 
     catools.caget = mock.MagicMock()
     catools.caput = mock.MagicMock()
@@ -36,5 +38,5 @@ def pytest_sessionstart():
     cothread.catools = catools
     cothread.dbr = dbr
 
-    sys.modules['cothread'] = cothread
-    sys.modules['cothread.catools'] = catools
+    sys.modules["cothread"] = cothread
+    sys.modules["cothread.catools"] = catools

@@ -43,8 +43,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
             extension, or if the  .req file does not exist.
 
     """
-    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (
-            not os.path.isfile(req_file)):
+    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (not os.path.isfile(req_file)):
         raise ValueError("Invalid .req file input.")
 
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
@@ -78,8 +77,7 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
             extension, or if the  .rqg file does not exist.
 
     """
-    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (
-            not os.path.isfile(rqg_file)):
+    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (not os.path.isfile(rqg_file)):
         raise ValueError("Invalid .rqg file input.")
 
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
@@ -159,12 +157,14 @@ def _gen_snap_header(req_path, comments, keywords):
     # Carriage returns and newlines from user input can malform the BURT header
     # so write to the snap file as escaped symbols. This is the behaviour of
     # the old BURT.
-    keywords = "" if keywords is None else \
-        keywords.replace('\r', '\\r').replace('\n', '\\n')
+    keywords = (
+        "" if keywords is None else keywords.replace("\r", "\\r").replace("\n", "\\n")
+    )
     logging.debug("Keywords: {}".format(keywords))
 
-    comments = "" if comments is None else \
-        comments.replace('\r', '\\r').replace('\n', '\\n')
+    comments = (
+        "" if comments is None else comments.replace("\r", "\\r").replace("\n", "\\n")
+    )
     logging.debug("Comments: {}".format(comments))
 
     type = snap.TYPE_DEFAULT_VAL
@@ -174,24 +174,25 @@ def _gen_snap_header(req_path, comments, keywords):
 
     req_file = req_path
 
-    header_elements = OrderedDict([
-        (snap.SNAP_HEADER_START, ''),
-        (snap.TIME_PREFIX, current_time),
-        (snap.LOGINID_PREFIX, curr_user),
-        (snap.UID_PREFIX, uid),
-        (snap.GROUPID_PREFIX, gid),
-        (snap.KEYWORDS_PREFIX, keywords),
-        (snap.COMMENTS_PREFIX, comments),
-        (snap.TYPE_PREFIX, type),
-        (snap.DIRECTORY_PREFIX, directory),
-        (snap.REQ_FILE_PREFIX, req_file),
-        (snap.SNAP_HEADER_END, '')
-    ])
+    header_elements = OrderedDict(
+        [
+            (snap.SNAP_HEADER_START, ""),
+            (snap.TIME_PREFIX, current_time),
+            (snap.LOGINID_PREFIX, curr_user),
+            (snap.UID_PREFIX, uid),
+            (snap.GROUPID_PREFIX, gid),
+            (snap.KEYWORDS_PREFIX, keywords),
+            (snap.COMMENTS_PREFIX, comments),
+            (snap.TYPE_PREFIX, type),
+            (snap.DIRECTORY_PREFIX, directory),
+            (snap.REQ_FILE_PREFIX, req_file),
+            (snap.SNAP_HEADER_END, ""),
+        ]
+    )
 
     header = r""
     for prefix in header_elements:
-        if (prefix == snap.SNAP_HEADER_START) or (
-                prefix == snap.SNAP_HEADER_END):
+        if (prefix == snap.SNAP_HEADER_START) or (prefix == snap.SNAP_HEADER_END):
             header += prefix + os.linesep
 
         # Special case with no colon.
@@ -202,8 +203,9 @@ def _gen_snap_header(req_path, comments, keywords):
         # cases.
         else:
             left_padding = " " * (10 - len(":") - len(prefix))
-            header += prefix + ":" + left_padding + str(
-                header_elements[prefix]) + os.linesep
+            header += (
+                prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
+            )
 
     return header
 
@@ -261,15 +263,17 @@ def _gen_snapshot_entry(pv_entry):
         # User specified to save only save_len elements from ca_reading.
         if pv_entry.save_len:
             if pv_entry.save_len > ca_reading_len:
-                raise ValueError("Save length value specified in .req "
-                                 "file exceeds length of PV data.")
+                raise ValueError(
+                    "Save length value specified in .req "
+                    "file exceeds length of PV data."
+                )
             else:
                 ca_reading_len = pv_entry.save_len
 
         # Flattening ca_array
         ca_reading_str = " ".join(
-            ["{:.15e}".format(reading) for reading in
-             ca_reading[:ca_reading_len]])
+            ["{:.15e}".format(reading) for reading in ca_reading[:ca_reading_len]]
+        )
 
     # A DBR enum, e.g. "DIAD".
     elif isinstance(ca_reading, cothread.dbr.ca_str):
@@ -282,7 +286,6 @@ def _gen_snapshot_entry(pv_entry):
     if pv_entry.modifier:
         snapshot_entry += pv_entry.modifier + " "
 
-    snapshot_entry += "{} {} {}".format(pv_entry.name, ca_reading_len,
-                                        ca_reading_str)
+    snapshot_entry += "{} {} {}".format(pv_entry.name, ca_reading_len, ca_reading_str)
 
     return snapshot_entry

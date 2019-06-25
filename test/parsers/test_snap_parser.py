@@ -21,11 +21,10 @@ def test_inline_comments():
     """
     correct_pv_snapshots = [
         sp.SNAP_PV("SR01C-DI-COL-01:POS1", 1, ["3.259328000000000e+00"], None),
-        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 2, ["-3.276854000000000e+00",
-                                               "333"], None),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS1", 1, ["-1.200000000000000e+01"],
-                   None),
-        sp.SNAP_PV("SR01C-DI-COL-03:POS3", 1, ["666"], None)]
+        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 2, ["-3.276854000000000e+00", "333"], None),
+        sp.SNAP_PV("SR01C-DI-COL-02:POS1", 1, ["-1.200000000000000e+01"], None),
+        sp.SNAP_PV("SR01C-DI-COL-03:POS3", 1, ["666"], None),
+    ]
 
     snap_parser = sp(test.INLINE_COMMENTS_SNAP)
     header, body = snap_parser.parse()
@@ -36,14 +35,15 @@ def test_inline_comments():
     assert "37245" == header[sp.UID_PREFIX]
     assert "37245" == header[sp.GROUPID_PREFIX]
     assert "hello world" == header[sp.KEYWORDS_PREFIX]
-    assert r"Nominal optics\nInjection efficiency with IDs closed to 5mm" \
-           r" is 80%\nResidual kick less than 1mm peak to" \
-           r" peak\nOnly changed injection magnets\nRF phasing 94/180" \
-           r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    assert (
+        r"Nominal optics\nInjection efficiency with IDs closed to 5mm"
+        r" is 80%\nResidual kick less than 1mm peak to"
+        r" peak\nOnly changed injection magnets\nRF phasing 94/180"
+        r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    )
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert "/home/ops/burt/backupFiles" == header[sp.DIRECTORY_PREFIX]
-    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[
-        sp.REQ_FILE_PREFIX]
+    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[sp.REQ_FILE_PREFIX]
     assert correct_pv_snapshots == body
 
 
@@ -105,11 +105,10 @@ def test_snap_parser_scalars():
     """
     correct_pv_snapshots = [
         sp.SNAP_PV("SR01C-DI-COL-01:POS1", 1, ["3.259328000000000e+00"], None),
-        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"],
-                   None),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS1", 1, ["-1.200000000000000e+01"],
-                   None),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], None)]
+        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"], None),
+        sp.SNAP_PV("SR01C-DI-COL-02:POS1", 1, ["-1.200000000000000e+01"], None),
+        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], None),
+    ]
 
     snap_parser = sp(test.SCALARS_SNAP)
     header, body = snap_parser.parse()
@@ -121,14 +120,15 @@ def test_snap_parser_scalars():
     assert "37245" == header[sp.UID_PREFIX]
     assert "37245" == header[sp.GROUPID_PREFIX]
     assert "hello world" == header[sp.KEYWORDS_PREFIX]
-    assert r"Nominal optics\nInjection efficiency with IDs closed to 5mm" \
-           r" is 80%\nResidual kick less than 1mm peak to" \
-           r" peak\nOnly changed injection magnets\nRF phasing 94/180" \
-           r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    assert (
+        r"Nominal optics\nInjection efficiency with IDs closed to 5mm"
+        r" is 80%\nResidual kick less than 1mm peak to"
+        r" peak\nOnly changed injection magnets\nRF phasing 94/180"
+        r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    )
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert "/home/ops/burt/backupFiles" == header[sp.DIRECTORY_PREFIX]
-    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[
-        sp.REQ_FILE_PREFIX]
+    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[sp.REQ_FILE_PREFIX]
     assert correct_pv_snapshots == body
 
 
@@ -136,14 +136,21 @@ def test_snap_parser_ca_arr():
     """Runs the .snap parser against a case with ca arrays.
     """
     correct_pv_snapshots = [
-        sp.SNAP_PV("SR01C-DI-COL-01:POS1", 3,
-                   ["3.259328000000000e+00", "3.259328000000000e+00",
-                    "3.259328000000000e+00"], None),
-        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"],
-                   None),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS1", 2,
-                   ["-1.200000000000000e+01", "-1.200000000000000e+01"], None),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], None)]
+        sp.SNAP_PV(
+            "SR01C-DI-COL-01:POS1",
+            3,
+            ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"],
+            None,
+        ),
+        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"], None),
+        sp.SNAP_PV(
+            "SR01C-DI-COL-02:POS1",
+            2,
+            ["-1.200000000000000e+01", "-1.200000000000000e+01"],
+            None,
+        ),
+        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], None),
+    ]
 
     snap_parser = sp(test.ARRAYS_AND_SCALARS_SNAP)
     header, body = snap_parser.parse()
@@ -155,14 +162,15 @@ def test_snap_parser_ca_arr():
     assert "37245" == header[sp.UID_PREFIX]
     assert "37245" == header[sp.GROUPID_PREFIX]
     assert "hello world" == header[sp.KEYWORDS_PREFIX]
-    assert r"Nominal optics\nInjection efficiency with IDs closed to 5mm" \
-           r" is 80%\nResidual kick less than 1mm peak to" \
-           r" peak\nOnly changed injection magnets\nRF phasing 94/180" \
-           r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    assert (
+        r"Nominal optics\nInjection efficiency with IDs closed to 5mm"
+        r" is 80%\nResidual kick less than 1mm peak to"
+        r" peak\nOnly changed injection magnets\nRF phasing 94/180"
+        r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    )
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert "/home/ops/burt/backupFiles" == header[sp.DIRECTORY_PREFIX]
-    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[
-        sp.REQ_FILE_PREFIX]
+    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[sp.REQ_FILE_PREFIX]
     assert correct_pv_snapshots == body
 
 
@@ -170,15 +178,21 @@ def test_snap_parser_with_modifiers():
     """Runs the .snap parser against a case with optional modifiers.
     """
     correct_pv_snapshots = [
-        sp.SNAP_PV("SR01C-DI-COL-01:POS1", 3,
-                   ["3.259328000000000e+00", "3.259328000000000e+00",
-                    "3.259328000000000e+00"], "RO"),
-        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"],
-                   "WO"),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS1", 2,
-                   ["-1.200000000000000e+01", "-1.200000000000000e+01"], None),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"],
-                   "RON")]
+        sp.SNAP_PV(
+            "SR01C-DI-COL-01:POS1",
+            3,
+            ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"],
+            "RO",
+        ),
+        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"], "WO"),
+        sp.SNAP_PV(
+            "SR01C-DI-COL-02:POS1",
+            2,
+            ["-1.200000000000000e+01", "-1.200000000000000e+01"],
+            None,
+        ),
+        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], "RON"),
+    ]
 
     snap_parser = sp(test.MODIFIERS_SNAP)
     header, body = snap_parser.parse()
@@ -190,12 +204,13 @@ def test_snap_parser_with_modifiers():
     assert "37245" == header[sp.UID_PREFIX]
     assert "37245" == header[sp.GROUPID_PREFIX]
     assert "hello world" == header[sp.KEYWORDS_PREFIX]
-    assert r"Nominal optics\nInjection efficiency with IDs closed to 5mm" \
-           r" is 80%\nResidual kick less than 1mm peak to" \
-           r" peak\nOnly changed injection magnets\nRF phasing 94/180" \
-           r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    assert (
+        r"Nominal optics\nInjection efficiency with IDs closed to 5mm"
+        r" is 80%\nResidual kick less than 1mm peak to"
+        r" peak\nOnly changed injection magnets\nRF phasing 94/180"
+        r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
+    )
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert "/home/ops/burt/backupFiles" == header[sp.DIRECTORY_PREFIX]
-    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[
-        sp.REQ_FILE_PREFIX]
+    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[sp.REQ_FILE_PREFIX]
     assert correct_pv_snapshots == body

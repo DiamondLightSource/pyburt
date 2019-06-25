@@ -44,9 +44,9 @@ class RgrParser(BurtParser):
             namedtuple(super.HEADER): The .rgr file header.
 
         """
-        return super(RgrParser, self).HEADER(self.RGR_HEADER_START,
-                                             (SnapParser.COMMENTS_PREFIX,),
-                                             self.RGR_HEADER_END)
+        return super(RgrParser, self).HEADER(
+            self.RGR_HEADER_START, (SnapParser.COMMENTS_PREFIX,), self.RGR_HEADER_END
+        )
 
     def read_body_line(self, line):
         """Check and read a file path in the .rgr file body.
@@ -56,8 +56,10 @@ class RgrParser(BurtParser):
 
         """
         if not line.endswith(burt.SNAP_FILE_EXT) and not line.endswith(
-                burt.CHECK_FILE_EXT):
-            raise ParserException("Malformed .rgr file: invalid .snap or"
-                                  ".check file specified.")
+            burt.CHECK_FILE_EXT
+        ):
+            raise ParserException(
+                "Malformed .rgr file: invalid .snap or" ".check file specified."
+            )
 
         return line

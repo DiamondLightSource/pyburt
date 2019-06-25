@@ -33,7 +33,7 @@ class CheckParser(BurtParser):
     CHECK_HEADER_END = "--- End BURT checkfile header"
     COMMENTS_PREFIX = "Comments"
 
-    CHECK_PV = namedtuple('CHECK_PV', 'name target tolerance')
+    CHECK_PV = namedtuple("CHECK_PV", "name target tolerance")
 
     def __init__(self, path):
         """Constructor.
@@ -51,9 +51,9 @@ class CheckParser(BurtParser):
             namedtuple(super.HEADER): The .snap file header.
 
         """
-        return super(CheckParser, self).HEADER(self.CHECK_HEADER_START,
-                                               (self.COMMENTS_PREFIX,),
-                                               self.CHECK_HEADER_END)
+        return super(CheckParser, self).HEADER(
+            self.CHECK_HEADER_START, (self.COMMENTS_PREFIX,), self.CHECK_HEADER_END
+        )
 
     def read_body_line(self, line):
         """Store a PV in the .snap body into a namedtuple object.
@@ -67,9 +67,10 @@ class CheckParser(BurtParser):
 
         if len(pv_snapshot) < 2 or len(pv_snapshot) > 3:
             raise ParserException(
-                "Malformed .check body: Unexpected number of elements.")
+                "Malformed .check body: Unexpected number of elements."
+            )
 
-        is_tolerance_specified = (len(pv_snapshot) == 3)
+        is_tolerance_specified = len(pv_snapshot) == 3
 
         pv_name = pv_snapshot[0].strip()
         target = pv_snapshot[1]
@@ -79,7 +80,6 @@ class CheckParser(BurtParser):
             target = float(target)
             tolerance = float(tolerance)
         except ValueError:
-            raise ParserException(
-                "Malformed .check file: values must be numbers.")
+            raise ParserException("Malformed .check file: values must be numbers.")
 
         return self.CHECK_PV(pv_name, target, tolerance)

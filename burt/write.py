@@ -35,8 +35,7 @@ def restore(snap_file):
         not exist.
 
     """
-    if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (
-            not os.path.isfile(snap_file)):
+    if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (not os.path.isfile(snap_file)):
         raise ValueError("Invalid .snap file.")
 
     snap_parser = burt.SnapParser(snap_file)
@@ -44,8 +43,10 @@ def restore(snap_file):
     logging.debug("Parsed .snap PVs: {}".format(body))
 
     for pv_entry in body:
-        if pv_entry.modifier not in (burt.READONLY_NOTIFY_SPECIFIER,
-                                     burt.READONLY_SPECIFIER):
+        if pv_entry.modifier not in (
+            burt.READONLY_NOTIFY_SPECIFIER,
+            burt.READONLY_SPECIFIER,
+        ):
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
@@ -69,8 +70,7 @@ def restore_group(rgr_file):
         not exist.
 
     """
-    if (not rgr_file.endswith(burt.RGR_FILE_EXT)) or (
-            not os.path.isfile(rgr_file)):
+    if (not rgr_file.endswith(burt.RGR_FILE_EXT)) or (not os.path.isfile(rgr_file)):
         raise ValueError("Invalid .rgr file.")
 
     rgr_parser = burt.RgrParser(rgr_file)

@@ -10,7 +10,7 @@ import numpy
 from burt import SnapParser as sp
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_blank_snapshot(mock_caget):
     """Runs the burt snapshot against a blank .req file.
     """
@@ -25,7 +25,7 @@ def test_blank_snapshot(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_bad_file_arguments(mock_caget):
     """Runs the burt script against a case where the file arguments are
     malformed.
@@ -48,21 +48,20 @@ def test_bad_file_arguments(mock_caget):
         burt.restore("helloworld.snap")
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_snapshot_arrays(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked ca array
     return value.
     """
     # Flattened ndarray is a 40 element list.
-    mock_caget.return_value = cothread.dbr.ca_array(
-        numpy.array([1, 1, 40])
-    ).flatten()
+    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment,
-                       test_keywords)
+    burt.take_snapshot(
+        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
     assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
@@ -122,7 +121,7 @@ def test_snapshot_arrays(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_snapshot_enum(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked enum
     return value.
@@ -132,8 +131,9 @@ def test_snapshot_enum(mock_caget):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment,
-                       test_keywords)
+    burt.take_snapshot(
+        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
     assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
@@ -190,7 +190,7 @@ def test_snapshot_enum(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_snapshot_scalar(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked scalar
     return value.
@@ -200,8 +200,9 @@ def test_snapshot_scalar(mock_caget):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment,
-                       test_keywords)
+    burt.take_snapshot(
+        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
     assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
@@ -256,7 +257,7 @@ def test_snapshot_scalar(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_snapshot_newlines_in_args(mock_caget):
     """Runs a take snapshot test with the problematic case of newlines in user
     supplied meta data. The newlines should appear as is in the .snap file,
@@ -271,8 +272,9 @@ def test_snapshot_newlines_in_args(mock_caget):
     expected_snap_comment = "\\nHello\\r\\n \\nWorld\\r\\n\\r"
     expected_snap_keywords = "\\r\\ncool\\n,\\r\\nsnap,file\\n\\r\\r"
 
-    burt.take_snapshot(test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment,
-                       test_keywords)
+    burt.take_snapshot(
+        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
     assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
@@ -289,7 +291,7 @@ def test_snapshot_newlines_in_args(mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_snapshot_invalid_save_len(mock_caget):
     """
     Try to save a PV with a length specified that is greater than the PV
@@ -297,16 +299,13 @@ def test_snapshot_invalid_save_len(mock_caget):
     """
     # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
     # The requested save length in the .req file is 937.
-    mock_caget.return_value = cothread.dbr.ca_array(
-        numpy.array([1, 1, 936])
-    ).flatten()
+    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
 
     with pytest.raises(ValueError):
-        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ,
-                           test.TMP_PYBURT_OUT)
+        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ, test.TMP_PYBURT_OUT)
 
 
-@mock.patch('burt.read.caget')
+@mock.patch("burt.read.caget")
 def test_snapshot_group_arrays(mock_caget):
     """Runs a take snapshot group test of a .rqg file with mocked ca array
     return values. The request group file specifies a .req file twice, so
@@ -332,8 +331,10 @@ def test_snapshot_group_arrays(mock_caget):
     assert "" == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert "testables/req/normal.req,testables/req/normal.req" == header[
-        sp.REQ_FILE_PREFIX]
+    assert (
+        "testables/req/normal.req,testables/req/normal.req"
+        == header[sp.REQ_FILE_PREFIX]
+    )
 
     assert body[0].name == "SR01C-DI-COL-01:CENTRE"
     assert len(body[0].vals) == 40

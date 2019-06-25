@@ -21,7 +21,7 @@ class ReqParser(BurtParser):
 
     """
 
-    REQ_PV = namedtuple('PV', 'name save_len modifier')
+    REQ_PV = namedtuple("PV", "name save_len modifier")
 
     def __init__(self, path):
         """Constructor.
@@ -46,12 +46,9 @@ class ReqParser(BurtParser):
         pv_entry = [segment.strip() for segment in line.split()]
 
         if len(pv_entry) > 3:
-            raise ParserException(
-                "Malformed .req file: Too many elements in line.")
+            raise ParserException("Malformed .req file: Too many elements in line.")
 
-        pv_name, save_len_index, modifier = ReqParser._extract_elements(
-            pv_entry
-        )
+        pv_name, save_len_index, modifier = ReqParser._extract_elements(pv_entry)
 
         save_len = ReqParser._extract_save_len(pv_entry, save_len_index)
 
@@ -72,7 +69,7 @@ class ReqParser(BurtParser):
         is_modifier_specified = pv_entry[0] in (
             burt.READONLY_SPECIFIER,
             burt.READONLY_NOTIFY_SPECIFIER,
-            burt.WRITEONLY_SPECIFIER
+            burt.WRITEONLY_SPECIFIER,
         )
 
         save_len_index = None
@@ -114,11 +111,13 @@ class ReqParser(BurtParser):
             except ValueError:
                 raise ParserException(
                     "Malformed .req file: save length (third tuple element)"
-                    "must be an integer")
+                    "must be an integer"
+                )
 
         if save_len and save_len <= 0:
             raise ParserException(
                 "Malformed .req file: save length (third tuple element) must"
-                "be a positive integer")
+                "be a positive integer"
+            )
 
         return save_len
