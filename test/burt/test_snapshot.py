@@ -54,7 +54,8 @@ def test_snapshot_arrays(mock_caget):
     return value.
     """
     # Flattened ndarray is a 40 element list.
-    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    mock_caget.return_value = cothread.dbr.ca_array(
+        numpy.array([1, 1, 40])).flatten()
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -299,10 +300,12 @@ def test_snapshot_invalid_save_len(mock_caget):
     """
     # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
     # The requested save length in the .req file is 937.
-    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
+    mock_caget.return_value = cothread.dbr.ca_array(
+        numpy.array([1, 1, 936])).flatten()
 
     with pytest.raises(ValueError):
-        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ, test.TMP_PYBURT_OUT)
+        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ,
+                           test.TMP_PYBURT_OUT)
 
 
 @mock.patch("burt.read.caget")
@@ -332,8 +335,8 @@ def test_snapshot_group_arrays(mock_caget):
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
     assert (
-        "testables/req/normal.req,testables/req/normal.req"
-        == header[sp.REQ_FILE_PREFIX]
+            "testables/req/normal.req"
+            == header[sp.REQ_FILE_PREFIX]
     )
 
     assert body[0].name == "SR01C-DI-COL-01:CENTRE"
@@ -371,42 +374,6 @@ def test_snapshot_group_arrays(mock_caget):
     assert body[10].modifier == "RO"
     assert body[11].name == "SR-CS-RING-01:MODE"
     assert len(body[11].vals) == 40
-
-    assert body[12].name == "SR01C-DI-COL-01:CENTRE"
-    assert len(body[12].vals) == 40
-    assert body[13].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[13].vals) == 40
-    assert body[14].name == "SR01C-DI-COL-02:CENTRE"
-    assert len(body[14].vals) == 40
-    assert body[15].name == "SR01C-DI-COL-02:GAP"
-    assert len(body[15].vals) == 40
-
-    # These PVs have a set save value in the .req file, and the last two have
-    # readonly modifiers
-    assert body[16].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[16].vals) == 5
-    assert body[17].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[17].vals) == 10
-    assert body[17].modifier == "RO"
-    assert body[18].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[18].vals) == 25
-    assert body[18].modifier == "RON"
-
-    # Some readonly modifiers here.
-    assert body[19].name == "SR01C-DI-COL-01:POS1"
-    assert len(body[19].vals) == 40
-    assert body[19].modifier == "RON"
-    assert body[20].name == "SR01C-DI-COL-01:POS2"
-    assert len(body[20].vals) == 40
-    assert body[20].modifier == "RO"
-    assert body[21].name == "SR01C-DI-COL-02:POS1"
-    assert len(body[21].vals) == 40
-    assert body[21].modifier == "RO"
-    assert body[22].name == "SR01C-DI-COL-02:POS2"
-    assert len(body[22].vals) == 40
-    assert body[22].modifier == "RO"
-    assert body[23].name == "SR-CS-RING-01:MODE"
-    assert len(body[23].vals) == 40
 
     # cleanup
     os.remove(test.TMP_PYBURT_OUT)
