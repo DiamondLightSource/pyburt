@@ -15,16 +15,7 @@ from cothread.catools import caget
 class CheckFailedException(Exception):
     """Raise when a check unexpectedly fails. Encapsulate failed check info.
 
-    Attributes:
-    PV_NAME (str): The name of the failed PV.
-    PV_TARGET(float): The target value.
-    PV_TOLERANCE The tolerance.
-
     """
-
-    PV_NAME = ""
-    PV_TARGET = 0
-    PV_TOLERANCE = 0
 
     def __init__(self, check_pv, msg=""):
         """Constructor.
@@ -38,9 +29,8 @@ class CheckFailedException(Exception):
         PV_TOLERANCE = check_pv.tolerance
 
         super(CheckFailedException, self).__init__(
-            "{} failed with target {} and tolerance {}. {}".format(
-                check_pv.name, check_pv.target, check_pv.tolerance, msg
-            )
+            f"{check_pv.name} failed with target {check_pv.target} and "
+            f"tolerance {check_pv.tolerance}. {msg}"
         )
 
 

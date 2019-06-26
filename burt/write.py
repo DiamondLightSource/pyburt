@@ -40,7 +40,7 @@ def restore(snap_file):
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
-    logging.debug("Parsed .snap PVs: {}".format(body))
+    logging.debug(f"Parsed .snap PVs: {body}")
 
     for pv_entry in body:
         if pv_entry.modifier not in (
@@ -75,7 +75,7 @@ def restore_group(rgr_file):
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
-    logging.debug("Parsed .snap files: {}".format(body))
+    logging.debug(f"Parsed .snap files: {body}")
 
     for file_path in body:
         # Ignore .check files as pyburt does not need to deal with them.
