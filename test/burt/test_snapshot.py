@@ -322,7 +322,7 @@ def test_snapshot_group_arrays(mock_caget):
 
     snap_parser = sp(test.TMP_PYBURT_OUT)
     header, body = snap_parser.parse()
-    assert 24 == len(body)
+    assert 12 == len(body)
     assert header[sp.TIME_PREFIX]
     assert header[sp.LOGINID_PREFIX]
     assert header[sp.UID_PREFIX]
