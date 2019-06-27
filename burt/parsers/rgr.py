@@ -1,6 +1,6 @@
 """Parser class which reads the information from a .rgr BURT file."""
 import burt
-from . import BurtParser, ParserException
+from burt.parsers import BurtParser, ParserException
 from burt.parsers.snap import SnapParser
 
 

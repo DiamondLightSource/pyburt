@@ -13,20 +13,21 @@ documentation for more information.
 A request group .rqg file contains a collection of paths to .req files, and is
 used to create bulk snapshots.
 """
-import burt
-import os
-import errno
-import time
-import pwd
-import getpass
-import cothread
-import logging
 import argparse
-import burt.utils.file as utils
-
+import errno
+import getpass
+import logging
+import os
+import pwd
+import time
 from collections import OrderedDict
-from burt.parsers.snap import SnapParser as snap
+
+import cothread
 from cothread.catools import caget
+
+import burt
+import burt.utils.file as utils
+from burt.parsers.snap import SnapParser as snap
 
 
 def take_snapshot(req_file, snap_file, comments=None, keywords=None):

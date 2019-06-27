@@ -5,10 +5,12 @@ check fails, then the BURT snapshot or restore is cancelled.
 
 A check succeeds if |pv-value - target| < tolerance, else it fails.
 """
-import burt
+
 import os
 
 from cothread.catools import caget
+
+import burt
 
 
 class CheckFailedException(Exception):

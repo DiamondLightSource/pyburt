@@ -15,13 +15,14 @@ A restore group .rgr file is just a collection of paths to .snap files,
 and some .check files which verifies certain preconditions prior to the
 restore operation proceeding. It is used for bulk restoring of PVs.
 """
-import burt
-import os
-import logging
 import argparse
-import burt.utils.file as utils
+import logging
+import os
 
 from cothread.catools import caput
+
+import burt
+import burt.utils.file as utils
 
 
 def restore(snap_file):

@@ -1,7 +1,8 @@
 """Snap parser class which reads the information from a .snap BURT file."""
-import burt
-from . import BurtParser, ParserException
 from collections import namedtuple
+
+import burt
+from burt.parsers import BurtParser, ParserException
 
 
 class SnapParser(BurtParser):

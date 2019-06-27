@@ -1,5 +1,6 @@
 """BURT file related utility functions."""
 import os
+
 import burt
 
 

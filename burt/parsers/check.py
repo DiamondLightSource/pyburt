@@ -1,6 +1,7 @@
 """Check parser class which reads the information from a .check BURT file."""
-from . import BurtParser, ParserException
 from collections import namedtuple
+
+from burt.parsers import BurtParser, ParserException
 
 
 class CheckParser(BurtParser):

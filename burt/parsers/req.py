@@ -1,7 +1,8 @@
 """Request parser class which reads the information from a .req BURT file."""
-import burt
-from . import BurtParser, ParserException
 from collections import namedtuple
+
+import burt
+from burt.parsers import BurtParser, ParserException
 
 
 class ReqParser(BurtParser):
