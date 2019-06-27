@@ -2,16 +2,18 @@ rhel7_job:
   tags:
     - rhel7
   script:
-    - virtualenv --python dls-python venv
+    - dls-python3 -m venv venv
     - source venv/bin/activate
-    - pip install pytest
-    - pip install pytest-cov
-    - pip install cothread
-    - pip install pycodestyle
-    - pip install pydocstyle
-    - pip install mock
-    - pip install sphinx
-    - python -m pytest --cov=burt --cov-report term-missing --cov-fail-under 90 test
+    - pip3 install pytest
+    - pip3 install pytest-cov
+    - pip3 install cothread
+    - pip3 install pycodestyle
+    - pip3 install pydocstyle
+    - pip3 install mock
+    - pip3 install sphinx
+    - pip3 install flake8
+    - pip3 install black
+    - python3 -m pytest --cov=burt --cov-report term-missing --cov-fail-under 90 test
     - pycodestyle --show-source --show-pep8 burt
     - pydocstyle -e burt
     - sphinx-build -b html -E -q docs docs/_build/html
