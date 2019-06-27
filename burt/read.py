@@ -44,8 +44,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
             extension, or if the  .req file does not exist.
 
     """
-    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (
-            not os.path.isfile(req_file)):
+    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (not os.path.isfile(req_file)):
         raise ValueError("Invalid .req file input.")
 
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
@@ -79,8 +78,7 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
             extension, or if the  .rqg file does not exist.
 
     """
-    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (
-            not os.path.isfile(rqg_file)):
+    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (not os.path.isfile(rqg_file)):
         raise ValueError("Invalid .rqg file input.")
 
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
@@ -161,14 +159,12 @@ def _gen_snap_header(req_path, comments, keywords):
     # so write to the snap file as escaped symbols. This is the behaviour of
     # the old BURT.
     keywords = (
-        "" if keywords is None else keywords.replace("\r", "\\r").replace("\n",
-                                                                          "\\n")
+        "" if keywords is None else keywords.replace("\r", "\\r").replace("\n", "\\n")
     )
     logging.debug(f"Keywords: {keywords}")
 
     comments = (
-        "" if comments is None else comments.replace("\r", "\\r").replace("\n",
-                                                                          "\\n")
+        "" if comments is None else comments.replace("\r", "\\r").replace("\n", "\\n")
     )
     logging.debug(f"Comments: {comments}")
 
@@ -197,8 +193,7 @@ def _gen_snap_header(req_path, comments, keywords):
 
     header = r""
     for prefix in header_elements:
-        if (prefix == snap.SNAP_HEADER_START) or (
-                prefix == snap.SNAP_HEADER_END):
+        if (prefix == snap.SNAP_HEADER_START) or (prefix == snap.SNAP_HEADER_END):
             header += prefix + os.linesep
 
         # Special case with no colon.
@@ -210,8 +205,7 @@ def _gen_snap_header(req_path, comments, keywords):
         else:
             left_padding = " " * (10 - len(":") - len(prefix))
             header += (
-                    prefix + ":" + left_padding + str(
-                header_elements[prefix]) + os.linesep
+                prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
             )
 
     return header
@@ -279,8 +273,7 @@ def _gen_snapshot_entry(pv_entry):
 
         # Flattening ca_array
         ca_reading_str = " ".join(
-            ["{:.15e}".format(reading) for reading in
-             ca_reading[:ca_reading_len]]
+            ["{:.15e}".format(reading) for reading in ca_reading[:ca_reading_len]]
         )
 
     # A DBR enum, e.g. "DIAD".
@@ -301,28 +294,26 @@ def _gen_snapshot_entry(pv_entry):
 
 if __name__ == "__main__":
     cli = argparse.ArgumentParser()
-    cli.add_argument('request_file', type=str,
-                     help='The path to either a .req or .rqg file.')
-    cli.add_argument('snap_destination', type=str,
-                     help='The path to the destination .snap file.')
-    cli.add_argument('-c', type=str,
-                     help='Optional snapshot comments.')
-    cli.add_argument('-k', type=str,
-                     help='Optional snapshot keywords.')
+    cli.add_argument(
+        "request_file", type=str, help="The path to either a .req or .rqg file."
+    )
+    cli.add_argument(
+        "snap_destination", type=str, help="The path to the destination .snap file."
+    )
+    cli.add_argument("-c", type=str, help="Optional snapshot comments.")
+    cli.add_argument("-k", type=str, help="Optional snapshot keywords.")
 
     args = cli.parse_args()
 
     if utils.is_req_file(args.request_file):
-        take_snapshot(args.request_file,
-                      args.snap_destination,
-                      comments=args.c,
-                      keywords=args.k)
+        take_snapshot(
+            args.request_file, args.snap_destination, comments=args.c, keywords=args.k
+        )
 
     elif utils.is_rqg_file(args.request_file):
-        take_snapshot_group(args.request_file,
-                            args.snap_destination,
-                            comments=args.c,
-                            keywords=args.k)
+        take_snapshot_group(
+            args.request_file, args.snap_destination, comments=args.c, keywords=args.k
+        )
 
     else:
         logging.critical("Invalid request file argument.")
