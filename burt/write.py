@@ -86,7 +86,7 @@ def restore_group(rgr_file):
             restore(file_path)
 
 
-if __name__ == "__main__":
+def main():
     cli = argparse.ArgumentParser()
     cli.add_argument(
         "restore_file", type=str, help="The path to either a .snap or .rgr file."

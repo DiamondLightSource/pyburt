@@ -293,7 +293,7 @@ def _gen_snapshot_entry(pv_entry):
     return snapshot_entry
 
 
-if __name__ == "__main__":
+def main():
     cli = argparse.ArgumentParser()
     cli.add_argument(
         "request_file", type=str, help="The path to either a .req or .rqg file."
