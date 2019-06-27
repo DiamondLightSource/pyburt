@@ -1,5 +1,4 @@
 """Check parser class which reads the information from a .check BURT file."""
-import burt
 from . import BurtParser, ParserException
 from collections import namedtuple
 
@@ -52,7 +51,8 @@ class CheckParser(BurtParser):
 
         """
         return super(CheckParser, self).HEADER(
-            self.CHECK_HEADER_START, (self.COMMENTS_PREFIX,), self.CHECK_HEADER_END
+            self.CHECK_HEADER_START, (self.COMMENTS_PREFIX,),
+            self.CHECK_HEADER_END
         )
 
     def read_body_line(self, line):
@@ -80,6 +80,7 @@ class CheckParser(BurtParser):
             target = float(target)
             tolerance = float(tolerance)
         except ValueError:
-            raise ParserException("Malformed .check file: values must be numbers.")
+            raise ParserException(
+                "Malformed .check file: values must be numbers.")
 
         return self.CHECK_PV(pv_name, target, tolerance)

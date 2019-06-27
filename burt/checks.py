@@ -7,7 +7,6 @@ A check succeeds if |pv-value - target| < tolerance, else it fails.
 """
 import burt
 import os
-import logging
 
 from cothread.catools import caget
 
@@ -22,9 +21,6 @@ class CheckFailedException(Exception):
             check_pv: A CHECK_PV named tuple of the PV which failed the check.
             msg (str): Any other message.
         """
-        PV_NAME = check_pv.name
-        PV_TARGET = check_pv.target
-        PV_TOLERANCE = check_pv.tolerance
 
         super(CheckFailedException, self).__init__(
             f"{check_pv.name} failed with target {check_pv.target} and "
