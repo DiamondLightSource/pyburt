@@ -46,7 +46,7 @@ def check(check_file):
 
     """
     if (not check_file.endswith(burt.CHECK_FILE_EXT)) or (
-            not os.path.isfile(check_file)
+        not os.path.isfile(check_file)
     ):
         raise ValueError("Invalid .check file input.")
 
