@@ -294,6 +294,7 @@ def _gen_snapshot_entry(pv_entry):
 
 
 def main():
+    """Main function used by cli."""
     cli = argparse.ArgumentParser()
     cli.add_argument(
         "request_file", type=str, help="The path to either a .req or .rqg file."
