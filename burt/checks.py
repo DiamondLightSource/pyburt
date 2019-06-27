@@ -13,9 +13,7 @@ from cothread.catools import caget
 
 
 class CheckFailedException(Exception):
-    """Raise when a check unexpectedly fails. Encapsulate failed check info.
-
-    """
+    """Raise when a check unexpectedly fails. Encapsulate failed check info."""
 
     def __init__(self, check_pv, msg=""):
         """Constructor.
@@ -50,7 +48,7 @@ def check(check_file):
 
     """
     if (not check_file.endswith(burt.CHECK_FILE_EXT)) or (
-        not os.path.isfile(check_file)
+            not os.path.isfile(check_file)
     ):
         raise ValueError("Invalid .check file input.")
 
