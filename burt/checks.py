@@ -20,8 +20,8 @@ class CheckFailedException(Exception):
         Args:
             check_pv: A CHECK_PV named tuple of the PV which failed the check.
             msg (str): Any other message.
-        """
 
+        """
         super(CheckFailedException, self).__init__(
             f"{check_pv.name} failed with target {check_pv.target} and "
             f"tolerance {check_pv.tolerance}. {msg}"
