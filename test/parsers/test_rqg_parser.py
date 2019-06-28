@@ -33,7 +33,8 @@ def test_inline_comments():
         "/home/ops/burt/requestFiles/BR02C-TI.req",
         "/home/ops/burt/requestFiles/BR03C-TI.req",
         "/home/ops/burt/requestFiles/BR-PC.req",
-        "/home/ops/burt/requestFiles/BR-MP.req", ]
+        "/home/ops/burt/requestFiles/BR-MP.req",
+    ]
 
     rqg_parser = rp(test.INLINE_COMMENTS_RQG)
     _, body = rqg_parser.parse()
@@ -55,8 +56,10 @@ def normal_case():
     """Runs the rqg parser against a typical case.
     """
 
-    correct_checks = ["/home/ops/burt/checkFiles/tune-FFWD.check",
-                      "/home/ops/burt/checkFiles/fastchic.check"]
+    correct_checks = [
+        "/home/ops/burt/checkFiles/tune-FFWD.check",
+        "/home/ops/burt/checkFiles/fastchic.check",
+    ]
 
     correct_reqs = [
         "/home/ops/burt/requestFiles/LI-PC.req",
@@ -71,7 +74,8 @@ def normal_case():
         "/home/ops/burt/requestFiles/BR02C-TI.req",
         "/home/ops/burt/requestFiles/BR03C-TI.req",
         "/home/ops/burt/requestFiles/BR-PC.req",
-        "/home/ops/burt/requestFiles/BR-MP.req", ]
+        "/home/ops/burt/requestFiles/BR-MP.req",
+    ]
 
     rqg_parser = rp(test.NORMAL_RQG)
     _, body = rqg_parser.parse()

@@ -38,8 +38,10 @@ class RqgParser(BurtParser):
 
         """
         if not line.endswith(burt.REQ_FILE_EXT) and not line.endswith(
-                burt.CHECK_FILE_EXT):
-            raise ParserException("Malformed .rgr file: invalid .req or"
-                                  ".check file specified.")
+            burt.CHECK_FILE_EXT
+        ):
+            raise ParserException(
+                "Malformed .rgr file: invalid .req or" ".check file specified."
+            )
 
         return line

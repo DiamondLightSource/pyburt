@@ -20,9 +20,11 @@ def test_inline_comments():
     """Runs the rgr parser against a case with inline comments next to paths.
     """
 
-    correct_checks = ["/home/ops/burt/checkFiles/tune-FFWD.check",
-                      "/home/ops/burt/checkFiles/fastchic.check",
-                      "/home/ops/burt/checkFiles/misc.check"]
+    correct_checks = [
+        "/home/ops/burt/checkFiles/tune-FFWD.check",
+        "/home/ops/burt/checkFiles/fastchic.check",
+        "/home/ops/burt/checkFiles/misc.check",
+    ]
 
     correct_snaps = [
         "/home/ops/burt/backupFiles/SR01A-TI/SR-rtf26_190226_164119.snap",
@@ -30,14 +32,17 @@ def test_inline_comments():
         "/home/ops/burt/backupFiles/SR-PC/SR-rtf26_190226_164119.snap",
         "/home/ops/burt/backupFiles/SR-DI/SR-rtf26_190226_164119.snap",
         "/home/ops/burt/backupFiles/SR01A-PC/SR-rtf26_190226_164119.snap",
-        "/home/ops/burt/backupFiles/SR02A-PC-DDBA/SR-rtf26_190226_164119.snap"]
+        "/home/ops/burt/backupFiles/SR02A-PC-DDBA/SR-rtf26_190226_164119.snap",
+    ]
 
     rgr_parser = rp(test.INLINE_COMMENTS_RGR)
     header, body = rgr_parser.parse()
     assert test.INLINE_COMMENTS_RGR == rgr_parser.path
-    assert header["Comments"] == \
-           "LOCO applied for skews only, vertical emittance corrected to" \
-           " 8pm. Magnets not cycled yet."
+    assert (
+        header["Comments"]
+        == "LOCO applied for skews only, vertical emittance corrected to"
+        " 8pm. Magnets not cycled yet."
+    )
     assert 9 == len(body)
     assert correct_checks == body[:3]
     assert correct_snaps == body[3:]
@@ -88,9 +93,11 @@ def normal_case():
     """Runs the rgr parser against a typical case.
     """
 
-    correct_checks = ["/home/ops/burt/checkFiles/tune-FFWD.check",
-                      "/home/ops/burt/checkFiles/fastchic.check",
-                      "/home/ops/burt/checkFiles/misc.check"]
+    correct_checks = [
+        "/home/ops/burt/checkFiles/tune-FFWD.check",
+        "/home/ops/burt/checkFiles/fastchic.check",
+        "/home/ops/burt/checkFiles/misc.check",
+    ]
 
     correct_snaps = [
         "/home/ops/burt/backupFiles/SR-MP/SR-rtf26_190226_164119.snap",
@@ -100,14 +107,17 @@ def normal_case():
         "/home/ops/burt/backupFiles/SR-PC/SR-rtf26_190226_164119.snap",
         "/home/ops/burt/backupFiles/SR-DI/SR-rtf26_190226_164119.snap",
         "/home/ops/burt/backupFiles/SR01A-PC/SR-rtf26_190226_164119.snap",
-        "/home/ops/burt/backupFiles/SR02A-PC-DDBA/SR-rtf26_190226_164119.snap"]
+        "/home/ops/burt/backupFiles/SR02A-PC-DDBA/SR-rtf26_190226_164119.snap",
+    ]
 
     rgr_parser = rp(test.NORMAL_RGR)
     header, body = rgr_parser.parse()
     assert test.INLINE_COMMENTS_RGR == rgr_parser.path
-    assert header["Comments"] == \
-           "LOCO applied for skews only, vertical emittance corrected to" \
-           " 8pm. Magnets not cycled yet."
+    assert (
+        header["Comments"]
+        == "LOCO applied for skews only, vertical emittance corrected to"
+        " 8pm. Magnets not cycled yet."
+    )
     assert 9 == len(body)
     assert correct_checks == body[:3]
     assert correct_snaps == body[3:]

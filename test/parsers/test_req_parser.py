@@ -20,9 +20,11 @@ def test_inline_comments():
     """Runs the parser against a case with inline comments next to
     PVs.
     """
-    correct_pv_list = [rp.REQ_PV("SR01C-DI-COL-01:CENTRE", None, None),
-                       rp.REQ_PV("SR01C-DI-COL-01:GAP", None, None),
-                       rp.REQ_PV("SR01C-DI-COL-01:LEFT", None, None)]
+    correct_pv_list = [
+        rp.REQ_PV("SR01C-DI-COL-01:CENTRE", None, None),
+        rp.REQ_PV("SR01C-DI-COL-01:GAP", None, None),
+        rp.REQ_PV("SR01C-DI-COL-01:LEFT", None, None),
+    ]
 
     req_parser = rp(test.INLINE_COMMENTS_REQ)
     _, body = req_parser.parse()
@@ -50,18 +52,20 @@ def test_malformed_files():
 def test_req_parser_normal():
     """Runs the .req parser against a basic case.
     """
-    correct_pv_list = [rp.REQ_PV("SR01C-DI-COL-01:CENTRE", None, None),
-                       rp.REQ_PV("SR-DI-PICO-01:BUCKETS", None, None),
-                       rp.REQ_PV("SR01C-DI-COL-02:CENTRE", None, None),
-                       rp.REQ_PV("SR01C-DI-COL-02:GAP", None, None),
-                       rp.REQ_PV("SR-DI-PICO-01:BUCKETS", 5, None),
-                       rp.REQ_PV("SR-DI-PICO-01:BUCKETS", 10, "RO"),
-                       rp.REQ_PV("SR-DI-PICO-01:BUCKETS", 25, "RON"),
-                       rp.REQ_PV("SR01C-DI-COL-01:POS1", None, "RON"),
-                       rp.REQ_PV("SR01C-DI-COL-01:POS2", None, "RO"),
-                       rp.REQ_PV("SR01C-DI-COL-02:POS1", None, "RO"),
-                       rp.REQ_PV("SR01C-DI-COL-02:POS2", None, "RO"),
-                       rp.REQ_PV("SR-CS-RING-01:MODE", None, None)]
+    correct_pv_list = [
+        rp.REQ_PV("SR01C-DI-COL-01:CENTRE", None, None),
+        rp.REQ_PV("SR-DI-PICO-01:BUCKETS", None, None),
+        rp.REQ_PV("SR01C-DI-COL-02:CENTRE", None, None),
+        rp.REQ_PV("SR01C-DI-COL-02:GAP", None, None),
+        rp.REQ_PV("SR-DI-PICO-01:BUCKETS", 5, None),
+        rp.REQ_PV("SR-DI-PICO-01:BUCKETS", 10, "RO"),
+        rp.REQ_PV("SR-DI-PICO-01:BUCKETS", 25, "RON"),
+        rp.REQ_PV("SR01C-DI-COL-01:POS1", None, "RON"),
+        rp.REQ_PV("SR01C-DI-COL-01:POS2", None, "RO"),
+        rp.REQ_PV("SR01C-DI-COL-02:POS1", None, "RO"),
+        rp.REQ_PV("SR01C-DI-COL-02:POS2", None, "RO"),
+        rp.REQ_PV("SR-CS-RING-01:MODE", None, None),
+    ]
 
     req_parser = rp(test.NORMAL_REQ)
     assert test.NORMAL_REQ == req_parser.path

@@ -5,25 +5,16 @@ check fails, then the BURT snapshot or restore is cancelled.
 
 A check succeeds if |pv-value - target| < tolerance, else it fails.
 """
-import burt
+
 import os
 
 from cothread.catools import caget
 
+import burt
+
 
 class CheckFailedException(Exception):
-    """Raise when a check unexpectedly fails. Encapsulate failed check info.
-
-    Attributes:
-    PV_NAME (str): The name of the failed PV.
-    PV_TARGET(float): The target value.
-    PV_TOLERANCE The tolerance.
-
-    """
-
-    PV_NAME = ""
-    PV_TARGET = 0
-    PV_TOLERANCE = 0
+    """Raise when a check unexpectedly fails. Encapsulate failed check info."""
 
     def __init__(self, check_pv, msg=""):
         """Constructor.
@@ -31,14 +22,12 @@ class CheckFailedException(Exception):
         Args:
             check_pv: A CHECK_PV named tuple of the PV which failed the check.
             msg (str): Any other message.
-        """
-        PV_NAME = check_pv.name
-        PV_TARGET = check_pv.target
-        PV_TOLERANCE = check_pv.tolerance
 
+        """
         super(CheckFailedException, self).__init__(
-            "{} failed with target {} and tolerance {}. {}".format(
-                check_pv.name, check_pv.target, check_pv.tolerance, msg))
+            f"{check_pv.name} failed with target {check_pv.target} and "
+            f"tolerance {check_pv.tolerance}. {msg}"
+        )
 
 
 def check(check_file):
@@ -57,7 +46,8 @@ def check(check_file):
 
     """
     if (not check_file.endswith(burt.CHECK_FILE_EXT)) or (
-            not os.path.isfile(check_file)):
+        not os.path.isfile(check_file)
+    ):
         raise ValueError("Invalid .check file input.")
 
     check_parser = burt.CheckParser(check_file)

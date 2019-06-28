@@ -18,9 +18,9 @@ def test_snapshot_normal():
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(test.NORMAL_REQ, integration.TMP_PYBURT_OUT,
-                       test_comment,
-                       test_keywords)
+    burt.take_snapshot(
+        test.NORMAL_REQ, integration.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
 
     assert os.path.isfile(integration.TMP_PYBURT_OUT)
     assert os.stat(integration.TMP_PYBURT_OUT).st_size != 0
@@ -77,9 +77,9 @@ def test_snapshot_group_normal():
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot_group(test.NORMAL_RQG, integration.TMP_PYBURT_OUT,
-                             test_comment,
-                             test_keywords)
+    burt.take_snapshot_group(
+        test.NORMAL_RQG, integration.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
 
     assert os.path.isfile(integration.TMP_PYBURT_OUT)
     assert os.stat(integration.TMP_PYBURT_OUT).st_size != 0
@@ -109,8 +109,7 @@ def test_snapshot_invalid_save_len():
     data size. This is a case which would not be  caught by the parser.
     """
     with pytest.raises(ValueError):
-        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ,
-                           test.TMP_PYBURT_OUT)
+        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ, test.TMP_PYBURT_OUT)
 
 
 def test_burt_vanilla_rb():
@@ -120,15 +119,15 @@ def test_burt_vanilla_rb():
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    _vanilla_burtrb(integration.NORMAL_REQ, integration.TMP_BURT_OUT,
-                    comment, keyword)
+    _vanilla_burtrb(integration.NORMAL_REQ, integration.TMP_BURT_OUT, comment, keyword)
 
-    burt.take_snapshot(integration.NORMAL_REQ, integration.TMP_PYBURT_OUT,
-                       comment,
-                       keyword)
+    burt.take_snapshot(
+        integration.NORMAL_REQ, integration.TMP_PYBURT_OUT, comment, keyword
+    )
 
-    assert filecmp.cmp(integration.TMP_BURT_OUT, integration.TMP_PYBURT_OUT,
-                       shallow=False)
+    assert filecmp.cmp(
+        integration.TMP_BURT_OUT, integration.TMP_PYBURT_OUT, shallow=False
+    )
 
     # cleanup
     os.remove(integration.TMP_BURT_OUT)
@@ -145,10 +144,16 @@ def _vanilla_burtrb(input_req, output_snap, comments, keywords):
         comments (comments): comments
         keywords (keywords): keywords
     """
-    burt_rb_cmd = \
-        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f " \
-        + input_req + " -o " \
-        + output_snap + " -c " + comments + " -k " + keywords
+    burt_rb_cmd = (
+        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
+        + input_req
+        + " -o "
+        + output_snap
+        + " -c "
+        + comments
+        + " -k "
+        + keywords
+    )
 
     # Without shell=True raises an exception on Python 2.7
     process = subprocess.Popen(burt_rb_cmd, shell=True)

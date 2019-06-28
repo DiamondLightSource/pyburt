@@ -7,7 +7,7 @@ from random import randint
 
 from pkg_resources import require
 
-require('cothread')
+require("cothread")
 from cothread.catools import caget, caput
 
 
@@ -23,8 +23,7 @@ def test_restore():
     # CA array PV.
     burt.restore(integration.ARR_SNAP)
     ca_arr = caget(integration.IOC_LOCAL_PV)
-    assert abs(
-        ca_arr[0] - 3.259328000000000e+00) <= 0.2  # Allowed truncation margin
+    assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
 
@@ -47,7 +46,6 @@ def test_restore_group():
 
     # CA array PV.
     ca_arr = caget(integration.IOC_LOCAL_PV)
-    assert abs(
-        ca_arr[0] - 3.259328000000000e+00) <= 0.2  # Allowed truncation margin
+    assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1

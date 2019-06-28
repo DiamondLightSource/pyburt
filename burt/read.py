@@ -13,17 +13,21 @@ documentation for more information.
 A request group .rqg file contains a collection of paths to .req files, and is
 used to create bulk snapshots.
 """
-import burt
-import os
+import argparse
 import errno
-import time
-import pwd
 import getpass
-import cothread
-
+import logging
+import os
+import pwd
+import time
 from collections import OrderedDict
-from burt.parsers.snap import SnapParser as snap
+
+import cothread
 from cothread.catools import caget
+
+import burt
+import burt.utils.file as utils
+from burt.parsers.snap import SnapParser as snap
 
 
 def take_snapshot(req_file, snap_file, comments=None, keywords=None):
@@ -33,7 +37,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
         req_file (str): The path to the existing .req file.
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
-        keywords(str): A delimited string of keywords to append to the BURT
+        keywords (str): A delimited string of keywords to append to the BURT
             header.
 
     Raises:
@@ -41,8 +45,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
             extension, or if the  .req file does not exist.
 
     """
-    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (
-            not os.path.isfile(req_file)):
+    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (not os.path.isfile(req_file)):
         raise ValueError("Invalid .req file input.")
 
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
@@ -50,9 +53,13 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
 
     req_parser = burt.ReqParser(req_file)
     _, body = req_parser.parse()
+    logging.debug(f"Parsed PVs: {body}")
 
     snap_header = _gen_snap_header(req_file, comments, keywords)
+    logging.debug(f"Generated .snap header: {snap_header}")
+
     snap_footer = _gen_snap_footer(body)
+    logging.debug(f"Generated .snap footer: {snap_footer}")
 
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
@@ -72,8 +79,7 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
             extension, or if the  .rqg file does not exist.
 
     """
-    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (
-            not os.path.isfile(rqg_file)):
+    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (not os.path.isfile(rqg_file)):
         raise ValueError("Invalid .rqg file input.")
 
     if not snap_file.endswith(burt.SNAP_FILE_EXT):
@@ -81,22 +87,19 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
 
     rqg_parser = burt.RqgParser(rqg_file)
     _, body = rqg_parser.parse()
+    logging.debug(f"Parsed .req files: {body}")
 
-    req_paths = []
-    pvs = []
     for file_path in body:
-        # Ignore .check files as pyburt does not deal with them directly.
-        if file_path.endswith(burt.REQ_FILE_EXT):
-            req_parser = burt.ReqParser(file_path)
-            _, pv_entry = req_parser.parse()
+        if file_path.endswith(burt.CHECK_FILE_EXT):
+            try:
+                burt.checks.check(file_path)
+            except burt.checks.CheckFailedException as e:
+                logging.debug(e)
+                logging.critical(f"Check {file_path} failed. Exiting")
+                return
 
-            req_paths.append(file_path)
-            pvs.extend(pv_entry)
-
-    snap_header = _gen_snap_header(",".join(req_paths), comments, keywords)
-    snap_footer = _gen_snap_footer(pvs)
-
-    _write_to_snap_file(snap_header, snap_footer, snap_file)
+        elif file_path.endswith(burt.REQ_FILE_EXT):
+            take_snapshot(file_path, snap_file, comments, keywords)
 
 
 def _write_to_snap_file(snap_header, snap_footer, snap_file):
@@ -139,55 +142,72 @@ def _gen_snap_header(req_path, comments, keywords):
     """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
+    logging.debug(f"Current time: {current_time}")
 
     # Username (Lastname, Initials (Firstname)) format
-    curr_user = getpass.getuser() + " (" + pwd.getpwuid(os.getuid())[4] + ")"
+    username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
+    logging.debug(f"Current user: {username}")
+    logging.debug(f"Current user group: {ugroup}")
+    curr_user = username + " (" + ugroup + ")"
 
     uid = os.getuid()
+    logging.debug(f"uid: {uid}")
+
     gid = pwd.getpwnam(getpass.getuser()).pw_gid
+    logging.debug(f"gid: {gid}")
 
     # Carriage returns and newlines from user input can malform the BURT header
     # so write to the snap file as escaped symbols. This is the behaviour of
     # the old BURT.
-    keywords = "" if keywords is None else \
-        keywords.replace('\r', '\\r').replace('\n', '\\n')
-    comments = "" if comments is None else \
-        comments.replace('\r', '\\r').replace('\n', '\\n')
+    keywords = (
+        "" if keywords is None else keywords.replace("\r", "\\r").replace("\n", "\\n")
+    )
+    logging.debug(f"Keywords: {keywords}")
+
+    comments = (
+        "" if comments is None else comments.replace("\r", "\\r").replace("\n", "\\n")
+    )
+    logging.debug(f"Comments: {comments}")
 
     type = snap.TYPE_DEFAULT_VAL
+
     directory = os.getcwd()
+    logging.debug(f"Cwd: {directory}")
+
     req_file = req_path
 
-    header_elements = OrderedDict([
-        (snap.SNAP_HEADER_START, ''),
-        (snap.TIME_PREFIX, current_time),
-        (snap.LOGINID_PREFIX, curr_user),
-        (snap.UID_PREFIX, uid),
-        (snap.GROUPID_PREFIX, gid),
-        (snap.KEYWORDS_PREFIX, keywords),
-        (snap.COMMENTS_PREFIX, comments),
-        (snap.TYPE_PREFIX, type),
-        (snap.DIRECTORY_PREFIX, directory),
-        (snap.REQ_FILE_PREFIX, req_file),
-        (snap.SNAP_HEADER_END, '')
-    ])
+    header_elements = OrderedDict(
+        [
+            (snap.SNAP_HEADER_START, ""),
+            (snap.TIME_PREFIX, current_time),
+            (snap.LOGINID_PREFIX, curr_user),
+            (snap.UID_PREFIX, uid),
+            (snap.GROUPID_PREFIX, gid),
+            (snap.KEYWORDS_PREFIX, keywords),
+            (snap.COMMENTS_PREFIX, comments),
+            (snap.TYPE_PREFIX, type),
+            (snap.DIRECTORY_PREFIX, directory),
+            (snap.REQ_FILE_PREFIX, req_file),
+            (snap.SNAP_HEADER_END, ""),
+        ]
+    )
 
     header = r""
     for prefix in header_elements:
-        if (prefix == snap.SNAP_HEADER_START) or (
-                prefix == snap.SNAP_HEADER_END):
+        if (prefix == snap.SNAP_HEADER_START) or (prefix == snap.SNAP_HEADER_END):
             header += prefix + os.linesep
 
         # Special case with no colon.
         elif prefix == snap.DIRECTORY_PREFIX:
-            header += "{} {}\n".format(prefix, header_elements[prefix])
+            header += f"{prefix} {header_elements[prefix]}\n"
 
         # 10 space alignment from the left after the prefix for the non special
         # cases.
         else:
             left_padding = " " * (10 - len(":") - len(prefix))
-            header += prefix + ":" + left_padding + str(
-                header_elements[prefix]) + os.linesep
+            header += (
+                prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
+            )
 
     return header
 
@@ -236,6 +256,8 @@ def _gen_snapshot_entry(pv_entry):
     ca_reading = caget(pv_entry.name, datatype=cothread.catools.DBR_ENUM_STR)
     ca_reading_len = 1
     ca_reading_str = ""
+    logging.debug(f"ca_reading: {ca_reading}")
+    logging.debug(f"ca_reading type: {type(ca_reading)}")
 
     if isinstance(ca_reading, cothread.dbr.ca_array):
         ca_reading_len = len(ca_reading)
@@ -243,15 +265,17 @@ def _gen_snapshot_entry(pv_entry):
         # User specified to save only save_len elements from ca_reading.
         if pv_entry.save_len:
             if pv_entry.save_len > ca_reading_len:
-                raise ValueError("Save length value specified in .req "
-                                 "file exceeds length of PV data.")
+                raise ValueError(
+                    "Save length value specified in .req "
+                    "file exceeds length of PV data."
+                )
             else:
                 ca_reading_len = pv_entry.save_len
 
         # Flattening ca_array
         ca_reading_str = " ".join(
-            ["{:.15e}".format(reading) for reading in
-             ca_reading[:ca_reading_len]])
+            ["{:.15e}".format(reading) for reading in ca_reading[:ca_reading_len]]
+        )
 
     # A DBR enum, e.g. "DIAD".
     elif isinstance(ca_reading, cothread.dbr.ca_str):
@@ -264,7 +288,34 @@ def _gen_snapshot_entry(pv_entry):
     if pv_entry.modifier:
         snapshot_entry += pv_entry.modifier + " "
 
-    snapshot_entry += "{} {} {}".format(pv_entry.name, ca_reading_len,
-                                        ca_reading_str)
+    snapshot_entry += f"{pv_entry.name} {ca_reading_len} {ca_reading_str}"
 
     return snapshot_entry
+
+
+def main():
+    """Main function used by cli."""
+    cli = argparse.ArgumentParser()
+    cli.add_argument(
+        "request_file", type=str, help="The path to either a .req or .rqg file."
+    )
+    cli.add_argument(
+        "snap_destination", type=str, help="The path to the destination .snap file."
+    )
+    cli.add_argument("-c", type=str, help="Optional snapshot comments.")
+    cli.add_argument("-k", type=str, help="Optional snapshot keywords.")
+
+    args = cli.parse_args()
+
+    if utils.is_req_file(args.request_file):
+        take_snapshot(
+            args.request_file, args.snap_destination, comments=args.c, keywords=args.k
+        )
+
+    elif utils.is_rqg_file(args.request_file):
+        take_snapshot_group(
+            args.request_file, args.snap_destination, comments=args.c, keywords=args.k
+        )
+
+    else:
+        logging.critical("Invalid request file argument.")

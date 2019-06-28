@@ -6,11 +6,11 @@ READONLY_NOTIFY_SPECIFIER = "RON"
 WRITEONLY_SPECIFIER = "WO"
 
 # BURT file extensions.
-REQ_FILE_EXT = '.req'
-SNAP_FILE_EXT = '.snap'
-RQG_FILE_EXT = '.rqg'
-RGR_FILE_EXT = '.rgr'
-CHECK_FILE_EXT = '.check'
+REQ_FILE_EXT = ".req"
+SNAP_FILE_EXT = ".snap"
+RQG_FILE_EXT = ".rqg"
+RGR_FILE_EXT = ".rgr"
+CHECK_FILE_EXT = ".check"
 
 # Ignore PEP8 warning as imports below require globals above.
 from burt.write import restore  # noqa

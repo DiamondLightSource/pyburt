@@ -1,7 +1,8 @@
 """Snap parser class which reads the information from a .snap BURT file."""
-import burt
-from . import BurtParser, ParserException
 from collections import namedtuple
+
+import burt
+from burt.parsers import BurtParser, ParserException
 
 
 class SnapParser(BurtParser):
@@ -42,7 +43,7 @@ class SnapParser(BurtParser):
     DIRECTORY_PREFIX = "Directory"
     REQ_FILE_PREFIX = "Req File"
 
-    SNAP_PV = namedtuple('SNAP_PV', 'name dtype_len vals modifier')
+    SNAP_PV = namedtuple("SNAP_PV", "name dtype_len vals modifier")
 
     def __init__(self, path):
         """Constructor.
@@ -60,17 +61,21 @@ class SnapParser(BurtParser):
             namedtuple(super.HEADER): The .snap file header.
 
         """
-        return super(SnapParser, self).HEADER(self.SNAP_HEADER_START,
-                                              (self.TIME_PREFIX,
-                                               self.LOGINID_PREFIX,
-                                               self.UID_PREFIX,
-                                               self.GROUPID_PREFIX,
-                                               self.KEYWORDS_PREFIX,
-                                               self.COMMENTS_PREFIX,
-                                               self.TYPE_PREFIX,
-                                               self.DIRECTORY_PREFIX,
-                                               self.REQ_FILE_PREFIX),
-                                              self.SNAP_HEADER_END)
+        return super(SnapParser, self).HEADER(
+            self.SNAP_HEADER_START,
+            (
+                self.TIME_PREFIX,
+                self.LOGINID_PREFIX,
+                self.UID_PREFIX,
+                self.GROUPID_PREFIX,
+                self.KEYWORDS_PREFIX,
+                self.COMMENTS_PREFIX,
+                self.TYPE_PREFIX,
+                self.DIRECTORY_PREFIX,
+                self.REQ_FILE_PREFIX,
+            ),
+            self.SNAP_HEADER_END,
+        )
 
     def read_body_line(self, line):
         """Store a PV in the .snap body into a namedtuple object.
@@ -83,13 +88,13 @@ class SnapParser(BurtParser):
         pv_snapshot = [segment.strip() for segment in line.split()]
 
         if len(pv_snapshot) < 3:
-            raise ParserException(
-                "Malformed .snap body: Too few elements for a PV.")
+            raise ParserException("Malformed .snap body: Too few elements for a PV.")
 
         is_modifier_specified = pv_snapshot[0] in (
             burt.READONLY_SPECIFIER,
             burt.READONLY_NOTIFY_SPECIFIER,
-            burt.WRITEONLY_SPECIFIER)
+            burt.WRITEONLY_SPECIFIER,
+        )
 
         pv_name_index = 1 if is_modifier_specified else 0
         dtype_len_index = pv_name_index + 1
@@ -104,6 +109,7 @@ class SnapParser(BurtParser):
             dtype_len = int(dtype_len)
         except ValueError:
             raise ParserException(
-                "Malformed .snap file: data type length is a non integer.")
+                "Malformed .snap file: data type length is a non integer."
+            )
 
         return self.SNAP_PV(pv_name, dtype_len, vals, modifier)

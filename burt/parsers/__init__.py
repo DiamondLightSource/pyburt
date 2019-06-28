@@ -19,7 +19,7 @@ class BurtParser:
 
     __metaclass__ = ABCMeta
 
-    HEADER = namedtuple('HEADER', 'start_label prefixes end_label')
+    HEADER = namedtuple("HEADER", "start_label prefixes end_label")
 
     def __init__(self, path):
         """Constructor.
@@ -72,12 +72,11 @@ class BurtParser:
             If there is no header, the dict will be empty.
 
         """
-        with open(self.path, 'r') as f:
+        with open(self.path, "r") as f:
             file_contents = f.read()
 
             if self.get_header():
-                header_lines, body_lines = self._extract_header_and_body(
-                    file_contents)
+                header_lines, body_lines = self._extract_header_and_body(file_contents)
                 header_vals = self.parse_header(header_lines)
             else:
                 body_lines = file_contents.splitlines()
@@ -150,24 +149,24 @@ class BurtParser:
             ParserException: If the BURT file is malformed.
 
         """
-        if not (self.get_header().start_label in file_contents) and \
-                (self.get_header().end_label in file_contents):
+        if not (self.get_header().start_label in file_contents) and (
+            self.get_header().end_label in file_contents
+        ):
             raise ParserException("Malformed BURT header.")
 
         try:
-            header, body = [part.strip() for part in
-                            file_contents.split(
-                                self.get_header().end_label)]
+            header, body = [
+                part.strip()
+                for part in file_contents.split(self.get_header().end_label)
+            ]
         except ValueError:
-            raise ParserException(
-                "Duplicated BURT headers.")
+            raise ParserException("Duplicated BURT headers.")
 
         header_lines = header.splitlines()[1:]
         body_lines = body.splitlines()
 
         if len(header_lines) != len(self.get_header().prefixes):
-            raise ParserException(
-                "Missing or duplicate prefixes in BURT header.")
+            raise ParserException("Missing or duplicate prefixes in BURT header.")
 
         return header_lines, body_lines
 
@@ -200,7 +199,7 @@ class BurtParser:
         """
         cleaned_line = line
         if INLINE_COMMENT in line:
-            cleaned_line = line[:line.find(INLINE_COMMENT)]
+            cleaned_line = line[: line.find(INLINE_COMMENT)]
 
         return cleaned_line.strip()
 

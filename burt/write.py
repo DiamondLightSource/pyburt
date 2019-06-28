@@ -15,10 +15,14 @@ A restore group .rgr file is just a collection of paths to .snap files,
 and some .check files which verifies certain preconditions prior to the
 restore operation proceeding. It is used for bulk restoring of PVs.
 """
-import burt
+import argparse
+import logging
 import os
 
 from cothread.catools import caput
+
+import burt
+import burt.utils.file as utils
 
 
 def restore(snap_file):
@@ -34,16 +38,18 @@ def restore(snap_file):
         not exist.
 
     """
-    if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (
-            not os.path.isfile(snap_file)):
+    if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (not os.path.isfile(snap_file)):
         raise ValueError("Invalid .snap file.")
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
+    logging.debug(f"Parsed .snap PVs: {body}")
 
     for pv_entry in body:
-        if pv_entry.modifier not in (burt.READONLY_NOTIFY_SPECIFIER,
-                                     burt.READONLY_SPECIFIER):
+        if pv_entry.modifier not in (
+            burt.READONLY_NOTIFY_SPECIFIER,
+            burt.READONLY_SPECIFIER,
+        ):
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
@@ -67,14 +73,33 @@ def restore_group(rgr_file):
         not exist.
 
     """
-    if (not rgr_file.endswith(burt.RGR_FILE_EXT)) or (
-            not os.path.isfile(rgr_file)):
+    if (not rgr_file.endswith(burt.RGR_FILE_EXT)) or (not os.path.isfile(rgr_file)):
         raise ValueError("Invalid .rgr file.")
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
+    logging.debug(f"Parsed .snap files: {body}")
 
     for file_path in body:
         # Ignore .check files as pyburt does not need to deal with them.
         if file_path.endswith(burt.SNAP_FILE_EXT):
             restore(file_path)
+
+
+def main():
+    """Main function used by cli."""
+    cli = argparse.ArgumentParser()
+    cli.add_argument(
+        "restore_file", type=str, help="The path to either a .snap or .rgr file."
+    )
+
+    args = cli.parse_args()
+
+    if utils.is_snap_file(args.restore_file):
+        restore(args.restore_file)
+
+    elif utils.is_rgr_file(args.restore_file):
+        restore_group(args.restore_file)
+
+    else:
+        logging.critical("Invalid restore file argument.")
