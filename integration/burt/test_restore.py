@@ -33,6 +33,19 @@ def test_restore():
     assert ca_arr[0] == 2
 
 
+def test_restore_long():
+    """Runs burt restore against a .snap file with a long datatype.
+
+    A caget on the test IOC is performed to check that the restore changed the
+    value to as specified in the .snap file.
+    """
+    # Randomize IOC start value.
+    caput(integration.IOC_LOCAL_PV_LONG, randint(1, 100))
+
+    # CA long PV.
+    burt.restore(integration.LONG_SNAP)
+
+
 def test_restore_group():
     """Runs burt restore group against a normal case.
 

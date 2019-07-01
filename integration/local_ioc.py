@@ -34,6 +34,7 @@ if __name__ == "__main__":
     mbbout_one = builder.mbbOut("MBBO1", ("OFF", 0))
     mbbin = builder.mbbIn("MBBI", ("OFF", 0), ("ON", 1), ("NOT SURE", 2))
     wave = builder.WaveformOut("TESTPV", length=5)
+    long = builder.longOut("TESTPV_LONG")
     builder.LoadDatabase()
     softioc.iocInit()
     softioc.interactive_ioc(globals())

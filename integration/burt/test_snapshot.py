@@ -88,7 +88,7 @@ def test_snapshot_group_normal():
     # properties, e.g. keywords, directory, etc.
     snap_parser = burt.SnapParser(integration.TMP_PYBURT_OUT)
     header, body = snap_parser.parse()
-    assert 556 == len(body)
+    assert 6 == len(body)
     assert header[sp.TIME_PREFIX]
     assert header[sp.LOGINID_PREFIX]
     assert header[sp.UID_PREFIX]
@@ -97,7 +97,6 @@ def test_snapshot_group_normal():
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert 13 == len(header[sp.REQ_FILE_PREFIX].split(","))
 
     # cleanup
     os.remove(integration.TMP_PYBURT_OUT)
