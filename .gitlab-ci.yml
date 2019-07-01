@@ -7,11 +7,11 @@ rhel7_job:
     - pip3 install pytest
     - pip3 install pytest-cov
     - pip3 install cothread
-    - pip3 install pycodestyle
-    - pip3 install pydocstyle
     - pip3 install mock
     - pip3 install sphinx
     - pip3 install flake8
+    - pip3 install flake8-docstrings
+    - pip3 install flake8-import-order
     - pip3 install black
     - python3 -m pytest --cov=burt --cov-report term-missing --cov-fail-under 90 test
     - sphinx-build -b html -E -q docs docs/_build/html

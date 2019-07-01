@@ -46,8 +46,9 @@ $ pip install pyburt
 To build the Sphinx documentation:
 
 ```bash
-$ cd docs
-$ make html
+$ pipenv shell
+(pyburt) $ cd docs
+(pyburt) $ make html
 ```
 
 The generated pages are in `docs/_build/html`.

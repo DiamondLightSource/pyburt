@@ -7,21 +7,15 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 mock = "*"
-configparser = "*" # Mysteriously needed by python 2.7 for pydocstyle.
 coveralls = "*"
 flake8 = "*"
-black = "*"
-pycodestyle = "*"
-pydocstyle = "*"
 flake8-docstrings = "*"
 flake8-import-order = "*"
+black = "==19.3b0"
 
 [requires]
 python_version = "3.7"
 
 [packages]
 cothread = ">=2.15"
-sphinx = "==2.0.1"
-
-[pipenv]
-allow_prereleases = true
+sphinx = "*"

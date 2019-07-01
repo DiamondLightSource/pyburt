@@ -2,8 +2,9 @@
 /.idea/
 /.vscode/
 
-# Documentation build files
+# Build files
 */_build/
+/pyburt.egg-info/
 
 # Pipenv cache
 /.cache/
