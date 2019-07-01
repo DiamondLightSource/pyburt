@@ -87,7 +87,7 @@ def restore_group(rgr_file):
 
 
 def main():
-    """Main function used by cli."""
+    """Start command-line interface."""
     cli = argparse.ArgumentParser()
     cli.add_argument(
         "restore_file", type=str, help="The path to either a .snap or .rgr file."
