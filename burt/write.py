@@ -30,6 +30,11 @@ def restore(snap_file):
 
     This function does nothing for PVs marked with RO or RON specifiers.
 
+    Note that cothread invokes numpy integer conversion for arrays, which must
+    be handled separately; each value is converted to a floating point number,
+    which is possible as array record types are only supported for DBR_CHAR,
+    DBR_SHORT, DBR_LONG, DBR_FLOAT, and DBR_DOUBLE.
+
     Args:
         snap_file (str): The path to the .snap file.
 
@@ -45,6 +50,10 @@ def restore(snap_file):
     _, body = snap_parser.parse()
     logging.debug(f"Parsed .snap PVs: {body}")
 
+    # Improve performance by putting all at once later on.
+    singleton_pvs_to_restore = {}
+    array_pvs_to_restore = {}
+
     for pv_entry in body:
         if pv_entry.modifier not in (
             burt.READONLY_NOTIFY_SPECIFIER,
@@ -54,12 +63,21 @@ def restore(snap_file):
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
                 print("WO type PVs currently unimplemented.")
+
             else:
-                caput(pv_entry.name, pv_entry.vals)
+                if 1 == pv_entry.dtype_len:
+                    singleton_pvs_to_restore[pv_entry.name] = pv_entry.vals
+                else:
+                    array_pvs_to_restore[pv_entry.name] = [
+                        float(val) for val in pv_entry.vals
+                    ]
 
         if pv_entry == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
             print("RON type PVs currently unimplemented.")
+
+    caput(singleton_pvs_to_restore.keys, singleton_pvs_to_restore.items)
+    caput(array_pvs_to_restore.keys, array_pvs_to_restore.items)
 
 
 def restore_group(rgr_file):
