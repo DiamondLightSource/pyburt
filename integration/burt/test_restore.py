@@ -23,7 +23,8 @@ def test_restore():
     # CA array PV.
     burt.restore(integration.ARR_SNAP)
     ca_arr = caget(integration.IOC_LOCAL_PV)
-    assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
+    assert abs(
+        ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
 
@@ -46,6 +47,19 @@ def test_restore_long():
     burt.restore(integration.LONG_SNAP)
 
 
+def test_restore_enum():
+    """Runs burt restore against a .snap file with an enum datatype.
+
+    A caget on the test IOC is performed to check that the restore changed the
+    value to as specified in the .snap file.
+    """
+    # Randomize IOC start value.
+    caput(integration.IOC_LOCAL_PV, randint(1, 100))
+
+    # CA long PV.
+    burt.restore(integration.ENUM_SNAP)
+
+
 def test_restore_group():
     """Runs burt restore group against a normal case.
 
@@ -59,6 +73,7 @@ def test_restore_group():
 
     # CA array PV.
     ca_arr = caget(integration.IOC_LOCAL_PV)
-    assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
+    assert abs(
+        ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
