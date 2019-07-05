@@ -64,15 +64,16 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
 
-def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
+def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
         rqg_file (str): The path to the existing .rqg file.
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
-        keywords(str): A delimited string of keywords to append to the BURT
+        keywords (str): A delimited string of keywords to append to the BURT
             header.
+        check (bool): Whether to inspect .check files or not.
 
     Raises:
         ValueError: If the rqg file or snap file arguments have an invalid
@@ -90,13 +91,8 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
     logging.debug(f"Parsed .req files: {body}")
 
     for file_path in body:
-        if file_path.endswith(burt.CHECK_FILE_EXT):
-            try:
-                burt.checks.check(file_path)
-            except burt.checks.CheckFailedException as e:
-                logging.debug(e)
-                logging.critical(f"Check {file_path} failed. Exiting")
-                return
+        if file_path.endswith(burt.CHECK_FILE_EXT) and check:
+            burt.checks.check(file_path)
 
         elif file_path.endswith(burt.REQ_FILE_EXT):
             take_snapshot(file_path, snap_file, comments, keywords)

@@ -18,6 +18,7 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 import argparse
 import logging
 import os
+from collections import OrderedDict
 
 from cothread.catools import caput
 
@@ -51,8 +52,8 @@ def restore(snap_file):
     logging.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
-    singleton_pvs_to_restore = {}
-    array_pvs_to_restore = {}
+    singleton_pvs_to_restore = OrderedDict()
+    array_pvs_to_restore = OrderedDict()
 
     for pv_entry in body:
         if pv_entry.modifier not in (
@@ -76,15 +77,16 @@ def restore(snap_file):
             # TODO: write to the no write snapshot file
             print("RON type PVs currently unimplemented.")
 
-    caput(singleton_pvs_to_restore.keys, singleton_pvs_to_restore.items)
-    caput(array_pvs_to_restore.keys, array_pvs_to_restore.items)
+    caput(singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values())
+    caput(array_pvs_to_restore.keys(), array_pvs_to_restore.values())
 
 
-def restore_group(rgr_file):
+def restore_group(rgr_file, check=True):
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Args:
         rgr_file (str): The path to the .rgr file.
+        check (bool): Whether to inspect .check files or not.
 
     Raises:
         ValueError: If the rgr file has an invalid extension, or if it does
@@ -99,8 +101,11 @@ def restore_group(rgr_file):
     logging.debug(f"Parsed .snap files: {body}")
 
     for file_path in body:
-        # Ignore .check files as pyburt does not need to deal with them.
-        if file_path.endswith(burt.SNAP_FILE_EXT):
+
+        if file_path.endswith(burt.CHECK_FILE_EXT) and check:
+            burt.checks.check(file_path)
+
+        elif file_path.endswith(burt.SNAP_FILE_EXT):
             restore(file_path)
 
 

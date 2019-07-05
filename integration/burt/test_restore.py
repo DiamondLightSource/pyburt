@@ -68,7 +68,7 @@ def test_restore_group():
     # Randomize IOC start value.
     caput(integration.IOC_LOCAL_PV, randint(1, 100))
 
-    burt.restore_group(test.NORMAL_ALT_RGR)
+    burt.restore_group(test.NORMAL_ALT_RGR, False)
 
     # CA array PV.
     ca_arr = caget(integration.IOC_LOCAL_PV)

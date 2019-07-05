@@ -78,7 +78,7 @@ def test_snapshot_group_normal():
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot_group(
-        test.NORMAL_RQG, integration.TMP_PYBURT_OUT, test_comment, test_keywords
+        test.NORMAL_RQG, integration.TMP_PYBURT_OUT, test_comment, test_keywords, False
     )
 
     assert os.path.isfile(integration.TMP_PYBURT_OUT)
