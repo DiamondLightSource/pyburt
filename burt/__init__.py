@@ -16,6 +16,7 @@ CHECK_FILE_EXT = ".check"
 from burt.write import restore  # noqa
 from burt.write import restore_group  # noqa
 from burt.read import take_snapshot  # noqa
+from burt.read import take_snapshot2  # noqa
 from burt.read import take_snapshot_group  # noqa
 from burt.checks import check  # noqa
 from burt.checks import CheckFailedException  # noqa

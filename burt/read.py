@@ -64,6 +64,40 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
 
+def take_snapshot2(req_file, snap_file, comments=None, keywords=None):
+    """Save the PVs and their state to the specified snap file, with metadata.
+
+    Args:
+        req_file (str): The path to the existing .req file.
+        snap_file (str): The path to the new .snap file.
+        comments (str): Comments to append to the BURT header.
+        keywords (str): A delimited string of keywords to append to the BURT
+            header.
+
+    Raises:
+        ValueError: If the request file or snap file arguments have an invalid
+            extension, or if the  .req file does not exist.
+
+    """
+    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (not os.path.isfile(req_file)):
+        raise ValueError("Invalid .req file input.")
+
+    if not snap_file.endswith(burt.SNAP_FILE_EXT):
+        raise ValueError("Invalid .snap file destination.")
+
+    req_parser = burt.ReqParser(req_file)
+    _, body = req_parser.parse()
+    logging.debug(f"Parsed PVs: {body}")
+
+    snap_header = _gen_snap_header(req_file, comments, keywords)
+    logging.debug(f"Generated .snap header: {snap_header}")
+
+    snap_footer = _gen_snap_footer2(body)
+    logging.debug(f"Generated .snap footer: {snap_footer}")
+
+    _write_to_snap_file(snap_header, snap_footer, snap_file)
+
+
 def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
@@ -230,6 +264,24 @@ def _gen_snap_footer(pvs):
     return os.linesep.join(footer_entries)
 
 
+def _gen_snap_footer2(pvs):
+    """Generate the .snap file footer as a string.
+
+    This will be the sequence of PVs followed by their reading length and
+    current values.
+
+    Args:
+        pvs (List): A list of PV named tuple objects.
+
+    Returns:
+        str: The .snap file footer as a string.
+
+    """
+    snapshots = _gen_snapshot_entry2(pvs)
+
+    return os.linesep.join(snapshots)
+
+
 def _gen_snapshot_entry(pv_entry):
     """Take a snapshot of the PV's current state.
 
@@ -287,6 +339,73 @@ def _gen_snapshot_entry(pv_entry):
     snapshot_entry += f"{pv_entry.name} {ca_reading_len} {ca_reading_str}"
 
     return snapshot_entry
+
+
+def _gen_snapshot_entry2(pv_entries):
+    """Take a snapshot of the PV's current state.
+
+    A snapshot is performed by storing the values as a formatted string, which
+    is placed in a .snap file.
+
+    The .snap file PV entries require a 15 width precision number(s) in
+    scientific notation.
+
+    Args:
+        pv_entry (namedtuple(PV)): A PV entry in a .req file.
+
+    Returns:
+        str: The .snap file entry for the PV.
+
+    Raises:
+        ValueError: If the save length is invalid.
+
+    """
+    ca_readings = caget(
+        [pv.name for pv in pv_entries], datatype=cothread.catools.DBR_ENUM_STR
+    )
+
+    snap_entries = []
+    for i in range(len(ca_readings)):
+        ca_reading_len = 1
+        ca_reading_str = ""
+
+        if isinstance(ca_readings[i], cothread.dbr.ca_array):
+            ca_reading_len = len(ca_readings[i])
+
+            # User specified to save only save_len elements from ca_reading.
+            if pv_entries[i].save_len:
+                if pv_entries[i].save_len > ca_reading_len:
+                    raise ValueError(
+                        "Save length value specified in .req "
+                        "file exceeds length of PV data."
+                    )
+                else:
+                    ca_reading_len = pv_entries[i].save_len
+
+            # Flattening ca_array
+            ca_reading_str = " ".join(
+                [
+                    "{:.15e}".format(reading)
+                    for reading in ca_readings[i][:ca_reading_len]
+                ]
+            )
+
+        # A DBR enum, e.g. "DIAD".
+        elif isinstance(ca_readings[i], cothread.dbr.ca_str):
+            ca_reading_str = str(ca_readings[i])
+
+        else:
+            ca_reading_str = "{:.15e}".format(ca_readings[i])
+
+        snapshot_entry = ""
+        if pv_entries[i].modifier:
+            snapshot_entry += pv_entries[i].modifier + " "
+
+        snapshot_entry += f"{pv_entries[i].name} {ca_reading_len} {ca_reading_str}"
+
+        snap_entries.append(snapshot_entry)
+
+    return snap_entries
 
 
 def main():

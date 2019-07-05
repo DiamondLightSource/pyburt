@@ -7,6 +7,7 @@ import burt
 import subprocess
 import os
 import filecmp
+import time
 
 from burt import SnapParser as sp
 
@@ -131,6 +132,56 @@ def test_burt_vanilla_rb():
     # cleanup
     os.remove(integration.TMP_BURT_OUT)
     os.remove(integration.TMP_PYBURT_OUT)
+
+
+def test_speed_snapshot():
+    """Speed comparison between different snapshot schemes."""
+    test_comment = "Hello World"
+    test_keywords = "cool,snap,file"
+
+    t0 = time.time()
+    burt.take_snapshot(
+        "/home/ops/burt/requestFiles/bcdorbit.req",
+        integration.TMP_PYBURT_OUT,
+        test_comment,
+        test_keywords,
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_snapshot_pyburt_1:{tend}")
+    # cleanup
+    os.remove(integration.TMP_PYBURT_OUT)
+
+    t0 = time.time()
+    burt.take_snapshot2(
+        "/home/ops/burt/requestFiles/bcdorbit.req",
+        integration.TMP_PYBURT_OUT,
+        test_comment,
+        test_keywords,
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_snapshot_pyburt_2:{tend}")
+    # cleanup
+    os.remove(integration.TMP_PYBURT_OUT)
+
+    t0 = time.time()
+    _vanilla_burtrb(
+        "/home/ops/burt/requestFiles/bcdorbit.req",
+        integration.TMP_PYBURT_OUT,
+        test_comment,
+        test_keywords,
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_snapshot_burt_vanilla:{tend}")
+    # cleanup
+    os.remove(integration.TMP_PYBURT_OUT)
+
+
+def test_speed_snapshot_group():
+    """Speed comparison between different snapshot group schemes"""
+    pass
 
 
 def _vanilla_burtrb(input_req, output_snap, comments, keywords):
