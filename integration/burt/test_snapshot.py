@@ -153,7 +153,7 @@ def test_speed_snapshot():
     os.remove(integration.TMP_PYBURT_OUT)
 
     t0 = time.time()
-    burt.take_snapshot2(
+    burt.take_snapshot(
         "/home/ops/burt/requestFiles/bcdorbit.req",
         integration.TMP_PYBURT_OUT,
         test_comment,

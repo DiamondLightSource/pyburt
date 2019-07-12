@@ -14,7 +14,7 @@ from burt import SnapParser as sp
 def test_blank_snapshot(mock_caget):
     """Runs the burt snapshot against a blank .req file.
     """
-    mock_caget.return_value = cothread.catools.ca_nothing
+    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([0, 0, 0])).flatten()
 
     burt.take_snapshot(test.BLANK_REQ, test.TMP_PYBURT_OUT)
 
@@ -53,8 +53,9 @@ def test_snapshot_arrays(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked ca array
     return value.
     """
-    # Flattened ndarray is a 40 element list.
-    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    # Flattened ndarray is a 12 element list of 40 elements.
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -126,7 +127,8 @@ def test_snapshot_enum(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked enum
     return value.
     """
-    mock_caget.return_value = cothread.dbr.ca_str("DIAD")
+    singleton_return_value = cothread.dbr.ca_str("DIAD")
+    mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -195,7 +197,8 @@ def test_snapshot_scalar(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked scalar
     return value.
     """
-    mock_caget.return_value = -1e-16
+    singleton_return_value = -1e-16
+    mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -263,8 +266,9 @@ def test_snapshot_newlines_in_args(mock_caget):
     supplied meta data. The newlines should appear as is in the .snap file,
     with the help of an extra backslash, and not interpreted.
     """
-    mock_ret = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
-    mock_caget.return_value = mock_ret
+    # Flattened ndarray is a 12 element list of 40 elements.
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "\nHello\r\n \nWorld\r\n\r"
     test_keywords = "\r\ncool\n,\r\nsnap,file\n\r\r"
@@ -299,7 +303,8 @@ def test_snapshot_invalid_save_len(mock_caget):
     """
     # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
     # The requested save length in the .req file is 937.
-    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
+    mock_caget.return_value = singleton_return_value
 
     with pytest.raises(ValueError):
         burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ, test.TMP_PYBURT_OUT)
@@ -312,8 +317,9 @@ def test_snapshot_group_arrays(mock_caget):
     the contents of the snap file should consist of the header, plus the
     .req pvs twice.
     """
-    mock_ret = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
-    mock_caget.return_value = mock_ret
+    # Flattened ndarray is a 12 element list of 40 elements.
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     burt.take_snapshot_group(test.NORMAL_ALT_RQG, test.TMP_PYBURT_OUT)
 

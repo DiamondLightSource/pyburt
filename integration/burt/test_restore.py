@@ -85,17 +85,13 @@ def test_speed_restore():
     test_keywords = "cool,snap,file"
 
     t0 = time.time()
-    burt.restore(
-        integration.BCDORBIT_SNAP
-    )
+    burt.restore(integration.BCDORBIT_SNAP)
     t1 = time.time()
     tend = t1 - t0
     print(f"test_speed_restore_1:{tend}")
 
     t0 = time.time()
-    _vanilla_burtwb(
-        integration.BCDORBIT_SNAP
-    )
+    _vanilla_burtwb(integration.BCDORBIT_SNAP)
     t1 = time.time()
     tend = t1 - t0
     print(f"test_speed_restore_burt_vanilla:{tend}")
