@@ -67,7 +67,7 @@ def restore(snap_file):
                 print("WO type PVs currently unimplemented.")
             else:
                 if 1 == pv_entry.dtype_len:
-                    singleton_pvs_to_restore[pv_entry.name] = pv_entry.vals
+                    singleton_pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
                 else:
                     array_pvs_to_restore[pv_entry.name] = [
                         float(val) for val in pv_entry.vals
