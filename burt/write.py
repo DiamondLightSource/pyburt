@@ -56,15 +56,15 @@ def restore(snap_file):
     array_pvs_to_restore = OrderedDict()
 
     for pv_entry in body:
-        if pv_entry.modifier not in (
-            burt.READONLY_NOTIFY_SPECIFIER,
-            burt.READONLY_SPECIFIER,
-        ):
+        if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
+            # TODO: write to the no write snapshot file
+            print("RON type PVs currently unimplemented.")
+
+        elif pv_entry.modifier != burt.READONLY_SPECIFIER:
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
                 print("WO type PVs currently unimplemented.")
-
             else:
                 if 1 == pv_entry.dtype_len:
                     singleton_pvs_to_restore[pv_entry.name] = pv_entry.vals
@@ -72,10 +72,6 @@ def restore(snap_file):
                     array_pvs_to_restore[pv_entry.name] = [
                         float(val) for val in pv_entry.vals
                     ]
-
-        if pv_entry == burt.READONLY_NOTIFY_SPECIFIER:
-            # TODO: write to the no write snapshot file
-            print("RON type PVs currently unimplemented.")
 
     caput(singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values())
     caput(array_pvs_to_restore.keys(), array_pvs_to_restore.values())

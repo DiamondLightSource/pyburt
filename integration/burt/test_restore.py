@@ -2,7 +2,9 @@
 """
 import integration
 import burt
+import subprocess
 import test
+import time
 from random import randint
 
 from pkg_resources import require
@@ -75,3 +77,42 @@ def test_restore_group():
     assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
+
+
+def test_speed_restore():
+    """Speed comparison between different restore schemes."""
+    test_comment = "Hello World"
+    test_keywords = "cool,snap,file"
+
+    t0 = time.time()
+    burt.restore(
+        integration.BCDORBIT_SNAP
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_restore_1:{tend}")
+
+    t0 = time.time()
+    _vanilla_burtwb(
+        integration.BCDORBIT_SNAP
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_restore_burt_vanilla:{tend}")
+
+
+def _vanilla_burtwb(input_snap):
+    """
+    Wrapper for the original burtwb implementation.
+
+    Args:
+        input_snap (str): input snap file
+    """
+    burt_rb_cmd = (
+        f"/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtwb -f {input_snap}"
+    )
+
+    # Without shell=True raises an exception on Python 2.7
+    process = subprocess.Popen(burt_rb_cmd, shell=True)
+    process.wait()
+    assert process.returncode == 0

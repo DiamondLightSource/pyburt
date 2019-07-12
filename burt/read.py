@@ -30,7 +30,7 @@ import burt.utils.file as utils
 from burt.parsers.snap import SnapParser as snap
 
 
-def take_snapshot(req_file, snap_file, comments=None, keywords=None):
+def take_snapshot2(req_file, snap_file, comments=None, keywords=None):
     """Save the PVs and their state to the specified snap file, with metadata.
 
     Args:
@@ -64,7 +64,7 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
 
-def take_snapshot2(req_file, snap_file, comments=None, keywords=None):
+def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     """Save the PVs and their state to the specified snap file, with metadata.
 
     Args:
@@ -236,7 +236,8 @@ def _gen_snap_header(req_path, comments, keywords):
         else:
             left_padding = " " * (10 - len(":") - len(prefix))
             header += (
-                prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
+                    prefix + ":" + left_padding + str(
+                header_elements[prefix]) + os.linesep
             )
 
     return header
