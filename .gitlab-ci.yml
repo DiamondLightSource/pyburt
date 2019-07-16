@@ -10,6 +10,7 @@ rhel7_job:
     - pip3 install mock
     - pip3 install sphinx
     - pip3 install flake8
+    - pip3 install 'pydocstyle<4' # https://gitlab.com/pycqa/flake8-docstrings/issues/36
     - pip3 install flake8-docstrings
     - pip3 install flake8-import-order
     - pip3 install black
