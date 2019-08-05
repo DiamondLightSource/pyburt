@@ -304,7 +304,7 @@ def test_snapshot_invalid_save_len(mock_caget):
     # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
     # The requested save length in the .req file is 937.
     singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
-    mock_caget.return_value = singleton_return_value
+    mock_caget.return_value = [singleton_return_value]
 
     with pytest.raises(ValueError):
         burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ, test.TMP_PYBURT_OUT)

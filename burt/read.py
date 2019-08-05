@@ -223,59 +223,8 @@ def _gen_snap_footer(pvs):
         str: The .snap file footer as a string.
 
     """
-    snapshots = []
-    if len(pvs) == 1:
-        snapshots = _read_one(pvs[0])
-    else:
-        snapshots = _read_multi(pvs)
-
+    snapshots = _read_multi(pvs)
     return os.linesep.join(snapshots)
-
-
-def _read_one(pv_entry):
-    """Take a snapshot of the PV's current state.
-
-    A snapshot is performed by storing the values as a formatted string, which
-    is placed in a .snap file.
-
-    The .snap file PV entries require a 15 width precision number(s) in
-    scientific notation.
-
-    Args:
-        pv_entry (namedtuple(PV)): A PV entry in a .req file.
-
-    Returns:
-        str: The .snap file entry for the PV.
-
-    Raises:
-        ValueError: If the save length is invalid.
-
-    """
-    ca_reading = caget(pv_entry, datatype=cothread.catools.DBR_ENUM_STR)
-    logging.debug(f"ca_reading: {ca_reading}")
-    logging.debug(f"ca_reading type: {type(ca_reading)}")
-
-    snap_entries = []
-
-    ca_reading_len = 1
-    ca_reading_str = ""
-
-    if isinstance(ca_reading, cothread.dbr.ca_array):
-        ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
-            ca_reading, pv_entry
-        )
-
-    # A DBR enum, e.g. "DIAD".
-    elif isinstance(ca_reading, cothread.dbr.ca_str):
-        ca_reading_str = str(ca_reading)
-
-    else:
-        ca_reading_str = "{:.15e}".format(ca_reading)
-
-    snapshot_entry = _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry)
-    snap_entries.append(snapshot_entry)
-
-    return snap_entries
 
 
 def _read_multi(pv_entries):
@@ -288,10 +237,10 @@ def _read_multi(pv_entries):
     scientific notation.
 
     Args:
-        pv_entry (namedtuple(PV)): A PV entry in a .req file.
+        pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
 
     Returns:
-        str: The .snap file entry for the PV.
+        str: The .snap file entries for the PV.
 
     Raises:
         ValueError: If the save length is invalid.
