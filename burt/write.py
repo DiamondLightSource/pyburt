@@ -18,6 +18,7 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 import argparse
 import logging
 import os
+from collections import OrderedDict
 
 from cothread.catools import caput
 
@@ -29,6 +30,11 @@ def restore(snap_file):
     """Restores the state of the PVs in the .snap file.
 
     This function does nothing for PVs marked with RO or RON specifiers.
+
+    Note that cothread invokes numpy integer conversion for arrays, which must
+    be handled separately; each value is converted to a floating point number,
+    which is possible as array record types are only supported for DBR_CHAR,
+    DBR_SHORT, DBR_LONG, DBR_FLOAT, and DBR_DOUBLE.
 
     Args:
         snap_file (str): The path to the .snap file.
@@ -45,28 +51,38 @@ def restore(snap_file):
     _, body = snap_parser.parse()
     logging.debug(f"Parsed .snap PVs: {body}")
 
+    # Improve performance by putting all at once later on.
+    singleton_pvs_to_restore = OrderedDict()
+    array_pvs_to_restore = OrderedDict()
+
     for pv_entry in body:
-        if pv_entry.modifier not in (
-            burt.READONLY_NOTIFY_SPECIFIER,
-            burt.READONLY_SPECIFIER,
-        ):
+        if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
+            # TODO: write to the no write snapshot file
+            print("RON type PVs currently unimplemented.")
+
+        elif pv_entry.modifier != burt.READONLY_SPECIFIER:
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
                 print("WO type PVs currently unimplemented.")
             else:
-                caput(pv_entry.name, pv_entry.vals)
+                if 1 == pv_entry.dtype_len:
+                    singleton_pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+                else:
+                    array_pvs_to_restore[pv_entry.name] = [
+                        float(val) for val in pv_entry.vals
+                    ]
 
-        if pv_entry == burt.READONLY_NOTIFY_SPECIFIER:
-            # TODO: write to the no write snapshot file
-            print("RON type PVs currently unimplemented.")
+    caput(singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values())
+    caput(array_pvs_to_restore.keys(), array_pvs_to_restore.values())
 
 
-def restore_group(rgr_file):
+def restore_group(rgr_file, check=True):
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Args:
         rgr_file (str): The path to the .rgr file.
+        check (bool): Whether to inspect .check files or not.
 
     Raises:
         ValueError: If the rgr file has an invalid extension, or if it does
@@ -81,8 +97,11 @@ def restore_group(rgr_file):
     logging.debug(f"Parsed .snap files: {body}")
 
     for file_path in body:
-        # Ignore .check files as pyburt does not need to deal with them.
-        if file_path.endswith(burt.SNAP_FILE_EXT):
+
+        if file_path.endswith(burt.CHECK_FILE_EXT) and check:
+            burt.checks.check(file_path)
+
+        elif file_path.endswith(burt.SNAP_FILE_EXT):
             restore(file_path)
 
 

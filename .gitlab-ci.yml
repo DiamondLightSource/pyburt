@@ -16,7 +16,9 @@ Unit tests and coverage:
   variables:
     COVERAGE_ARGS: --cov=burt --cov-report term-missing --cov-fail-under 90
     TEST_DIR: test
-  after_script:
+  script:
+    # Run the tests.
+    - pipenv run python3 -m pytest ${COVERAGE_ARGS} ${TEST_DIR}
     # Run our custom flake8 and black checks
     - pipenv run sphinx-build -b html -E -q docs docs/_build/html
     - pipenv run flake8 --show-source burt

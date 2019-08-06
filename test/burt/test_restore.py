@@ -90,4 +90,4 @@ def test_restore_group_normal(mock_caput):
     """
     # Return value is ca_nothing on success.
     mock_caput.return_value = cothread.catools.ca_nothing
-    burt.restore_group(test.NORMAL_ALT_RGR)
+    burt.restore_group(test.NORMAL_ALT_RGR, False)

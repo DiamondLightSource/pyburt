@@ -6,6 +6,7 @@ check fails, then the BURT snapshot or restore is cancelled.
 A check succeeds if |pv-value - target| < tolerance, else it fails.
 """
 
+import logging
 import os
 
 from cothread.catools import caget
@@ -58,4 +59,8 @@ def check(check_file):
         current_pv_val = caget(pv_entry.name)
 
         if abs(current_pv_val - pv_entry.target) > pv_entry.tolerance:
-            raise CheckFailedException(pv_entry)
+            e = CheckFailedException(pv_entry)
+            logging.debug(e)
+            logging.critical(f"Check {check_file} failed.")
+
+            raise e

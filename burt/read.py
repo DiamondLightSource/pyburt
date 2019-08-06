@@ -14,7 +14,6 @@ A request group .rqg file contains a collection of paths to .req files, and is
 used to create bulk snapshots.
 """
 import argparse
-import errno
 import getpass
 import logging
 import os
@@ -64,15 +63,16 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
 
-def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
+def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
         rqg_file (str): The path to the existing .rqg file.
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
-        keywords(str): A delimited string of keywords to append to the BURT
+        keywords (str): A delimited string of keywords to append to the BURT
             header.
+        check (bool): Whether to inspect .check files or not.
 
     Raises:
         ValueError: If the rqg file or snap file arguments have an invalid
@@ -90,13 +90,8 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None):
     logging.debug(f"Parsed .req files: {body}")
 
     for file_path in body:
-        if file_path.endswith(burt.CHECK_FILE_EXT):
-            try:
-                burt.checks.check(file_path)
-            except burt.checks.CheckFailedException as e:
-                logging.debug(e)
-                logging.critical(f"Check {file_path} failed. Exiting")
-                return
+        if file_path.endswith(burt.CHECK_FILE_EXT) and check:
+            burt.checks.check(file_path)
 
         elif file_path.endswith(burt.REQ_FILE_EXT):
             take_snapshot(file_path, snap_file, comments, keywords)
@@ -114,13 +109,8 @@ def _write_to_snap_file(snap_header, snap_footer, snap_file):
         OSError: If the new snap file path is invalid.
 
     """
-    if not os.path.exists(os.path.dirname(snap_file)):
-        try:
-            os.makedirs(os.path.dirname(snap_file))
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
-
+    snap_dir = os.path.abspath(os.path.normpath(os.path.dirname(snap_file)))
+    os.makedirs(snap_dir, exist_ok=True)
     with open(snap_file, "w") as f:
         f.write(snap_header + snap_footer + os.linesep)
 
@@ -216,7 +206,9 @@ def _gen_snap_footer(pvs):
     """Generate the .snap file footer as a string.
 
     This will be the sequence of PVs followed by their reading length and
-    current values.
+    current values. A snapshot of the PV's current state is taken, which is performed
+    by storing the values as a formatted string, which is stored in a .snap file. PV
+    entries require a 15 width precision number(s) in scientific notation.
 
     Args:
         pvs (List): A list of PV named tuple objects.
@@ -225,16 +217,11 @@ def _gen_snap_footer(pvs):
         str: The .snap file footer as a string.
 
     """
-    footer_entries = []
-
-    for pv_entry in pvs:
-        snapshot = _gen_snapshot_entry(pv_entry)
-        footer_entries.append(snapshot)
-
-    return os.linesep.join(footer_entries)
+    snapshots = _read_multi(pvs)
+    return os.linesep.join(snapshots)
 
 
-def _gen_snapshot_entry(pv_entry):
+def _read_multi(pv_entries):
     """Take a snapshot of the PV's current state.
 
     A snapshot is performed by storing the values as a formatted string, which
@@ -244,47 +231,95 @@ def _gen_snapshot_entry(pv_entry):
     scientific notation.
 
     Args:
-        pv_entry (namedtuple(PV)): A PV entry in a .req file.
+        pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
 
     Returns:
-        str: The .snap file entry for the PV.
+        str: The .snap file entries for the PV.
 
     Raises:
         ValueError: If the save length is invalid.
 
     """
-    ca_reading = caget(pv_entry.name, datatype=cothread.catools.DBR_ENUM_STR)
-    ca_reading_len = 1
-    ca_reading_str = ""
-    logging.debug(f"ca_reading: {ca_reading}")
-    logging.debug(f"ca_reading type: {type(ca_reading)}")
+    ca_readings = caget(
+        [pv.name for pv in pv_entries], datatype=cothread.catools.DBR_ENUM_STR
+    )
+    logging.debug(f"ca_reading: {ca_readings}")
+    logging.debug(f"ca_reading type: {type(ca_readings)}")
 
-    if isinstance(ca_reading, cothread.dbr.ca_array):
-        ca_reading_len = len(ca_reading)
+    snap_entries = []
 
-        # User specified to save only save_len elements from ca_reading.
-        if pv_entry.save_len:
-            if pv_entry.save_len > ca_reading_len:
-                raise ValueError(
-                    "Save length value specified in .req "
-                    "file exceeds length of PV data."
-                )
-            else:
-                ca_reading_len = pv_entry.save_len
+    for i in range(len(pv_entries)):
+        ca_reading_len = 1
+        ca_reading_str = ""
 
-        # Flattening ca_array
-        ca_reading_str = " ".join(
-            ["{:.15e}".format(reading) for reading in ca_reading[:ca_reading_len]]
+        if isinstance(ca_readings[i], cothread.dbr.ca_array):
+            ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
+                ca_readings[i], pv_entries[i]
+            )
+
+        # A DBR enum, e.g. "DIAD".
+        elif isinstance(ca_readings[i], cothread.dbr.ca_str):
+            ca_reading_str = str(ca_readings[i])
+
+        else:
+            ca_reading_str = "{:.15e}".format(ca_readings[i])
+
+        snapshot_entry = _gen_snapshot_entry(
+            ca_reading_len, ca_reading_str, pv_entries[i]
         )
+        snap_entries.append(snapshot_entry)
 
-    # A DBR enum, e.g. "DIAD".
-    elif isinstance(ca_reading, cothread.dbr.ca_str):
-        ca_reading_str = str(ca_reading)
+    return snap_entries
 
-    else:
-        ca_reading_str = "{:.15e}".format(ca_reading)
 
+def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
+    """Flatten the ca array into a string and obtain the save length if specified.
+
+    Args:
+        ca_reading (any): Return value from cothread.
+        pv_entry (namedtuple(PV)): A PV entry in a .req file.
+
+    Returns:
+        int: The shortest reading length.
+        str: The flattened ca array as a string
+
+    Raises:
+        ValueError: If the save length is invalid.
+
+    """
+    ca_reading_len = len(ca_reading)
+
+    # User specified to save only save_len elements from ca_reading.
+    if pv_entry.save_len:
+
+        if pv_entry.save_len > ca_reading_len:
+            raise ValueError(
+                "Save length value specified in .req " "file exceeds length of PV data."
+            )
+        else:
+            ca_reading_len = pv_entry.save_len
+
+    # Flattening ca_array
+    ca_reading_str = " ".join(
+        ["{:.15e}".format(reading) for reading in ca_reading[:ca_reading_len]]
+    )
+    return ca_reading_len, ca_reading_str
+
+
+def _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry):
+    """Generate the final snapshot entry.
+
+    Args:
+        ca_reading_len (int): The ca reading length.
+        ca_reading_str (str): The ca reading value as a str.
+        pv_entry (namedtuple(PV)): A PV entry in a .req file.
+
+    Returns:
+        str: The snapshot entry.
+
+    """
     snapshot_entry = ""
+
     if pv_entry.modifier:
         snapshot_entry += pv_entry.modifier + " "
 

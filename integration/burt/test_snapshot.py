@@ -7,6 +7,7 @@ import burt
 import subprocess
 import os
 import filecmp
+import time
 
 from burt import SnapParser as sp
 
@@ -78,7 +79,7 @@ def test_snapshot_group_normal():
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot_group(
-        test.NORMAL_RQG, integration.TMP_PYBURT_OUT, test_comment, test_keywords
+        test.NORMAL_RQG, integration.TMP_PYBURT_OUT, test_comment, test_keywords, False
     )
 
     assert os.path.isfile(integration.TMP_PYBURT_OUT)
@@ -88,7 +89,7 @@ def test_snapshot_group_normal():
     # properties, e.g. keywords, directory, etc.
     snap_parser = burt.SnapParser(integration.TMP_PYBURT_OUT)
     header, body = snap_parser.parse()
-    assert 556 == len(body)
+    assert 6 == len(body)
     assert header[sp.TIME_PREFIX]
     assert header[sp.LOGINID_PREFIX]
     assert header[sp.UID_PREFIX]
@@ -97,7 +98,6 @@ def test_snapshot_group_normal():
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert 13 == len(header[sp.REQ_FILE_PREFIX].split(","))
 
     # cleanup
     os.remove(integration.TMP_PYBURT_OUT)
@@ -132,6 +132,56 @@ def test_burt_vanilla_rb():
     # cleanup
     os.remove(integration.TMP_BURT_OUT)
     os.remove(integration.TMP_PYBURT_OUT)
+
+
+def test_speed_snapshot():
+    """Speed comparison between different snapshot schemes."""
+    test_comment = "Hello World"
+    test_keywords = "cool,snap,file"
+
+    t0 = time.time()
+    burt.take_snapshot(
+        "/home/ops/burt/requestFiles/bcdorbit.req",
+        integration.TMP_PYBURT_OUT,
+        test_comment,
+        test_keywords,
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_snapshot_pyburt_1:{tend}")
+    # cleanup
+    os.remove(integration.TMP_PYBURT_OUT)
+
+    t0 = time.time()
+    burt.take_snapshot(
+        "/home/ops/burt/requestFiles/bcdorbit.req",
+        integration.TMP_PYBURT_OUT,
+        test_comment,
+        test_keywords,
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_snapshot_pyburt_2:{tend}")
+    # cleanup
+    os.remove(integration.TMP_PYBURT_OUT)
+
+    t0 = time.time()
+    _vanilla_burtrb(
+        "/home/ops/burt/requestFiles/bcdorbit.req",
+        integration.TMP_PYBURT_OUT,
+        test_comment,
+        test_keywords,
+    )
+    t1 = time.time()
+    tend = t1 - t0
+    print(f"test_speed_snapshot_burt_vanilla:{tend}")
+    # cleanup
+    os.remove(integration.TMP_PYBURT_OUT)
+
+
+def test_speed_snapshot_group():
+    """Speed comparison between different snapshot group schemes"""
+    pass
 
 
 def _vanilla_burtrb(input_req, output_snap, comments, keywords):
