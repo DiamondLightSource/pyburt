@@ -14,7 +14,6 @@ A request group .rqg file contains a collection of paths to .req files, and is
 used to create bulk snapshots.
 """
 import argparse
-import errno
 import getpass
 import logging
 import os
