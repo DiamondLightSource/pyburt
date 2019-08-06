@@ -110,13 +110,8 @@ def _write_to_snap_file(snap_header, snap_footer, snap_file):
         OSError: If the new snap file path is invalid.
 
     """
-    if not os.path.exists(os.path.dirname(snap_file)):
-        try:
-            os.makedirs(os.path.dirname(snap_file))
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
-
+    snap_dir = os.path.abspath(os.path.normpath(os.path.dirname(snap_file)))
+    os.makedirs(snap_dir, exist_ok=True)
     with open(snap_file, "w") as f:
         f.write(snap_header + snap_footer + os.linesep)
 
