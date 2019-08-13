@@ -15,6 +15,7 @@ def test_blank_snapshot(mock_caget):
     """Runs the burt snapshot against a blank .req file.
     """
     mock_caget.return_value = cothread.dbr.ca_array(numpy.array([0, 0, 0])).flatten()
+    mock_caget.return_value.ok = True
 
     burt.take_snapshot(test.BLANK_REQ, test.TMP_PYBURT_OUT)
 
@@ -31,6 +32,8 @@ def test_bad_file_arguments(mock_caget):
     malformed.
     """
     mock_caget.return_value = cothread.catools.ca_nothing
+    mock_caget.return_value.ok = False
+    mock_caget.return_value.errorcode = "Dummy"
 
     with pytest.raises(ValueError):
         burt.take_snapshot("", "")
@@ -195,7 +198,8 @@ def test_snapshot_enum(mock_caget):
 @mock.patch("burt.read.caget")
 def test_snapshot_scalar(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked scalar
-    return value.
+    return value. Note that cothread will always return an augmented non scalar
+    value.
     """
     singleton_return_value = -1e-16
     mock_caget.return_value = [singleton_return_value for i in range(12)]

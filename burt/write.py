@@ -20,6 +20,7 @@ import logging
 import os
 from collections import OrderedDict
 
+import cothread
 from cothread.catools import caput
 
 import burt
@@ -73,8 +74,15 @@ def restore(snap_file):
                         float(val) for val in pv_entry.vals
                     ]
 
-    caput(singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values())
-    caput(array_pvs_to_restore.keys(), array_pvs_to_restore.values())
+    singleton_rets = caput(
+        singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values(), throw=False
+    )
+    array_rets = caput(
+        array_pvs_to_restore.keys(), array_pvs_to_restore.values(), throw=False
+    )
+
+    _check_caput_rets(singleton_rets)
+    _check_caput_rets(array_rets)
 
 
 def restore_group(rgr_file, check=True):
@@ -103,6 +111,22 @@ def restore_group(rgr_file, check=True):
 
         elif file_path.endswith(burt.SNAP_FILE_EXT):
             restore(file_path)
+
+
+def _check_caput_rets(caput_rets):
+    """Check caput return codes and log any errors.
+
+    Args:
+        caput_rets (list): List of augmented caput return values.
+
+    """
+    if caput_rets is not cothread.catools.ca_nothing:
+        for caput_ret in caput_rets:
+            if not caput_ret.ok:
+                logging.critical(
+                    f"caput failure: {caput_ret.errorcode}"
+                    f", with error: {caput_ret}:"
+                )
 
 
 def main():

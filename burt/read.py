@@ -241,7 +241,9 @@ def _read_multi(pv_entries):
 
     """
     ca_readings = caget(
-        [pv.name for pv in pv_entries], datatype=cothread.catools.DBR_ENUM_STR
+        [pv.name for pv in pv_entries],
+        datatype=cothread.catools.DBR_ENUM_STR,
+        throw=False,
     )
     logging.debug(f"ca_reading: {ca_readings}")
     logging.debug(f"ca_reading type: {type(ca_readings)}")
@@ -252,7 +254,14 @@ def _read_multi(pv_entries):
         ca_reading_len = 1
         ca_reading_str = ""
 
-        if isinstance(ca_readings[i], cothread.dbr.ca_array):
+        if hasattr(ca_readings[i], "ok") and not ca_readings[i].ok:
+            logging.critical(
+                f"caget failure: {ca_readings[i].errorcode}"
+                f", with error: {ca_readings[i]}:"
+            )
+            continue
+
+        elif isinstance(ca_readings[i], cothread.dbr.ca_array):
             ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
                 ca_readings[i], pv_entries[i]
             )
