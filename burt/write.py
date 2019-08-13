@@ -112,7 +112,7 @@ def main():
         "restore_file", type=str, help="The path to either a .snap or .rgr file."
     )
     cli.add_argument(
-        "-v", nargs=0, help="Enable verbose logging (debug) level.", action="store_true"
+        "-v", help="Enable verbose logging (debug) level.", action="store_true"
     )
 
     args = cli.parse_args()

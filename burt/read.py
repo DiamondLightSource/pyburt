@@ -337,7 +337,7 @@ def main():
     cli.add_argument("-c", type=str, help="Optional snapshot comments.")
     cli.add_argument("-k", type=str, help="Optional snapshot keywords.")
     cli.add_argument(
-        "-v", nargs=0, help="Enable verbose logging (debug) level.", action="store_true"
+        "-v", help="Enable verbose logging (debug) level.", action="store_true"
     )
 
     args = cli.parse_args()
