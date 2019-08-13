@@ -187,14 +187,10 @@ def _gen_snap_header(req_path, comments, keywords):
         if (prefix == snap.SNAP_HEADER_START) or (prefix == snap.SNAP_HEADER_END):
             header += prefix + os.linesep
 
-        # Special case with no colon.
-        elif prefix == snap.DIRECTORY_PREFIX:
-            header += f"{prefix} {header_elements[prefix]}\n"
-
-        # 10 space alignment from the left after the prefix for the non special
+        # 11 space alignment from the left after the prefix for the non special
         # cases.
         else:
-            left_padding = " " * (10 - len(":") - len(prefix))
+            left_padding = " " * (11 - len(":") - len(prefix))
             header += (
                 prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
             )
