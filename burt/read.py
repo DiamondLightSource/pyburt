@@ -77,6 +77,7 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
     Raises:
         ValueError: If the rqg file or snap file arguments have an invalid
             extension, or if the  .rqg file does not exist.
+        CheckFailedException: If a Burt check failed.
 
     """
     if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (not os.path.isfile(rqg_file)):
@@ -90,11 +91,13 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
     logging.debug(f"Parsed .req files: {body}")
 
     for file_path in body:
+        logging.info(f"Processing {file_path}...")
         if file_path.endswith(burt.CHECK_FILE_EXT) and check:
             burt.checks.check(file_path)
-
         elif file_path.endswith(burt.REQ_FILE_EXT):
             take_snapshot(file_path, snap_file, comments, keywords)
+
+        logging.info(f"{file_path} processed.")
 
 
 def _write_to_snap_file(snap_header, snap_footer, snap_file):
@@ -234,7 +237,9 @@ def _read_multi(pv_entries):
 
     """
     ca_readings = caget(
-        [pv.name for pv in pv_entries], datatype=cothread.catools.DBR_ENUM_STR
+        [pv.name for pv in pv_entries],
+        datatype=cothread.catools.DBR_ENUM_STR,
+        throw=False,
     )
     logging.debug(f"ca_reading: {ca_readings}")
     logging.debug(f"ca_reading type: {type(ca_readings)}")
@@ -245,7 +250,14 @@ def _read_multi(pv_entries):
         ca_reading_len = 1
         ca_reading_str = ""
 
-        if isinstance(ca_readings[i], cothread.dbr.ca_array):
+        if hasattr(ca_readings[i], "ok") and not ca_readings[i].ok:
+            logging.critical(
+                f"caget failure: {ca_readings[i].errorcode}"
+                f", with error: {ca_readings[i]}:"
+            )
+            continue
+
+        elif isinstance(ca_readings[i], cothread.dbr.ca_array):
             ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
                 ca_readings[i], pv_entries[i]
             )

@@ -9,7 +9,7 @@ A check succeeds if |pv-value - target| < tolerance, else it fails.
 import logging
 import os
 
-from cothread.catools import caget
+from cothread.catools import ca_nothing, caget
 
 import burt
 
@@ -56,11 +56,15 @@ def check(check_file):
 
     # Each entry is a CHECK_PV named tuple
     for pv_entry in body:
-        current_pv_val = caget(pv_entry.name)
+        try:
+            current_pv_val = caget(pv_entry.name)
 
-        if abs(current_pv_val - pv_entry.target) > pv_entry.tolerance:
-            e = CheckFailedException(pv_entry)
-            logging.debug(e)
-            logging.critical(f"Check {check_file} failed.")
+            if abs(current_pv_val - pv_entry.target) > pv_entry.tolerance:
+                e = CheckFailedException(pv_entry)
+                logging.debug(e)
+                msg = f"Check {check_file} failed on {pv_entry.name}"
+                logging.critical(msg)
 
-            raise e
+                raise e
+        except ca_nothing as e:
+            raise CheckFailedException(pv_entry, e)
