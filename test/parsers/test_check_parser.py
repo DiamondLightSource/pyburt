@@ -49,6 +49,26 @@ def test_malformed_files():
         check_parser.parse()
 
 
+def test_non_floats():
+    """Runs the parser against cases with non parseable numbers.
+    """
+    with pytest.raises(ParserException):
+        check_parser = cp(test.NORMAL_CHECK_1)
+        check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL a")
+
+    with pytest.raises(ParserException):
+        check_parser = cp(test.NORMAL_CHECK_1)
+        check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL blabla dummy")
+
+    with pytest.raises(ParserException):
+        check_parser = cp(test.NORMAL_CHECK_1)
+        check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL blabla dummy dummy2")
+
+    # Should not throw an ex.
+    check_parser = cp(test.NORMAL_CHECK_1)
+    check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL 0 1")
+
+
 def test_check_parser_normal_1():
     """Runs the .check parser against a basic case.
     """

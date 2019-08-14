@@ -1,7 +1,7 @@
 """Parser class which reads the information from a .rgr BURT file."""
-import burt
 from burt.parsers import BurtParser, ParserException
 from burt.parsers.snap import SnapParser
+from burt.utils.file import is_check_file, is_snap_file
 
 
 class RgrParser(BurtParser):
@@ -22,6 +22,8 @@ class RgrParser(BurtParser):
 
     Attributes:
         path (str): The path to the .rgr file.
+        _is_snap_section (bool): Flag to ensure that .check files are always before
+        .snap files
 
     """
 
@@ -36,6 +38,8 @@ class RgrParser(BurtParser):
 
         """
         super(RgrParser, self).__init__(path)
+
+        self._is_snap_section = False
 
     def get_header(self):
         """Get the .rgr file header.
@@ -55,11 +59,17 @@ class RgrParser(BurtParser):
             str: A file path in the body.
 
         """
-        if not line.endswith(burt.SNAP_FILE_EXT) and not line.endswith(
-            burt.CHECK_FILE_EXT
-        ):
+        if not is_snap_file(line) and not is_check_file(line):
             raise ParserException(
-                "Malformed .rgr file: invalid .snap or" ".check file specified."
+                "Malformed .rgr file: invalid .snap or .check file specified."
             )
+
+        if self._is_snap_section and is_check_file(line):
+            raise ParserException(
+                "Malformed .rgr file: .check files must be ordered before .snap files."
+            )
+
+        if not self._is_snap_section and is_snap_file(line):
+            self._is_snap_section = True
 
         return line

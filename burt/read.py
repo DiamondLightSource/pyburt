@@ -25,8 +25,8 @@ import cothread
 from cothread.catools import caget
 
 import burt
-import burt.utils.file as utils
 from burt.parsers.snap import SnapParser as snap
+from burt.utils.file import is_check_file, is_req_file, is_rqg_file, is_snap_file
 
 
 def take_snapshot(req_file, snap_file, comments=None, keywords=None):
@@ -44,10 +44,10 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
             extension, or if the  .req file does not exist.
 
     """
-    if (not req_file.endswith(burt.REQ_FILE_EXT)) or (not os.path.isfile(req_file)):
+    if not is_req_file(req_file, True):
         raise ValueError("Invalid .req file input.")
 
-    if not snap_file.endswith(burt.SNAP_FILE_EXT):
+    if not is_snap_file(snap_file):
         raise ValueError("Invalid .snap file destination.")
 
     req_parser = burt.ReqParser(req_file)
@@ -80,10 +80,10 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
         CheckFailedException: If a Burt check failed.
 
     """
-    if (not rqg_file.endswith(burt.RQG_FILE_EXT)) or (not os.path.isfile(rqg_file)):
+    if not is_rqg_file(rqg_file, True):
         raise ValueError("Invalid .rqg file input.")
 
-    if not snap_file.endswith(burt.SNAP_FILE_EXT):
+    if not is_snap_file(snap_file):
         raise ValueError("Invalid .snap file destination.")
 
     rqg_parser = burt.RqgParser(rqg_file)
@@ -92,9 +92,10 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
 
     for file_path in body:
         logging.info(f"Processing {file_path}...")
-        if file_path.endswith(burt.CHECK_FILE_EXT) and check:
+
+        if check and is_check_file(file_path):
             burt.checks.check(file_path)
-        elif file_path.endswith(burt.REQ_FILE_EXT):
+        elif is_req_file(file_path):
             take_snapshot(file_path, snap_file, comments, keywords)
 
         logging.info(f"{file_path} processed.")
@@ -356,12 +357,12 @@ def main():
     else:
         logging.getLogger().setLevel(logging.INFO)
 
-    if utils.is_req_file(args.request_file):
+    if is_req_file(args.request_file):
         take_snapshot(
             args.request_file, args.snap_destination, comments=args.c, keywords=args.k
         )
 
-    elif utils.is_rqg_file(args.request_file):
+    elif is_rqg_file(args.request_file):
         take_snapshot_group(
             args.request_file, args.snap_destination, comments=args.c, keywords=args.k
         )

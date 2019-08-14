@@ -50,6 +50,13 @@ def test_bad_file_arguments(mock_caget):
     with pytest.raises(ValueError):
         burt.restore("helloworld.snap")
 
+    with pytest.raises(ValueError):
+        burt.take_snapshot_group(test.BLANK_REQ, "helloworld.snap")
+    with pytest.raises(ValueError):
+        burt.take_snapshot_group("dummy.rqg", "helloworld.snap")
+    with pytest.raises(ValueError):
+        burt.take_snapshot_group(test.NORMAL_RQG, "helloworld.sn")
+
 
 @mock.patch("burt.read.caget")
 def test_snapshot_arrays(mock_caget):

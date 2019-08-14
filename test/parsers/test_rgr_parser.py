@@ -83,6 +83,10 @@ def test_malformed_files():
         rgr_parser = rp(test.MALFORMED_BODY_RGR)
         rgr_parser.parse()
 
+    with pytest.raises(ParserException):
+        rgr_parser = rp(test.MALFORMED_BODY_MISORDERED_CHECKS_RGR)
+        rgr_parser.parse()
+
     # Entries should still be parsed fine as header is valid, but values could
     # be problematic.
     rgr_parser = rp(test.MALFORMED_HEADER_ENTRIES_RGR)
