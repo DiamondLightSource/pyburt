@@ -132,19 +132,12 @@ def _gen_snap_header(req_path, comments, keywords):
     """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
-    logging.debug(f"Current time: {current_time}")
 
     # Username (Lastname, Initials (Firstname)) format
     username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
-    logging.debug(f"Current user: {username}")
-    logging.debug(f"Current user group: {ugroup}")
     curr_user = username + " (" + ugroup + ")"
-
     uid = os.getuid()
-    logging.debug(f"uid: {uid}")
-
     gid = pwd.getpwnam(getpass.getuser()).pw_gid
-    logging.debug(f"gid: {gid}")
 
     # Carriage returns and newlines from user input can malform the BURT header
     # so write to the snap file as escaped symbols. This is the behaviour of
@@ -152,19 +145,23 @@ def _gen_snap_header(req_path, comments, keywords):
     keywords = (
         "" if keywords is None else keywords.replace("\r", "\\r").replace("\n", "\\n")
     )
-    logging.debug(f"Keywords: {keywords}")
-
     comments = (
         "" if comments is None else comments.replace("\r", "\\r").replace("\n", "\\n")
     )
-    logging.debug(f"Comments: {comments}")
 
     type = snap.TYPE_DEFAULT_VAL
-
     directory = os.getcwd()
-    logging.debug(f"Cwd: {directory}")
 
     req_file = req_path
+
+    logging.debug(f"Current time: {current_time}")
+    logging.debug(f"Current user: {username}")
+    logging.debug(f"Current user group: {ugroup}")
+    logging.debug(f"uid: {uid}")
+    logging.debug(f"gid: {gid}")
+    logging.debug(f"Keywords: {keywords}")
+    logging.debug(f"Comments: {comments}")
+    logging.debug(f"Cwd: {directory}")
 
     header_elements = OrderedDict(
         [
@@ -335,8 +332,17 @@ def main():
     )
     cli.add_argument("-c", type=str, help="Optional snapshot comments.")
     cli.add_argument("-k", type=str, help="Optional snapshot keywords.")
+    cli.add_argument(
+        "-v", help="Enable verbose logging (debug) level.", action="store_true"
+    )
 
     args = cli.parse_args()
+
+    logging.basicConfig()
+    if args.v:
+        logging.getLogger().setLevel(logging.DEBUG)
+    else:
+        logging.getLogger().setLevel(logging.INFO)
 
     if utils.is_req_file(args.request_file):
         take_snapshot(
