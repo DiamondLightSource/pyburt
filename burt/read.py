@@ -26,7 +26,7 @@ from cothread.catools import caget
 
 import burt
 from burt.parsers.snap import SnapParser as snap
-from burt.utils.file import is_req_file, is_snap_file, is_rqg_file, is_check_file
+from burt.utils.file import is_check_file, is_req_file, is_rqg_file, is_snap_file
 
 
 def take_snapshot(req_file, snap_file, comments=None, keywords=None):
@@ -193,8 +193,7 @@ def _gen_snap_header(req_path, comments, keywords):
         else:
             left_padding = " " * (11 - len(":") - len(prefix))
             header += (
-                    prefix + ":" + left_padding + str(
-                header_elements[prefix]) + os.linesep
+                prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
             )
 
     return header

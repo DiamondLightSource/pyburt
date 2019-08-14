@@ -103,8 +103,8 @@ def test_check_parser_normal_2():
 
     header, body = check_parser.parse()
     assert (
-            "Aggregate to Set points for backup / zero set points for "
-            "restore." == header[cp.COMMENTS_PREFIX]
+        "Aggregate to Set points for backup / zero set points for "
+        "restore." == header[cp.COMMENTS_PREFIX]
     )
     assert test.NORMAL_CHECK_2 == check_parser.path
     assert 8 == len(body)

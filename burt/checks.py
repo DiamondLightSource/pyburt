@@ -7,12 +7,11 @@ A check succeeds if |pv-value - target| < tolerance, else it fails.
 """
 
 import logging
-import os
 
-from burt.utils.file import is_check_file
 from cothread.catools import ca_nothing, caget
 
 import burt
+from burt.utils.file import is_check_file
 
 
 class CheckFailedException(Exception):

@@ -17,14 +17,13 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 """
 import argparse
 import logging
-import os
 from collections import OrderedDict
 
 import cothread
 from cothread.catools import caput
 
 import burt
-from burt.utils.file import is_snap_file, is_rgr_file, is_check_file
+from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
 
 
 def restore(snap_file):

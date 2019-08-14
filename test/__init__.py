@@ -41,8 +41,9 @@ NORMAL_ALT_RGR = "testables/rgr/normal_alt.rgr"
 
 DUPLICATE_HEADERS_RGR = "testables/rgr/duplicate_rgr_headers.rgr"
 MALFORMED_BODY_RGR = "testables/rgr/malformed_body.rgr"
-MALFORMED_BODY_MISORDERED_CHECKS_RGR = \
+MALFORMED_BODY_MISORDERED_CHECKS_RGR = (
     "testables/rgr/malformed_body_misordered_checks.rgr"
+)
 MALFORMED_HEADER_ENTRIES_RGR = "testables/rgr/malformed_header_strange_entries.rgr"
 MALFORMED_HEADER_TYPO_RGR = "testables/rgr/malformed_header_typo.rgr"
 MALFORMED_HEADER_PREFIX_TYPO_RGR = "testables/rgr/malformed_header_typo_prefixes.rgr"
