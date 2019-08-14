@@ -9,6 +9,7 @@ A check succeeds if |pv-value - target| < tolerance, else it fails.
 import logging
 import os
 
+from burt.utils.file import is_check_file
 from cothread.catools import ca_nothing, caget
 
 import burt
@@ -46,9 +47,7 @@ def check(check_file):
         CheckFailedException: If the check fails.
 
     """
-    if (not check_file.endswith(burt.CHECK_FILE_EXT)) or (
-            not os.path.isfile(check_file)
-    ):
+    if not is_check_file(check_file, True):
         raise ValueError("Invalid .check file input.")
 
     check_parser = burt.CheckParser(check_file)

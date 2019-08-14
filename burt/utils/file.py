@@ -4,81 +4,91 @@ import os
 import burt
 
 
-def is_req_file(filename):
+def is_req_file(filename, check_existence=False):
     """Check if a given filename refers to a .req file.
 
     Args:
         filename: The name of the file.
+        check_existence: If true, checks also if the file exists.
 
     Returns:
         True if the file is a .req file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.REQ_FILE_EXT)
+    return _is_correct_ext(filename, burt.REQ_FILE_EXT, check_existence)
 
 
-def is_snap_file(filename):
+def is_snap_file(filename, check_existence=False):
     """Check if a given filename refers to a .snap file.
 
     Args:
         filename: The name of the file.
+        check_existence: Check also if the file exists.
 
     Returns:
         True if the file is a .snap file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.SNAP_FILE_EXT)
+    return _is_correct_ext(filename, burt.SNAP_FILE_EXT, check_existence)
 
 
-def is_rqg_file(filename):
+def is_rqg_file(filename, check_existence=False):
     """Check if a given filename refers to a .rqg file.
 
     Args:
         filename: The name of the file.
+        check_existence: If true, checks also if the file exists.
 
     Returns:
         True if the file is a .rqg file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.RQG_FILE_EXT)
+    return _is_correct_ext(filename, burt.RQG_FILE_EXT, check_existence)
 
 
-def is_rgr_file(filename):
+def is_rgr_file(filename, check_existence=False):
     """Check if a given filename refers to a .rgr file.
 
     Args:
         filename: The name of the file.
+        check_existence: If true, checks also if the file exists.
 
     Returns:
         True if the file is a .rgr file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.RGR_FILE_EXT)
+    return _is_correct_ext(filename, burt.RGR_FILE_EXT, check_existence)
 
 
-def is_check_file(filename):
+def is_check_file(filename, check_existence=False):
     """Check if a given filename refers to a .check file.
 
     Args:
         filename: The name of the file.
+        check_existence: If true, checks also if the file exists.
 
     Returns:
         True if the file is a .check file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.CHECK_FILE_EXT)
+    return _is_correct_ext(filename, burt.CHECK_FILE_EXT, check_existence)
 
 
-def _is_correct_ext(filename, correct_ext):
+def _is_correct_ext(filename, correct_ext, check_existence=False):
     """Check if a given filename has the expected file extension.
 
     Args:
         filename: The name of the file.
         correct_ext: The expected file extension.
+        check_existence: If true, checks also if the file exists.
 
     Returns:
         True if the file has the expected file extension, False otherwise.
 
     """
+    if check_existence:
+        if not os.path.isfile(filename):
+            raise ValueError(f"The file {filename} does not exist")
+
     _, parsed_ext = os.path.splitext(filename)
     return parsed_ext == correct_ext

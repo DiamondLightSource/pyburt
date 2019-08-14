@@ -24,7 +24,7 @@ import cothread
 from cothread.catools import caput
 
 import burt
-import burt.utils.file as utils
+from burt.utils.file import is_snap_file, is_rgr_file, is_check_file
 
 
 def restore(snap_file):
@@ -45,7 +45,7 @@ def restore(snap_file):
         not exist.
 
     """
-    if (not snap_file.endswith(burt.SNAP_FILE_EXT)) or (not os.path.isfile(snap_file)):
+    if not is_snap_file(snap_file, True):
         raise ValueError("Invalid .snap file.")
 
     snap_parser = burt.SnapParser(snap_file)
@@ -97,7 +97,7 @@ def restore_group(rgr_file, check=True):
         not exist.
 
     """
-    if (not rgr_file.endswith(burt.RGR_FILE_EXT)) or (not os.path.isfile(rgr_file)):
+    if not is_rgr_file(rgr_file):
         raise ValueError("Invalid .rgr file.")
 
     rgr_parser = burt.RgrParser(rgr_file)
@@ -106,10 +106,10 @@ def restore_group(rgr_file, check=True):
 
     for file_path in body:
 
-        if file_path.endswith(burt.CHECK_FILE_EXT) and check:
+        if check and is_check_file(file_path):
             burt.checks.check(file_path)
 
-        elif file_path.endswith(burt.SNAP_FILE_EXT):
+        elif is_snap_file(file_path):
             restore(file_path)
 
 
@@ -147,10 +147,10 @@ def main():
     else:
         logging.getLogger().setLevel(logging.INFO)
 
-    if utils.is_snap_file(args.restore_file):
+    if is_snap_file(args.restore_file):
         restore(args.restore_file)
 
-    elif utils.is_rgr_file(args.restore_file):
+    elif is_rgr_file(args.restore_file):
         restore_group(args.restore_file)
 
     else:
