@@ -41,6 +41,7 @@ NORMAL_ALT_RGR = "testables/rgr/normal_alt.rgr"
 
 DUPLICATE_HEADERS_RGR = "testables/rgr/duplicate_rgr_headers.rgr"
 MALFORMED_BODY_RGR = "testables/rgr/malformed_body.rgr"
+MALFORMED_BODY_MISORDERED_CHECKS_RGR = "testables/rgr/malformed_body.rgr"
 MALFORMED_HEADER_ENTRIES_RGR = "testables/rgr/malformed_header_strange_entries.rgr"
 MALFORMED_HEADER_TYPO_RGR = "testables/rgr/malformed_header_typo.rgr"
 MALFORMED_HEADER_PREFIX_TYPO_RGR = "testables/rgr/malformed_header_typo_prefixes.rgr"
@@ -55,6 +56,7 @@ INLINE_COMMENTS_RQG = "testables/rqg/inline_comments.rqg"
 NORMAL_RQG = "testables/rqg/normal.rqg"
 NORMAL_ALT_RQG = "testables/rqg/normal_alt.rqg"
 MALFORMED_RQG = "testables/rqg/malformed.rqg"
+MALFORMED_MISORDERED_CHECKS_RQG = "testables/rqg/malformed_misordered_checks.rqg"
 
 # Shared test .check files.
 BAD_PREFIX_CHECK = "testables/check/bad_prefix.check"

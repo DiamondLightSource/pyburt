@@ -51,6 +51,10 @@ def test_malformed_files():
         rqg_parser = burt.RqgParser(test.MALFORMED_RQG)
         rqg_parser.parse()
 
+    with pytest.raises(ParserException):
+        rqg_parser = burt.RqgParser(test.MALFORMED_MISORDERED_CHECKS_RQG)
+        rqg_parser.parse()
+
 
 def normal_case():
     """Runs the rqg parser against a typical case.

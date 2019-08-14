@@ -39,9 +39,9 @@ def test_inline_comments():
     header, body = rgr_parser.parse()
     assert test.INLINE_COMMENTS_RGR == rgr_parser.path
     assert (
-        header["Comments"]
-        == "LOCO applied for skews only, vertical emittance corrected to"
-        " 8pm. Magnets not cycled yet."
+            header["Comments"]
+            == "LOCO applied for skews only, vertical emittance corrected to"
+               " 8pm. Magnets not cycled yet."
     )
     assert 9 == len(body)
     assert correct_checks == body[:3]
@@ -83,6 +83,10 @@ def test_malformed_files():
         rgr_parser = rp(test.MALFORMED_BODY_RGR)
         rgr_parser.parse()
 
+    with pytest.raises(ParserException):
+        rgr_parser = rp(test.MALFORMED_BODY_MISORDERED_CHECKS_RGR)
+        rgr_parser.parse()
+
     # Entries should still be parsed fine as header is valid, but values could
     # be problematic.
     rgr_parser = rp(test.MALFORMED_HEADER_ENTRIES_RGR)
@@ -114,9 +118,9 @@ def normal_case():
     header, body = rgr_parser.parse()
     assert test.INLINE_COMMENTS_RGR == rgr_parser.path
     assert (
-        header["Comments"]
-        == "LOCO applied for skews only, vertical emittance corrected to"
-        " 8pm. Magnets not cycled yet."
+            header["Comments"]
+            == "LOCO applied for skews only, vertical emittance corrected to"
+               " 8pm. Magnets not cycled yet."
     )
     assert 9 == len(body)
     assert correct_checks == body[:3]
