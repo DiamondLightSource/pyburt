@@ -4,6 +4,7 @@ import test
 import mock
 import burt
 import cothread
+from cothread.catools import ca_nothing
 
 
 @mock.patch("burt.checks.caget")
@@ -81,4 +82,10 @@ def test_fail_check(mock_caget):
         burt.check(test.NORMAL_CHECK_3)
     with pytest.raises(burt.CheckFailedException):
         mock_caget.return_value = -1e-5
+        burt.check(test.NORMAL_CHECK_3)
+
+    # ca_nothing caget failure
+    with pytest.raises(burt.CheckFailedException):
+        mock_caget.side_effect = ca_nothing("mock_bad_caget")
+        mock_caget.return_value = 0
         burt.check(test.NORMAL_CHECK_3)
