@@ -39,6 +39,9 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
         keywords (str): A delimited string of keywords to append to the BURT
             header.
 
+    Returns:
+        failed_pvs (list): A list of the PV names where something went wrong.
+
     Raises:
         ValueError: If the request file or snap file arguments have an invalid
             extension, or if the  .req file does not exist.
@@ -51,16 +54,18 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
         raise ValueError("Invalid .snap file destination.")
 
     req_parser = burt.ReqParser(req_file)
-    _, body = req_parser.parse()
-    logging.debug(f"Parsed PVs: {body}")
+    _, pvs = req_parser.parse()
+    logging.debug(f"Parsed PVs: {pvs}")
 
     snap_header = _gen_snap_header(req_file, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
 
-    snap_footer = _gen_snap_footer(body)
+    snapshots, failed_pvs = _read_multi(pvs)
+    snap_footer = _gen_snap_footer(snapshots)
     logging.debug(f"Generated .snap footer: {snap_footer}")
 
     _write_to_snap_file(snap_header, snap_footer, snap_file)
+    return failed_pvs
 
 
 def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
@@ -199,23 +204,20 @@ def _gen_snap_header(req_path, comments, keywords):
     return header
 
 
-def _gen_snap_footer(pvs):
+def _gen_snap_footer(snap_entries):
     """Generate the .snap file footer as a string.
 
     This will be the sequence of PVs followed by their reading length and
-    current values. A snapshot of the PV's current state is taken, which is performed
-    by storing the values as a formatted string, which is stored in a .snap file. PV
-    entries require a 15 width precision number(s) in scientific notation.
+    current values. This is simply the provided entries concatenated.
 
     Args:
-        pvs (List): A list of PV named tuple objects.
+        snap_entries (List): A list of snap file entries
 
     Returns:
         str: The .snap file footer as a string.
 
     """
-    snapshots = _read_multi(pvs)
-    return os.linesep.join(snapshots)
+    return os.linesep.join(snap_entries)
 
 
 def _read_multi(pv_entries):
@@ -231,7 +233,8 @@ def _read_multi(pv_entries):
         pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
 
     Returns:
-        str: The .snap file entries for the PV.
+        list(str): The .snap file entries for the PV.
+        list(str): PVs for which getting the value failed.
 
     Raises:
         ValueError: If the save length is invalid.
@@ -246,36 +249,35 @@ def _read_multi(pv_entries):
     logging.debug(f"ca_reading type: {type(ca_readings)}")
 
     snap_entries = []
+    failed_pvs = []
 
-    for i in range(len(pv_entries)):
+    for ca_reading, pv_entry in zip(ca_readings, pv_entries):
         ca_reading_len = 1
         ca_reading_str = ""
 
-        if hasattr(ca_readings[i], "ok") and not ca_readings[i].ok:
+        if hasattr(ca_reading, "ok") and not ca_reading.ok:
             logging.critical(
-                f"caget failure: {ca_readings[i].errorcode}"
-                f", with error: {ca_readings[i]}:"
+                f"caget failure: {ca_reading.errorcode}" f", with error: {ca_reading}:"
             )
+            failed_pvs.append(pv_entry.name)
             continue
 
-        elif isinstance(ca_readings[i], cothread.dbr.ca_array):
+        elif isinstance(ca_reading, cothread.dbr.ca_array):
             ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
-                ca_readings[i], pv_entries[i]
+                ca_reading, pv_entry
             )
 
         # A DBR enum, e.g. "DIAD".
-        elif isinstance(ca_readings[i], cothread.dbr.ca_str):
-            ca_reading_str = str(ca_readings[i])
+        elif isinstance(ca_reading, cothread.dbr.ca_str):
+            ca_reading_str = str(ca_reading)
 
         else:
-            ca_reading_str = "{:.15e}".format(ca_readings[i])
+            ca_reading_str = "{:.15e}".format(ca_reading)
 
-        snapshot_entry = _gen_snapshot_entry(
-            ca_reading_len, ca_reading_str, pv_entries[i]
-        )
+        snapshot_entry = _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry)
         snap_entries.append(snapshot_entry)
 
-    return snap_entries
+    return snap_entries, failed_pvs
 
 
 def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
