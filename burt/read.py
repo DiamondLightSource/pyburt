@@ -29,11 +29,15 @@ from burt.parsers.snap import SnapParser as snap
 from burt.utils.file import is_check_file, is_req_file, is_rqg_file, is_snap_file
 
 
-def take_snapshot(req_file, snap_file, comments=None, keywords=None):
+def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     """Save the PVs and their state to the specified snap file, with metadata.
 
+    If more than one .req file is given as a list or iterable, then the snapshot values
+    will be appended to the given snap file.
+
     Args:
-        req_file (str): The path to the existing .req file.
+        req_files (str or iterable): A single path/iterable of paths to (an) existing
+        .req file(s).
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
@@ -47,12 +51,40 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
             extension, or if the  .req file does not exist.
 
     """
-    if not is_req_file(req_file, True):
-        raise ValueError("Invalid .req file input.")
-
     if not is_snap_file(snap_file):
         raise ValueError("Invalid .snap file destination.")
 
+    if isinstance(req_files, str):
+        _check_req_file_validity(req_files)
+
+        failed_pvs = _snapshot_singleton_req(req_files, snap_file, comments, keywords)
+    else:
+        for req_file in req_files:
+            _check_req_file_validity(req_file)
+
+        failed_pvs = _snapshot_multi_req(req_files, snap_file, comments, keywords)
+
+    return failed_pvs
+
+
+def _snapshot_singleton_req(req_file, snap_file, comments=None, keywords=None):
+    """Save the PV states of one .req file onto one .snap file.
+
+    Args:
+        req_file (str): A single path to (an) existing .req file(s).
+        snap_file (str): The path to the new .snap file.
+        comments (str): Comments to append to the BURT header.
+        keywords (str): A delimited string of keywords to append to the BURT
+            header.
+
+    Returns:
+        failed_pvs (list): A list of the PV names where something went wrong.
+
+    Raises:
+        ValueError: If the request file or snap file arguments have an invalid
+            extension, or if the  .req file does not exist.
+
+    """
     req_parser = burt.ReqParser(req_file)
     _, pvs = req_parser.parse()
     logging.debug(f"Parsed PVs: {pvs}")
@@ -65,7 +97,61 @@ def take_snapshot(req_file, snap_file, comments=None, keywords=None):
     logging.debug(f"Generated .snap footer: {snap_footer}")
 
     _write_to_snap_file(snap_header, snap_footer, snap_file)
+
     return failed_pvs
+
+
+def _snapshot_multi_req(req_files, snap_file, comments=None, keywords=None):
+    """Save the PV states of 2+ .req files appended onto one .snap file.
+
+    Args:
+        req_file (iterable): An iterable of paths to existing .req file(s).
+        snap_file (str): The path to the new .snap file.
+        comments (str): Comments to append to the BURT header.
+        keywords (str): A delimited string of keywords to append to the BURT
+          header.
+
+    Returns:
+        failed_pvs (list): A list of the PV names where something went wrong.
+
+    Raises:
+        ValueError: If the request file or snap file arguments have an invalid
+          extension, or if the  .req file does not exist.
+
+    """
+    snap_multi_failed_pvs = []
+    snap_multi_footer = ""
+
+    # The header will be the same for all req files, except each one will add an extra
+    # Req File prefix.
+    snap_multi_header = _gen_snap_header(req_files[0], comments, keywords)
+    logging.debug(f"Generated .snap header: {snap_multi_header}")
+
+    first_iteration = True
+    for req_file in req_files:
+        req_parser = burt.ReqParser(req_file)
+        _, pvs = req_parser.parse()
+        logging.debug(f"Parsed PVs: {pvs}")
+
+        if first_iteration:
+            first_iteration = False
+        else:
+            extra_req_path_header_entry = _gen_snap_req_header_line(req_file)
+            snap_multi_header += extra_req_path_header_entry + os.linesep
+
+        snapshots, failed_pvs = _read_multi(pvs)
+        snap_footer = _gen_snap_footer(snapshots)
+        logging.debug(f"Generated .snap footer: {snap_footer}")
+        snap_multi_footer += snap_footer + os.linesep
+        snap_multi_failed_pvs.append(failed_pvs)
+
+    logging.debug(f"Snapshot multi failed pvs: {snap_multi_failed_pvs}")
+    logging.debug(f"Snapshot multi header: {snap_multi_header}")
+    logging.debug(f"Snapshot multi footer: {snap_multi_footer}")
+
+    _write_to_snap_file(snap_multi_header, snap_multi_footer, snap_file)
+
+    return snap_multi_failed_pvs
 
 
 def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
@@ -196,9 +282,8 @@ def _gen_snap_header(req_path, comments, keywords):
         # 11 space alignment from the left after the prefix for the non special
         # cases.
         else:
-            left_padding = " " * (11 - len(":") - len(prefix))
             header += (
-                prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
+                _gen_padded_header_line(prefix, header_elements[prefix]) + os.linesep
             )
 
     return header
@@ -218,6 +303,38 @@ def _gen_snap_footer(snap_entries):
 
     """
     return os.linesep.join(snap_entries)
+
+
+def _gen_padded_header_line(prefix, value):
+    """Generate a header line of a .snap file with padding, given the prefix and value.
+
+    Args:
+        prefix (str): The prefix in the header (e.g. Directory).
+        value (str): The value to be displayed next to the prefix, after the colon.
+
+    Returns:
+        str: The padded header line.
+
+    """
+    left_padding = " " * (11 - len(":") - len(prefix))
+    header_line = prefix + ":" + left_padding + str(value)
+
+    return header_line
+
+
+def _gen_snap_req_header_line(req_path):
+    """Generate a Req File .snap file header entry.
+
+    Needed by the multi req snapshot version which requires duplicate Req File headers.
+
+    Args:
+        req_path (str): The path to the .req file.
+
+    Returns:
+        str: The generated header entry for a Req File.
+
+    """
+    return _gen_padded_header_line(snap.DIRECTORY_PREFIX, req_path)
 
 
 def _read_multi(pv_entries):
@@ -334,6 +451,20 @@ def _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry):
     snapshot_entry += f"{pv_entry.name} {ca_reading_len} {ca_reading_str}"
 
     return snapshot_entry
+
+
+def _check_req_file_validity(req_file):
+    """Check if the supplied .req file is valid and exists.
+
+    Args:
+        req_file: The .req file to check.
+
+    Raises:
+        ValueError: If the request file is invalid.
+
+    """
+    if not is_req_file(req_file, True):
+        raise ValueError("Invalid .req file input.")
 
 
 def main():
