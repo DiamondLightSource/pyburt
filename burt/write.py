@@ -36,8 +36,13 @@ def restore(snap_file):
     which is possible as array record types are only supported for DBR_CHAR,
     DBR_SHORT, DBR_LONG, DBR_FLOAT, and DBR_DOUBLE.
 
+    Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
+
     Args:
         snap_file (str): The path to the .snap file.
+
+    Returns:
+        list(str): The list of pvs which failed to be caput-ed to.
 
     Raises:
         ValueError: If the snap file has an invalid extension, or if it does
@@ -55,6 +60,9 @@ def restore(snap_file):
     singleton_pvs_to_restore = OrderedDict()
     array_pvs_to_restore = OrderedDict()
 
+    # TODO: caput return does not behave similarly to caget, and it looks like it
+    #  returns the failed values which was being caput-ed. This needs to be changed.
+    all_failed_pvs = []
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
@@ -76,20 +84,30 @@ def restore(snap_file):
     singleton_rets = caput(
         singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values(), throw=False
     )
+    all_failed_pvs = singleton_rets
+
     array_rets = caput(
         array_pvs_to_restore.keys(), array_pvs_to_restore.values(), throw=False
     )
+    if array_rets is not cothread.catools.ca_nothing:
+        all_failed_pvs.extend(array_rets)
 
-    _check_caput_rets(singleton_rets)
-    _check_caput_rets(array_rets)
+    _check_caput_rets(all_failed_pvs)
+
+    return all_failed_pvs
 
 
 def restore_group(rgr_file, check=True):
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
+    Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
+
     Args:
         rgr_file (str): The path to the .rgr file.
         check (bool): Whether to inspect .check files or not.
+
+    Returns:
+        list(str): The list of pvs which failed to be caput-ed to.
 
     Raises:
         ValueError: If the rgr file has an invalid extension, or if it does
@@ -103,13 +121,21 @@ def restore_group(rgr_file, check=True):
     _, body = rgr_parser.parse()
     logging.debug(f"Parsed .snap files: {body}")
 
+    # TODO: caput return does not behave similarly to caget, and it looks like it
+    #  returns the failed values which was being caput-ed. This needs to be changed.
+    all_failed_pvs = []
     for file_path in body:
 
         if check and is_check_file(file_path):
             burt.checks.check(file_path)
 
         elif is_snap_file(file_path):
-            restore(file_path)
+            failed_pvs = restore(file_path)
+
+            if failed_pvs is not cothread.catools.ca_nothing:
+                all_failed_pvs.extend(failed_pvs)
+
+    return all_failed_pvs
 
 
 def _check_caput_rets(caput_rets):

@@ -50,8 +50,9 @@ class RgrParser(BurtParser):
 
         """
         return super(RgrParser, self).HEADER(
-            self.RGR_HEADER_START, (SnapParser.COMMENTS_PREFIX, self.RQG_PREFIX),
-            self.RGR_HEADER_END
+            self.RGR_HEADER_START,
+            (SnapParser.COMMENTS_PREFIX, self.RQG_PREFIX),
+            self.RGR_HEADER_END,
         )
 
     def read_body_line(self, line):
