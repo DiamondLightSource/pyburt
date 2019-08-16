@@ -27,6 +27,9 @@ import burt
 from burt.parsers.snap import SnapParser as snap
 from burt.utils.file import is_check_file, is_req_file, is_rqg_file, is_snap_file
 
+# Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
+SNAP_PRECISION_PYFORMAT = "{:.15e}"
+
 
 def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     """Save the PVs and their state to the specified snap file, with metadata.
@@ -54,27 +57,27 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
 
-    failed_pvs = []
-    snap_footer_entries = []
+    all_req_failed_pvs = []
+    all_req_snap_footer_entries = []
 
     for req_file in req_files:
         req_parser = burt.ReqParser(req_file)
         _, pvs = req_parser.parse()
         logging.debug(f"Parsed PVs: {pvs}")
 
-        snapshots, singleton_req_failed_pvs = _read_multi(pvs)
-        failed_pvs.extend(singleton_req_failed_pvs)
-        logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
+        singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(pvs)
 
-        singleton_req_snap_footer = _gen_snap_footer(snapshots)
-        snap_footer_entries.append(singleton_req_snap_footer)
+        all_req_snap_footer_entries.append(singleton_req_snap_footer)
         logging.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
 
-    snap_footer = os.linesep.join(snap_footer_entries)
+        all_req_failed_pvs.extend(singleton_req_failed_pvs)
+        logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
+
+    snap_footer = os.linesep.join(all_req_snap_footer_entries)
 
     _write_to_snap_file(snap_header, snap_footer, snap_file)
 
-    return failed_pvs
+    return all_req_failed_pvs
 
 
 def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
@@ -227,23 +230,6 @@ def _sanitise_header_line(header_text):
     return header_text.replace("\r", "\\r").replace("\n", "\\n")
 
 
-def _gen_snap_footer(snap_entries):
-    """Generate the .snap file footer as a string.
-
-    This will be the sequence of PVs followed by their reading length and
-    current values. This is simply the provided entries concatenated, as the snap
-    footer requires no special headers.
-
-    Args:
-        snap_entries (List): A list of snap file entries
-
-    Returns:
-        str: The .snap file footer as a string.
-
-    """
-    return os.linesep.join(snap_entries)
-
-
 def _gen_padded_header_line(prefix, value):
     """Generate a header line of a .snap file with 11 space alignment padding.
 
@@ -261,20 +247,17 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
-def _read_multi(pv_entries):
-    """Take a snapshot of the PV's current state.
+def _gen_snap_footer(pv_entries):
+    """Generate the .snap file BURT footer as a string.
 
-    A snapshot is performed by storing the values as a formatted string, which
-    is placed in a .snap file.
-
-    The .snap file PV entries require a 15 width precision number(s) in
-    scientific notation.
+    A snapshot of the PVs in the req file(s) is(are) performed by storing the values
+    as a formatted string, which is placed in the bottom of a .snap file.
 
     Args:
         pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
 
     Returns:
-        list(str): The .snap file entries for the PV.
+        str: The .snap file footer.
         list(str): PVs for which getting the value failed.
 
     Raises:
@@ -296,6 +279,8 @@ def _read_multi(pv_entries):
         ca_reading_len = 1
         ca_reading_str = ""
 
+        # Cothread attaches a .ok and .errorcode attribute to each reading. The error
+        # if present will be stored in the reading itself.
         if hasattr(ca_reading, "ok") and not ca_reading.ok:
             logging.critical(
                 f"caget failure: {ca_reading.errorcode}" f", with error: {ca_reading}:"
@@ -303,6 +288,8 @@ def _read_multi(pv_entries):
             failed_pvs.append(pv_entry.name)
             continue
 
+        # If a save length is specified in the .req file, this is used to shorten the
+        # cothread array length to the desired value.
         elif isinstance(ca_reading, cothread.dbr.ca_array):
             ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
                 ca_reading, pv_entry
@@ -312,19 +299,23 @@ def _read_multi(pv_entries):
         elif isinstance(ca_reading, cothread.dbr.ca_str):
             ca_reading_str = str(ca_reading)
 
+        # Any other augmented scalar value.
         else:
-            ca_reading_str = "{:.15e}".format(ca_reading)
+            ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
 
-        snapshot_entry = _gen_snapshot_footer_entry(
+        formatted_snapshot_entry = _format_snap_footer_entry(
             ca_reading_len, ca_reading_str, pv_entry
         )
-        snap_entries.append(snapshot_entry)
+        snap_entries.append(formatted_snapshot_entry)
 
-    return snap_entries, failed_pvs
+    return os.linesep.join(snap_entries), failed_pvs
 
 
 def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
     """Flatten the ca array into a string and obtain the save length if specified.
+
+    The .snap file PV entries require a 15 width precision number(s) in
+    scientific notation.
 
     Args:
         ca_reading (any): Return value from cothread.
@@ -338,26 +329,26 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
         ValueError: If the save length is invalid.
 
     """
-    ca_reading_len = len(ca_reading)
+    desired_ca_arr_len = len(ca_reading)
 
-    # User specified to save only save_len elements from ca_reading.
     if pv_entry.save_len:
-
-        if pv_entry.save_len > ca_reading_len:
+        if pv_entry.save_len > desired_ca_arr_len:
             raise ValueError(
-                "Save length value specified in .req " "file exceeds length of PV data."
+                "Save length value specified in .req file exceeds length of PV data."
             )
         else:
-            ca_reading_len = pv_entry.save_len
+            desired_ca_arr_len = pv_entry.save_len
 
-    # Flattening ca_array
     ca_reading_str = " ".join(
-        ["{:.15e}".format(reading) for reading in ca_reading[:ca_reading_len]]
+        [
+            SNAP_PRECISION_PYFORMAT.format(reading)
+            for reading in ca_reading[:desired_ca_arr_len]
+        ]
     )
-    return ca_reading_len, ca_reading_str
+    return desired_ca_arr_len, ca_reading_str
 
 
-def _gen_snapshot_footer_entry(ca_reading_len, ca_reading_str, pv_entry):
+def _format_snap_footer_entry(ca_reading_len, ca_reading_str, pv_entry):
     """Generate the final snapshot entry.
 
     Args:
