@@ -150,7 +150,7 @@ def _gen_snap_header(req_files, comments, keywords):
         str: The .snap file BURT header as a string.
 
     """
-    curr_user, current_time, directory, gid, uid = _get_snap_header_system_vals()
+    curr_user, curr_time, directory, gid, uid = _get_snap_header_system_vals()
 
     # Carriage returns and newlines from user input can malform the BURT header
     # so write to the snap file as escaped symbols.
@@ -164,7 +164,7 @@ def _gen_snap_header(req_files, comments, keywords):
 
     header_lines = [
         snap.SNAP_HEADER_START,
-        _gen_padded_header_line(snap.TIME_PREFIX, current_time),
+        _gen_padded_header_line(snap.TIME_PREFIX, curr_time),
         _gen_padded_header_line(snap.LOGINID_PREFIX, curr_user),
         _gen_padded_header_line(snap.UID_PREFIX, str(uid)),
         _gen_padded_header_line(snap.GROUPID_PREFIX, str(gid)),
