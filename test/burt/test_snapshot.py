@@ -440,7 +440,7 @@ def test_snapshot_invalid_save_len(mock_caget):
     mock_caget.return_value = [singleton_return_value]
 
     with pytest.raises(ValueError):
-        burt.take_snapshot(test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ, test.TMP_PYBURT_OUT)
+        burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], test.TMP_PYBURT_OUT)
 
 
 @mock.patch("burt.read.caget")
