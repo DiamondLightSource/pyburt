@@ -51,19 +51,19 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     """
     _check_snapshot_params(req_files, snap_file)
 
-    failed_pvs = []
-
     snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
 
+    failed_pvs = []
     snap_footer_entries = []
+
     for req_file in req_files:
         req_parser = burt.ReqParser(req_file)
         _, pvs = req_parser.parse()
         logging.debug(f"Parsed PVs: {pvs}")
 
         snapshots, singleton_req_failed_pvs = _read_multi(pvs)
-        failed_pvs.append(singleton_req_failed_pvs)
+        failed_pvs.extend(singleton_req_failed_pvs)
         logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
 
         singleton_req_snap_footer = _gen_snap_footer(snapshots)

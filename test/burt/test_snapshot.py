@@ -42,6 +42,8 @@ def test_bad_file_arguments(mock_caget):
     with pytest.raises(ValueError):
         burt.take_snapshot(["goodbyeworld.req"], "helloworld.snap")
     with pytest.raises(ValueError):
+        burt.take_snapshot([], "helloworld.snap")
+    with pytest.raises(ValueError):
         burt.take_snapshot([test.BLANK_REQ], "helloworld.txt")
 
     with pytest.raises(ValueError):
@@ -260,6 +262,49 @@ def test_snapshot_scalar(mock_caget):
     assert body[10].modifier == "RO"
     assert body[11].name == "SR-CS-RING-01:MODE"
     assert len(body[11].vals) == 1
+
+    # cleanup
+    os.remove(test.TMP_PYBURT_OUT)
+
+
+@mock.patch("burt.read.caget")
+def test_snapshot_scalar_failed_pvs_ret(mock_caget):
+    """Runs a take snapshot test of a normal .req file with a mocked scalar
+    return value, and tests the failed values for validity.
+    """
+    singleton_return_value = cothread.dbr.ca_str("DIAD")
+    mock_caget.return_value = [singleton_return_value for i in range(12)]
+
+    # Every PV will fail in test.NORMAL_REQ.
+    for mocked in mock_caget.return_value:
+        mocked.ok = False
+        mocked.errorcode = "Hello Goodbye World!"
+
+    test_comment = "Hello World"
+    test_keywords = "cool,snap,file"
+
+    expected_failed_pvs = [
+        "SR01C-DI-COL-01:CENTRE",
+        "SR-DI-PICO-01:BUCKETS",
+        "SR01C-DI-COL-02:CENTRE",
+        "SR01C-DI-COL-02:GAP",
+        "SR-DI-PICO-01:BUCKETS",
+        "SR-DI-PICO-01:BUCKETS",
+        "SR-DI-PICO-01:BUCKETS",
+        "SR01C-DI-COL-01:POS1",
+        "SR01C-DI-COL-01:POS2",
+        "SR01C-DI-COL-02:POS1",
+        "SR01C-DI-COL-02:POS2",
+        "SR-CS-RING-01:MODE",
+    ]
+
+    failed_pvs = burt.take_snapshot(
+        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
+
+    assert os.path.isfile(test.TMP_PYBURT_OUT)
+    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+    assert failed_pvs == expected_failed_pvs
 
     # cleanup
     os.remove(test.TMP_PYBURT_OUT)
