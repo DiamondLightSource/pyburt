@@ -1,6 +1,6 @@
 """BURT snapshot python implementation.
 
-A BURT snapshot creates a snapshot (.snap) file from a request (.req) file, the
+A BURT snapshot creates a snapshot (.snap) file from a request (.req) file(s), the
 former of which contains some metadata and PVs with their saved values, and the
 latter specifies the PVs to save. This operation involves some caget calls in
 order to retrieve the PV values at the moment the snapshot is run.
@@ -25,7 +25,13 @@ from cothread.catools import caget
 
 import burt
 from burt.parsers.snap import SnapParser as snap
-from burt.utils.file import is_check_file, is_req_file, is_rqg_file, is_snap_file
+from burt.utils.file import (
+    is_check_file,
+    is_req_file,
+    is_rgr_file,
+    is_rqg_file,
+    is_snap_file,
+)
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
@@ -80,16 +86,19 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     return all_req_failed_pvs
 
 
-def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
+def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=True):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
         rqg_file (str): The path to the existing .rqg file.
-        snap_file (str): The path to the new .snap file.
+        rgr_file (str): The path to the new .rgr file.
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
             header.
         check (bool): Whether to inspect .check files or not.
+
+    Returns:
+        list: A list of the PV names where something went wrong.
 
     Raises:
         ValueError: If the rqg file or snap file arguments have an invalid
@@ -97,26 +106,29 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
         CheckFailedException: If a Burt check failed.
 
     """
-    if not is_rqg_file(rqg_file, True):
-        raise ValueError("Invalid .rqg file input.")
-
-    if not is_snap_file(snap_file):
-        raise ValueError("Invalid .snap file destination.")
+    _check_snapshot_group_params(rgr_file, rqg_file)
 
     rqg_parser = burt.RqgParser(rqg_file)
-    _, body = rqg_parser.parse()
-    logging.debug(f"Parsed .req files: {body}")
+    _, checks_and_reqs = rqg_parser.parse()
+    logging.debug(f"Parsed .check and .req files: {checks_and_reqs}")
 
-    for file_path in body:
+    all_req_failed_pvs = []
+    for file_path in checks_and_reqs:
         logging.info(f"Processing {file_path}...")
 
         if check and is_check_file(file_path):
             burt.checks.check(file_path)
+
+        # TODO: Broken. Most of the work will be done here. For ea. request file write
+        #  to a .snap file (see the take_snapshot implementation, the helper methods
+        #  should make things easier), then afterwards write to a restore group file
+        #  listing the new snapshot files.
         elif is_req_file(file_path):
-            # This is broken atm until the new take_snapshot_group impl is done.
-            take_snapshot([file_path], snap_file, comments, keywords)
+            pass
 
         logging.info(f"{file_path} processed.")
+
+    return all_req_failed_pvs
 
 
 def _check_snapshot_params(req_files, snap_file):
@@ -136,6 +148,21 @@ def _check_snapshot_params(req_files, snap_file):
     for req_file in req_files:
         if not is_req_file(req_file, True):
             raise ValueError(f"Invalid .req file input: {req_file}.")
+
+
+def _check_snapshot_group_params(rgr_file, rqg_file):
+    """Check take_snapshot_group parameters for validity.
+
+    Args:
+        rgr_file: The rgr file.
+        rqg_file: The destination rqg file.
+
+    """
+    if not is_rqg_file(rqg_file, True):
+        raise ValueError("Invalid .rqg file input.")
+
+    if not is_rgr_file(rgr_file):
+        raise ValueError("Invalid .rgr file destination.")
 
 
 def _gen_snap_header(req_files, comments, keywords):

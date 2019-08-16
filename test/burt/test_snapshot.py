@@ -444,69 +444,10 @@ def test_snapshot_invalid_save_len(mock_caget):
 
 
 @mock.patch("burt.read.caget")
-def test_snapshot_group_arrays(mock_caget):
-    """Runs a take snapshot group test of a .rqg file with mocked ca array
-    return values. The request group file specifies a .req file twice, so
-    the contents of the snap file should consist of the header, plus the
-    .req pvs twice.
+def test_snapshot_group(mock_caget):
+    """Runs a take snapshot group test of a .rqg file.
     """
-    # Flattened ndarray is a 12 element list of 40 elements.
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
-    mock_caget.return_value = [singleton_return_value for i in range(12)]
+    # TODO: this is a broken test with incorrect behaviour. To be changed when
+    #  snapshot groups are implemented.
 
-    burt.take_snapshot_group(test.NORMAL_ALT_RQG, test.TMP_PYBURT_OUT)
-
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
-
-    snap_parser = sp(test.TMP_PYBURT_OUT)
-    header, body = snap_parser.parse()
-    assert 12 == len(body)
-    assert header[sp.TIME_PREFIX]
-    assert header[sp.LOGINID_PREFIX]
-    assert header[sp.UID_PREFIX]
-    assert header[sp.GROUPID_PREFIX]
-    assert "" == header[sp.KEYWORDS_PREFIX]
-    assert "" == header[sp.COMMENTS_PREFIX]
-    assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
-    assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert "testables/req/normal.req" == header[sp.REQ_FILE_PREFIX]
-
-    assert body[0].name == "SR01C-DI-COL-01:CENTRE"
-    assert len(body[0].vals) == 40
-    assert body[1].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[1].vals) == 40
-    assert body[2].name == "SR01C-DI-COL-02:CENTRE"
-    assert len(body[2].vals) == 40
-    assert body[3].name == "SR01C-DI-COL-02:GAP"
-    assert len(body[3].vals) == 40
-
-    # These PVs have a set save value in the .req file, and the last two have
-    # readonly modifiers
-    assert body[4].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[4].vals) == 5
-    assert body[5].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[5].vals) == 10
-    assert body[5].modifier == "RO"
-    assert body[6].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[6].vals) == 25
-    assert body[6].modifier == "RON"
-
-    # Some readonly modifiers here.
-    assert body[7].name == "SR01C-DI-COL-01:POS1"
-    assert len(body[7].vals) == 40
-    assert body[7].modifier == "RON"
-    assert body[8].name == "SR01C-DI-COL-01:POS2"
-    assert len(body[8].vals) == 40
-    assert body[8].modifier == "RO"
-    assert body[9].name == "SR01C-DI-COL-02:POS1"
-    assert len(body[9].vals) == 40
-    assert body[9].modifier == "RO"
-    assert body[10].name == "SR01C-DI-COL-02:POS2"
-    assert len(body[10].vals) == 40
-    assert body[10].modifier == "RO"
-    assert body[11].name == "SR-CS-RING-01:MODE"
-    assert len(body[11].vals) == 40
-
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
+    # Redacted tests.
