@@ -110,7 +110,8 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
         if check and is_check_file(file_path):
             burt.checks.check(file_path)
         elif is_req_file(file_path):
-            take_snapshot(file_path, snap_file, comments, keywords)
+            # This is broken atm until the new take_snapshot_group impl is done.
+            take_snapshot([file_path], snap_file, comments, keywords)
 
         logging.info(f"{file_path} processed.")
 

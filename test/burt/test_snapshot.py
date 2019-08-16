@@ -17,7 +17,7 @@ def test_blank_snapshot(mock_caget):
     mock_caget.return_value = cothread.dbr.ca_array(numpy.array([0, 0, 0])).flatten()
     mock_caget.return_value.ok = True
 
-    burt.take_snapshot(test.BLANK_REQ, test.TMP_PYBURT_OUT)
+    burt.take_snapshot([test.BLANK_REQ], test.TMP_PYBURT_OUT)
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
     assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
@@ -36,19 +36,13 @@ def test_bad_file_arguments(mock_caget):
     mock_caget.return_value.errorcode = "Dummy"
 
     with pytest.raises(ValueError):
-        burt.take_snapshot("", "")
+        burt.take_snapshot([""], "")
     with pytest.raises(ValueError):
-        burt.take_snapshot("goodbyeworld", "helloworld")
+        burt.take_snapshot(["goodbyeworld"], "helloworld")
     with pytest.raises(ValueError):
-        burt.take_snapshot("goodbyeworld.req", "helloworld.snap")
+        burt.take_snapshot(["goodbyeworld.req"], "helloworld.snap")
     with pytest.raises(ValueError):
-        burt.take_snapshot(test.BLANK_REQ, "helloworld.txt")
-    with pytest.raises(ValueError):
-        burt.restore("")
-    with pytest.raises(ValueError):
-        burt.restore("goodbyeworld")
-    with pytest.raises(ValueError):
-        burt.restore("helloworld.snap")
+        burt.take_snapshot([test.BLANK_REQ], "helloworld.txt")
 
     with pytest.raises(ValueError):
         burt.take_snapshot_group(test.BLANK_REQ, "helloworld.snap")
@@ -71,7 +65,7 @@ def test_snapshot_arrays(mock_caget):
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot(
-        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
     )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
@@ -144,7 +138,7 @@ def test_snapshot_enum(mock_caget):
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot(
-        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
     )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
@@ -215,7 +209,7 @@ def test_snapshot_scalar(mock_caget):
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot(
-        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
     )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
@@ -295,7 +289,7 @@ def test_snapshot_multiple_reqs(mock_caget):
     # properties, e.g. keywords, directory, etc.
     snap_parser = sp(test.TMP_PYBURT_OUT)
     header, body = snap_parser.parse()
-    assert 12 == len(body)
+    assert 15 == len(body)
     assert header[sp.TIME_PREFIX]
     assert header[sp.LOGINID_PREFIX]
     assert header[sp.UID_PREFIX]
@@ -371,7 +365,7 @@ def test_snapshot_newlines_in_args(mock_caget):
     expected_snap_keywords = "\\r\\ncool\\n,\\r\\nsnap,file\\n\\r\\r"
 
     burt.take_snapshot(
-        test.NORMAL_REQ, test.TMP_PYBURT_OUT, test_comment, test_keywords
+        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
     )
 
     assert os.path.isfile(test.TMP_PYBURT_OUT)
