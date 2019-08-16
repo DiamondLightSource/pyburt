@@ -272,6 +272,89 @@ def test_snapshot_scalar(mock_caget):
 
 
 @mock.patch("burt.read.caget")
+def test_snapshot_multiple_reqs(mock_caget):
+    """Runs a take snapshot test of a .req file with multiple req paths.
+    """
+    singleton_return_value = -1e-16
+    mock_caget.return_value = [singleton_return_value for i in range(12)]
+
+    test_comment = "Hello World"
+    test_keywords = "cool,snap,file"
+
+    burt.take_snapshot(
+        [test.NORMAL_REQ, test.INLINE_COMMENTS_REQ, test.BLANK_REQ],
+        test.TMP_PYBURT_OUT,
+        test_comment,
+        test_keywords,
+    )
+
+    assert os.path.isfile(test.TMP_PYBURT_OUT)
+    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+
+    # Reverse parsing should have the correct contents for the independent
+    # properties, e.g. keywords, directory, etc.
+    snap_parser = sp(test.TMP_PYBURT_OUT)
+    header, body = snap_parser.parse()
+    assert 12 == len(body)
+    assert header[sp.TIME_PREFIX]
+    assert header[sp.LOGINID_PREFIX]
+    assert header[sp.UID_PREFIX]
+    assert header[sp.GROUPID_PREFIX]
+    assert test_keywords == header[sp.KEYWORDS_PREFIX]
+    assert test_comment == header[sp.COMMENTS_PREFIX]
+    assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
+    assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
+    assert [test.NORMAL_REQ, test.INLINE_COMMENTS_REQ, test.BLANK_REQ] == header[
+        sp.REQ_FILE_PREFIX
+    ]
+
+    # Req file 1 body
+    assert body[0].name == "SR01C-DI-COL-01:CENTRE"
+    assert len(body[0].vals) == 1
+    assert body[1].name == "SR-DI-PICO-01:BUCKETS"
+    assert len(body[1].vals) == 1
+    assert body[2].name == "SR01C-DI-COL-02:CENTRE"
+    assert len(body[2].vals) == 1
+    assert body[3].name == "SR01C-DI-COL-02:GAP"
+    assert len(body[3].vals) == 1
+    assert body[4].name == "SR-DI-PICO-01:BUCKETS"
+    assert len(body[4].vals) == 1
+    assert body[5].name == "SR-DI-PICO-01:BUCKETS"
+    assert len(body[5].vals) == 1
+    assert body[5].modifier == "RO"
+    assert body[6].name == "SR-DI-PICO-01:BUCKETS"
+    assert len(body[6].vals) == 1
+    assert body[6].modifier == "RON"
+    assert body[7].name == "SR01C-DI-COL-01:POS1"
+    assert len(body[7].vals) == 1
+    assert body[7].modifier == "RON"
+    assert body[8].name == "SR01C-DI-COL-01:POS2"
+    assert len(body[8].vals) == 1
+    assert body[8].modifier == "RO"
+    assert body[9].name == "SR01C-DI-COL-02:POS1"
+    assert len(body[9].vals) == 1
+    assert body[9].modifier == "RO"
+    assert body[10].name == "SR01C-DI-COL-02:POS2"
+    assert len(body[10].vals) == 1
+    assert body[10].modifier == "RO"
+    assert body[11].name == "SR-CS-RING-01:MODE"
+    assert len(body[11].vals) == 1
+
+    # Req file 2 body
+    assert body[12].name == "SR01C-DI-COL-01:CENTRE"
+    assert len(body[12].vals) == 1
+    assert body[13].name == "SR01C-DI-COL-01:GAP"
+    assert len(body[13].vals) == 1
+    assert body[14].name == "SR01C-DI-COL-01:LEFT"
+    assert len(body[14].vals) == 1
+
+    # Third req file is empty.
+
+    # cleanup
+    os.remove(test.TMP_PYBURT_OUT)
+
+
+@mock.patch("burt.read.caget")
 def test_snapshot_newlines_in_args(mock_caget):
     """Runs a take snapshot test with the problematic case of newlines in user
     supplied meta data. The newlines should appear as is in the .snap file,

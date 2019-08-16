@@ -118,10 +118,13 @@ class BurtParser:
             if key not in self.get_header().prefixes:
                 raise ParserException("Unexpected BURT header prefix.")
             else:
-                # Duplicated prefix.
+                # Duplicated prefix case. Use a list to keep track of duplicated values.
                 if key in prefix_to_val:
-                    prefix_to_val[key] = [extra_val for extra_val in prefix_to_val[key]]
-                    prefix_to_val[key].append(value)
+                    if isinstance(prefix_to_val[key], list):
+                        prefix_to_val[key].append(value)
+                    else:
+                        prefix_to_val[key] = [prefix_to_val[key]]
+                        prefix_to_val[key].append(value)
                 else:
                     prefix_to_val[key] = value
 

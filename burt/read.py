@@ -19,7 +19,6 @@ import logging
 import os
 import pwd
 import time
-from collections import OrderedDict
 
 import cothread
 from cothread.catools import caget
@@ -33,125 +32,49 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     """Save the PVs and their state to the specified snap file, with metadata.
 
     If more than one .req file is given as a list or iterable, then the snapshot values
-    will be appended to the given snap file.
+    will be appended to the given snap file one after the other.
 
     Args:
-        req_files (str or iterable): A single path/iterable of paths to (an) existing
-        .req file(s).
+        req_files (iterable): An iterable of paths to (an) existing .req file(s).
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
             header.
 
     Returns:
-        failed_pvs (list): A list of the PV names where something went wrong.
+        list: A list of the PV names where something went wrong.
 
     Raises:
         ValueError: If the request file or snap file arguments have an invalid
             extension, or if the  .req file does not exist.
 
     """
-    if not is_snap_file(snap_file):
-        raise ValueError("Invalid .snap file destination.")
+    _check_snapshot_params(req_files, snap_file)
 
-    if isinstance(req_files, str):
-        _check_req_file_validity(req_files)
+    failed_pvs = []
 
-        failed_pvs = _snapshot_singleton_req(req_files, snap_file, comments, keywords)
-    else:
-        for req_file in req_files:
-            _check_req_file_validity(req_file)
-
-        failed_pvs = _snapshot_multi_req(req_files, snap_file, comments, keywords)
-
-    return failed_pvs
-
-
-def _snapshot_singleton_req(req_file, snap_file, comments=None, keywords=None):
-    """Save the PV states of one .req file onto one .snap file.
-
-    Args:
-        req_file (str): A single path to (an) existing .req file(s).
-        snap_file (str): The path to the new .snap file.
-        comments (str): Comments to append to the BURT header.
-        keywords (str): A delimited string of keywords to append to the BURT
-            header.
-
-    Returns:
-        failed_pvs (list): A list of the PV names where something went wrong.
-
-    Raises:
-        ValueError: If the request file or snap file arguments have an invalid
-            extension, or if the  .req file does not exist.
-
-    """
-    req_parser = burt.ReqParser(req_file)
-    _, pvs = req_parser.parse()
-    logging.debug(f"Parsed PVs: {pvs}")
-
-    snap_header = _gen_snap_header(req_file, comments, keywords)
+    snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
 
-    snapshots, failed_pvs = _read_multi(pvs)
-    snap_footer = _gen_snap_footer(snapshots)
-    logging.debug(f"Generated .snap footer: {snap_footer}")
-
-    _write_to_snap_file(snap_header, snap_footer, snap_file)
-
-    return failed_pvs
-
-
-def _snapshot_multi_req(req_files, snap_file, comments=None, keywords=None):
-    """Save the PV states of 2+ .req files appended onto one .snap file.
-
-    Args:
-        req_file (iterable): An iterable of paths to existing .req file(s).
-        snap_file (str): The path to the new .snap file.
-        comments (str): Comments to append to the BURT header.
-        keywords (str): A delimited string of keywords to append to the BURT
-          header.
-
-    Returns:
-        failed_pvs (list): A list of the PV names where something went wrong.
-
-    Raises:
-        ValueError: If the request file or snap file arguments have an invalid
-          extension, or if the  .req file does not exist.
-
-    """
-    snap_multi_failed_pvs = []
-    snap_multi_footer = ""
-
-    # The header will be the same for all req files, except each one will add an extra
-    # Req File prefix.
-    snap_multi_header = _gen_snap_header(req_files[0], comments, keywords)
-    logging.debug(f"Generated .snap header: {snap_multi_header}")
-
-    first_iteration = True
+    snap_footer_entries = []
     for req_file in req_files:
         req_parser = burt.ReqParser(req_file)
         _, pvs = req_parser.parse()
         logging.debug(f"Parsed PVs: {pvs}")
 
-        if first_iteration:
-            first_iteration = False
-        else:
-            extra_req_path_header_entry = _gen_snap_req_header_line(req_file)
-            snap_multi_header += extra_req_path_header_entry + os.linesep
+        snapshots, singleton_req_failed_pvs = _read_multi(pvs)
+        failed_pvs.append(singleton_req_failed_pvs)
+        logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
 
-        snapshots, failed_pvs = _read_multi(pvs)
-        snap_footer = _gen_snap_footer(snapshots)
-        logging.debug(f"Generated .snap footer: {snap_footer}")
-        snap_multi_footer += snap_footer + os.linesep
-        snap_multi_failed_pvs.append(failed_pvs)
+        singleton_req_snap_footer = _gen_snap_footer(snapshots)
+        snap_footer_entries.append(singleton_req_snap_footer)
+        logging.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
 
-    logging.debug(f"Snapshot multi failed pvs: {snap_multi_failed_pvs}")
-    logging.debug(f"Snapshot multi header: {snap_multi_header}")
-    logging.debug(f"Snapshot multi footer: {snap_multi_footer}")
+    snap_footer = os.linesep.join(snap_footer_entries)
 
-    _write_to_snap_file(snap_multi_header, snap_multi_footer, snap_file)
+    _write_to_snap_file(snap_header, snap_footer, snap_file)
 
-    return snap_multi_failed_pvs
+    return failed_pvs
 
 
 def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
@@ -192,32 +115,33 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
         logging.info(f"{file_path} processed.")
 
 
-def _write_to_snap_file(snap_header, snap_footer, snap_file):
-    """Write to the .snap file, making directories if necessary.
+def _check_snapshot_params(req_files, snap_file):
+    """Check take_snapshot parameters for validity.
 
     Args:
-        snap_header: The .snap file header.
-        snap_footer: The .snap file footer.
-        snap_file: The .snap file destination.
-
-    Raises:
-        OSError: If the new snap file path is invalid.
+        req_files: The list of req files.
+        snap_file: The destination snap file.
 
     """
-    snap_dir = os.path.abspath(os.path.normpath(os.path.dirname(snap_file)))
-    os.makedirs(snap_dir, exist_ok=True)
-    with open(snap_file, "w") as f:
-        f.write(snap_header + snap_footer + os.linesep)
+    if not is_snap_file(snap_file):
+        raise ValueError("Invalid .snap file destination.")
+
+    if not req_files:
+        raise ValueError("Invalid .req file input. Empty list.")
+
+    for req_file in req_files:
+        if not is_req_file(req_file, True):
+            raise ValueError(f"Invalid .req file input: {req_file}.")
 
 
-def _gen_snap_header(req_path, comments, keywords):
+def _gen_snap_header(req_files, comments, keywords):
     """Generate the .snap file BURT header as a string.
 
     This will precede the list of PVs in the .snap file and will contain
     some meta information such as the current time, user id, etc.
 
     Args:
-        req_path (str): The path to the .req file.
+        req_files (list): A list of req files to take a snapshot of.
         comments: Optional comments.
         keywords: Optional keywords, with an arbitrary delimiter (or none).
 
@@ -225,75 +149,89 @@ def _gen_snap_header(req_path, comments, keywords):
         str: The .snap file BURT header as a string.
 
     """
+    curr_user, current_time, directory, gid, uid = _get_snap_header_system_vals()
+
+    # Carriage returns and newlines from user input can malform the BURT header
+    # so write to the snap file as escaped symbols.
+    sanitised_keywords = "" if keywords is None else _sanitise_header_line(keywords)
+    sanitised_comments = "" if comments is None else _sanitise_header_line(comments)
+    logging.debug(f"Keywords: {keywords}")
+    logging.debug(f"Comments: {comments}")
+
+    # Always absolute in current burt implementations.
+    type = snap.TYPE_DEFAULT_VAL
+
+    header_lines = [
+        snap.SNAP_HEADER_START,
+        _gen_padded_header_line(snap.TIME_PREFIX, current_time),
+        _gen_padded_header_line(snap.LOGINID_PREFIX, curr_user),
+        _gen_padded_header_line(snap.UID_PREFIX, str(uid)),
+        _gen_padded_header_line(snap.GROUPID_PREFIX, str(gid)),
+        _gen_padded_header_line(snap.KEYWORDS_PREFIX, sanitised_keywords),
+        _gen_padded_header_line(snap.COMMENTS_PREFIX, sanitised_comments),
+        _gen_padded_header_line(snap.TYPE_PREFIX, type),
+        _gen_padded_header_line(snap.DIRECTORY_PREFIX, directory),
+    ]
+
+    # 1 or more req files will require additional duplicate prefix entries.
+    for req_file in req_files:
+        header_lines.append(_gen_padded_header_line(snap.REQ_FILE_PREFIX, req_file))
+
+    header_lines.append(snap.SNAP_HEADER_END)
+
+    return os.linesep.join(header_lines)
+
+
+def _get_snap_header_system_vals():
+    """Obtain the required system values for the .snap header.
+
+    Returns:
+        str, str, str, int, int: The current user, current time, directory, gid,
+        and uid, in the format required for the .snap header.
+
+    """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
+    logging.debug(f"Current time: {current_time}")
 
     # Username (Lastname, Initials (Firstname)) format
     username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
     curr_user = username + " (" + ugroup + ")"
-    uid = os.getuid()
-    gid = pwd.getpwnam(getpass.getuser()).pw_gid
-
-    # Carriage returns and newlines from user input can malform the BURT header
-    # so write to the snap file as escaped symbols. This is the behaviour of
-    # the old BURT.
-    keywords = (
-        "" if keywords is None else keywords.replace("\r", "\\r").replace("\n", "\\n")
-    )
-    comments = (
-        "" if comments is None else comments.replace("\r", "\\r").replace("\n", "\\n")
-    )
-
-    type = snap.TYPE_DEFAULT_VAL
-    directory = os.getcwd()
-
-    req_file = req_path
-
-    logging.debug(f"Current time: {current_time}")
     logging.debug(f"Current user: {username}")
     logging.debug(f"Current user group: {ugroup}")
+
+    # Effective user and group ID.
+    uid = os.getuid()
+    gid = pwd.getpwnam(getpass.getuser()).pw_gid
     logging.debug(f"uid: {uid}")
     logging.debug(f"gid: {gid}")
-    logging.debug(f"Keywords: {keywords}")
-    logging.debug(f"Comments: {comments}")
+
+    # Absolute path to current directory.
+    directory = os.getcwd()
     logging.debug(f"Cwd: {directory}")
 
-    header_elements = OrderedDict(
-        [
-            (snap.SNAP_HEADER_START, ""),
-            (snap.TIME_PREFIX, current_time),
-            (snap.LOGINID_PREFIX, curr_user),
-            (snap.UID_PREFIX, uid),
-            (snap.GROUPID_PREFIX, gid),
-            (snap.KEYWORDS_PREFIX, keywords),
-            (snap.COMMENTS_PREFIX, comments),
-            (snap.TYPE_PREFIX, type),
-            (snap.DIRECTORY_PREFIX, directory),
-            (snap.REQ_FILE_PREFIX, req_file),
-            (snap.SNAP_HEADER_END, ""),
-        ]
-    )
+    return curr_user, current_time, directory, gid, uid
 
-    header = r""
-    for prefix in header_elements:
-        if (prefix == snap.SNAP_HEADER_START) or (prefix == snap.SNAP_HEADER_END):
-            header += prefix + os.linesep
 
-        # 11 space alignment from the left after the prefix for the non special
-        # cases.
-        else:
-            header += (
-                _gen_padded_header_line(prefix, header_elements[prefix]) + os.linesep
-            )
+def _sanitise_header_line(header_text):
+    """Clear a header line from unwanted characters.
 
-    return header
+    Args:
+        header_text: The header text.
+
+    Returns:
+        str: The sanitised header text.
+
+    """
+    return header_text.replace("\r", "\\r").replace("\n", "\\n")
 
 
 def _gen_snap_footer(snap_entries):
     """Generate the .snap file footer as a string.
 
     This will be the sequence of PVs followed by their reading length and
-    current values. This is simply the provided entries concatenated.
+    current values. This is simply the provided entries concatenated, as the snap
+    footer requires no special headers.
 
     Args:
         snap_entries (List): A list of snap file entries
@@ -306,7 +244,7 @@ def _gen_snap_footer(snap_entries):
 
 
 def _gen_padded_header_line(prefix, value):
-    """Generate a header line of a .snap file with padding, given the prefix and value.
+    """Generate a header line of a .snap file with 11 space alignment padding.
 
     Args:
         prefix (str): The prefix in the header (e.g. Directory).
@@ -320,21 +258,6 @@ def _gen_padded_header_line(prefix, value):
     header_line = prefix + ":" + left_padding + str(value)
 
     return header_line
-
-
-def _gen_snap_req_header_line(req_path):
-    """Generate a Req File .snap file header entry.
-
-    Needed by the multi req snapshot version which requires duplicate Req File headers.
-
-    Args:
-        req_path (str): The path to the .req file.
-
-    Returns:
-        str: The generated header entry for a Req File.
-
-    """
-    return _gen_padded_header_line(snap.DIRECTORY_PREFIX, req_path)
 
 
 def _read_multi(pv_entries):
@@ -391,7 +314,9 @@ def _read_multi(pv_entries):
         else:
             ca_reading_str = "{:.15e}".format(ca_reading)
 
-        snapshot_entry = _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry)
+        snapshot_entry = _gen_snapshot_footer_entry(
+            ca_reading_len, ca_reading_str, pv_entry
+        )
         snap_entries.append(snapshot_entry)
 
     return snap_entries, failed_pvs
@@ -431,7 +356,7 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
     return ca_reading_len, ca_reading_str
 
 
-def _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry):
+def _gen_snapshot_footer_entry(ca_reading_len, ca_reading_str, pv_entry):
     """Generate the final snapshot entry.
 
     Args:
@@ -453,18 +378,23 @@ def _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry):
     return snapshot_entry
 
 
-def _check_req_file_validity(req_file):
-    """Check if the supplied .req file is valid and exists.
+def _write_to_snap_file(snap_header, snap_footer, snap_file):
+    """Write to the .snap file, making directories if necessary.
 
     Args:
-        req_file: The .req file to check.
+        snap_header: The .snap file header.
+        snap_footer: The .snap file footer.
+        snap_file: The .snap file destination.
 
     Raises:
-        ValueError: If the request file is invalid.
+        OSError: If the new snap file path is invalid.
 
     """
-    if not is_req_file(req_file, True):
-        raise ValueError("Invalid .req file input.")
+    snap_dir = os.path.abspath(os.path.normpath(os.path.dirname(snap_file)))
+    os.makedirs(snap_dir, exist_ok=True)
+
+    with open(snap_file, "w") as f:
+        f.write(snap_header + snap_footer + os.linesep)
 
 
 def main():

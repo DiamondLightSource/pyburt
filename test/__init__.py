@@ -16,6 +16,7 @@ BLANK_SNAP = "testables/snap/blank.snap"
 SCALARS_SNAP = "testables/snap/scalars.snap"
 INLINE_COMMENTS_SNAP = "testables/snap/inline_comments.snap"
 MODIFIERS_SNAP = "testables/snap/modifiers.snap"
+MULTIPLE_REQ_PATHS_SNAP = "testables/snap/multiple_req_paths.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = "testables/snap/duplicate_burt_headers.snap"
 MALFORMED_BODY_SNAP = "testables/snap/malformed_body.snap"
