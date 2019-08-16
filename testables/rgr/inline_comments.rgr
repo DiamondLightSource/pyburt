@@ -1,5 +1,6 @@
 --- Start Restore Group header
 Comments: LOCO applied for skews only, vertical emittance corrected to 8pm. Magnets not cycled yet.
+Rqg File: /home/ops/sample.rqg
 --- End Restore Group header
 /home/ops/burt/checkFiles/tune-FFWD.check % Inline comments
 /home/ops/burt/checkFiles/fastchic.check % Inline comments % Duplicated percent % Duplicated hash 2

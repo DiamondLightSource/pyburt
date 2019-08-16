@@ -1,5 +1,6 @@
 --- Start Restore Group header
 Comments: Hello World
+Rqg File: /home/ops/sample.rqg
 --- End Restore Group header
 /some/path/oops.random
 /normal/path/here.check
