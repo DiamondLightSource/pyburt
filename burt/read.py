@@ -388,7 +388,7 @@ def _write_to_snap_file(snap_header, snap_footer, snap_file):
     os.makedirs(snap_dir, exist_ok=True)
 
     with open(snap_file, "w") as f:
-        f.write(snap_header + snap_footer + os.linesep)
+        f.write(snap_header + os.linesep + snap_footer + os.linesep)
 
 
 def main():

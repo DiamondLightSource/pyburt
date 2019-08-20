@@ -56,6 +56,28 @@ def test_bad_file_arguments(mock_caget):
 
 
 @mock.patch("burt.read.caget")
+@mock.patch("burt.read._get_snap_header_system_vals")
+def test_simple_snapshot(mock_get_vals, mock_caget):
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([2]))
+    singleton_return_value[0] = 1
+    singleton_return_value[1] = 2
+    mock_caget.return_value = [singleton_return_value]
+    mock_get_vals.return_value = ("user", "time", "dir", "group", 100)
+
+    test_comment = "Hello World"
+    test_keywords = "cool,snap,file"
+
+    burt.take_snapshot(
+        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
+    with open(test.TMP_PYBURT_OUT) as f1:
+        with open(test.SIMPLE_SNAP) as f2:
+            assert f1.read() == f2.read()
+    # cleanup
+    os.remove(test.TMP_PYBURT_OUT)
+
+
+@mock.patch("burt.read.caget")
 def test_snapshot_arrays(mock_caget):
     """Runs a take snapshot test of a normal .req file with a mocked ca array
     return value.
