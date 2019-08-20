@@ -71,7 +71,12 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
         _, pvs = req_parser.parse()
         logging.debug(f"Parsed PVs: {pvs}")
 
-        singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(pvs)
+        ca_readings = caget(
+            [pv.name for pv in pvs], datatype=cothread.catools.DBR_ENUM_STR, throw=False
+        )
+        singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(
+            ca_readings, pvs
+        )
 
         all_req_snap_footer_entries.append(singleton_req_snap_footer)
         logging.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
@@ -274,13 +279,14 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
-def _gen_snap_footer(pv_entries):
+def _gen_snap_footer(ca_readings, pv_entries):
     """Generate the .snap file BURT footer as a string.
 
     A snapshot of the PVs in the req file(s) is(are) performed by storing the values
     as a formatted string, which is placed in the bottom of a .snap file.
 
     Args:
+        ca_readings (list(ca_value)): Values returned by caget()
         pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
 
     Returns:
@@ -291,11 +297,6 @@ def _gen_snap_footer(pv_entries):
         ValueError: If the save length is invalid.
 
     """
-    ca_readings = caget(
-        [pv.name for pv in pv_entries],
-        datatype=cothread.catools.DBR_ENUM_STR,
-        throw=False,
-    )
     logging.debug(f"ca_reading: {ca_readings}")
     logging.debug(f"ca_reading type: {type(ca_readings)}")
 
