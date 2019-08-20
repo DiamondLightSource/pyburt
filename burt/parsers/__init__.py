@@ -1,4 +1,4 @@
-"""parsers package."""
+"""Parsers package."""
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
@@ -19,7 +19,7 @@ class BurtParser:
 
     __metaclass__ = ABCMeta
 
-    # Sublcasses must define the header elements via this namedtuple.
+    # Subclasses must define the header elements via this namedtuple.
     HEADER = namedtuple("HEADER", "start_label prefixes end_label")
 
     def __init__(self, path):
