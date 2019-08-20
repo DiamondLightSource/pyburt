@@ -5,6 +5,7 @@ include:
 
 stages:
   - run tests
+  - static code checks
   - publish coverage
   - publish docs
 
@@ -16,21 +17,22 @@ Unit tests and coverage:
   variables:
     COVERAGE_ARGS: --cov=burt --cov-report term-missing --cov-fail-under 90
     TEST_DIR: test
-  script:
-    # Run the tests.
-    - pipenv run python3 -m pytest ${COVERAGE_ARGS} ${TEST_DIR}
-    # Run our custom flake8 and black checks
-    - pipenv run sphinx-build -b html -E -q docs docs/_build/html
-    - pipenv run flake8 --show-source burt
-    - pipenv run black burt --check
-    - pipenv run black test --check
   artifacts:
     paths:
     # Pass on virtualenv, coverage and built docs to following stages
-    - venv/
     - .coverage
     - docs/_build/html/
     expire_in: 10 min
+
+# Run our custom flake8 and black checks
+Static code checks:
+  tags:
+    - rhel7
+  stage: static code checks
+  script:
+    - pipenv run flake8 --show-source burt
+    - pipenv run black burt --check
+    - pipenv run black test --check
 
 # Publish coverage html report to common location
 Publish coverage:
@@ -46,6 +48,7 @@ Install docs for latest master:
     only:
     - master
     script:
+    - pipenv run sphinx-build -b html -E -q docs docs/_build/html
     - mkdir -p ${DOCS_PUBLISH_ROOT}
     - cp -rf docs/_build/html ${DOCS_PUBLISH_ROOT}/latest
 
@@ -57,5 +60,6 @@ Install docs for tags:
     only:
     - tags
     script:
+    - pipenv run sphinx-build -b html -E -q docs docs/_build/html
     - mkdir -p ${DOCS_PUBLISH_ROOT}
     - cp -rf docs/_build/html ${DOCS_PUBLISH_ROOT}/${CI_COMMIT_TAG}
