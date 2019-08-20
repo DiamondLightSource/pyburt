@@ -46,11 +46,12 @@ def test_bad_file_arguments(mock_caget):
     with pytest.raises(ValueError):
         burt.take_snapshot([test.BLANK_REQ], "helloworld.txt")
 
-    with pytest.raises(ValueError):
+    # take_snapshot_group() not currently implemented
+    with pytest.raises(NotImplementedError):
         burt.take_snapshot_group(test.BLANK_REQ, "helloworld.snap")
-    with pytest.raises(ValueError):
+    with pytest.raises(NotImplementedError):
         burt.take_snapshot_group("dummy.rqg", "helloworld.snap")
-    with pytest.raises(ValueError):
+    with pytest.raises(NotImplementedError):
         burt.take_snapshot_group(test.NORMAL_RQG, "helloworld.sn")
 
 

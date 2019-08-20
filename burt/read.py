@@ -25,13 +25,7 @@ from cothread.catools import caget
 
 import burt
 from burt.parsers.snap import SnapParser as snap
-from burt.utils.file import (
-    is_check_file,
-    is_req_file,
-    is_rgr_file,
-    is_rqg_file,
-    is_snap_file,
-)
+from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
@@ -111,29 +105,9 @@ def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=
         CheckFailedException: If a Burt check failed.
 
     """
-    _check_snapshot_group_params(rgr_file, rqg_file)
-
-    rqg_parser = burt.RqgParser(rqg_file)
-    _, checks_and_reqs = rqg_parser.parse()
-    logging.debug(f"Parsed .check and .req files: {checks_and_reqs}")
-
-    all_req_failed_pvs = []
-    for file_path in checks_and_reqs:
-        logging.info(f"Processing {file_path}...")
-
-        if check and is_check_file(file_path):
-            burt.checks.check(file_path)
-
-        # TODO: Broken. Most of the work will be done here. For ea. request file write
-        #  to a .snap file (see the take_snapshot implementation, the helper methods
-        #  should make things easier), then afterwards write to a restore group file
-        #  listing the new snapshot files.
-        elif is_req_file(file_path):
-            pass
-
-        logging.info(f"{file_path} processed.")
-
-    return all_req_failed_pvs
+    # See Git history for a partial implementation.
+    # It is unclear how to decide how the all the new snap files are laid out.
+    raise NotImplementedError("Not yet implemented.")
 
 
 def _check_snapshot_params(req_files, snap_file):
