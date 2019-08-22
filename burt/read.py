@@ -1,6 +1,6 @@
 """BURT snapshot python implementation.
 
-A BURT snapshot creates a snapshot (.snap) file from a request (.req) file, the
+A BURT snapshot creates a snapshot (.snap) file from a request (.req) file(s), the
 former of which contains some metadata and PVs with their saved values, and the
 latter specifies the PVs to save. This operation involves some caget calls in
 order to retrieve the PV values at the moment the snapshot is run.
@@ -19,65 +19,85 @@ import logging
 import os
 import pwd
 import time
-from collections import OrderedDict
 
 import cothread
 from cothread.catools import caget
 
 import burt
 from burt.parsers.snap import SnapParser as snap
-from burt.utils.file import is_check_file, is_req_file, is_rqg_file, is_snap_file
+from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
+
+# Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
+SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 
-def take_snapshot(req_file, snap_file, comments=None, keywords=None):
+def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     """Save the PVs and their state to the specified snap file, with metadata.
 
+    If more than one .req file is given as a list or iterable, then the snapshot values
+    will be appended to the given snap file one after the other.
+
     Args:
-        req_file (str): The path to the existing .req file.
+        req_files (iterable): An iterable of paths to (an) existing .req file(s).
         snap_file (str): The path to the new .snap file.
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
             header.
 
     Returns:
-        failed_pvs (list): A list of the PV names where something went wrong.
+        list: A list of the PV names where something went wrong.
 
     Raises:
         ValueError: If the request file or snap file arguments have an invalid
             extension, or if the  .req file does not exist.
 
     """
-    if not is_req_file(req_file, True):
-        raise ValueError("Invalid .req file input.")
+    _check_snapshot_params(req_files, snap_file)
 
-    if not is_snap_file(snap_file):
-        raise ValueError("Invalid .snap file destination.")
-
-    req_parser = burt.ReqParser(req_file)
-    _, pvs = req_parser.parse()
-    logging.debug(f"Parsed PVs: {pvs}")
-
-    snap_header = _gen_snap_header(req_file, comments, keywords)
+    snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
 
-    snapshots, failed_pvs = _read_multi(pvs)
-    snap_footer = _gen_snap_footer(snapshots)
-    logging.debug(f"Generated .snap footer: {snap_footer}")
+    all_req_failed_pvs = []
+    all_req_snap_footer_entries = []
+
+    for req_file in req_files:
+        req_parser = burt.ReqParser(req_file)
+        _, pvs = req_parser.parse()
+        logging.debug(f"Parsed PVs: {pvs}")
+
+        ca_readings = caget(
+            [pv.name for pv in pvs], datatype=cothread.catools.DBR_ENUM_STR, throw=False
+        )
+        singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(
+            ca_readings, pvs
+        )
+
+        all_req_snap_footer_entries.append(singleton_req_snap_footer)
+        logging.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
+
+        all_req_failed_pvs.extend(singleton_req_failed_pvs)
+        logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
+
+    snap_footer = os.linesep.join(all_req_snap_footer_entries)
 
     _write_to_snap_file(snap_header, snap_footer, snap_file)
-    return failed_pvs
+
+    return all_req_failed_pvs
 
 
-def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check=True):
+def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=True):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
         rqg_file (str): The path to the existing .rqg file.
-        snap_file (str): The path to the new .snap file.
+        rgr_file (str): The path to the new .rgr file.
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
             header.
         check (bool): Whether to inspect .check files or not.
+
+    Returns:
+        list: A list of the PV names where something went wrong.
 
     Raises:
         ValueError: If the rqg file or snap file arguments have an invalid
@@ -85,53 +105,53 @@ def take_snapshot_group(rqg_file, snap_file, comments=None, keywords=None, check
         CheckFailedException: If a Burt check failed.
 
     """
-    if not is_rqg_file(rqg_file, True):
-        raise ValueError("Invalid .rqg file input.")
+    # See Git history for a partial implementation.
+    # It is unclear how to decide how the all the new snap files are laid out.
+    raise NotImplementedError("Not yet implemented.")
 
+
+def _check_snapshot_params(req_files, snap_file):
+    """Check take_snapshot parameters for validity.
+
+    Args:
+        req_files: The list of req files.
+        snap_file: The destination snap file.
+
+    """
     if not is_snap_file(snap_file):
         raise ValueError("Invalid .snap file destination.")
 
-    rqg_parser = burt.RqgParser(rqg_file)
-    _, body = rqg_parser.parse()
-    logging.debug(f"Parsed .req files: {body}")
+    if not req_files:
+        raise ValueError("Invalid .req file input. Empty list.")
 
-    for file_path in body:
-        logging.info(f"Processing {file_path}...")
-
-        if check and is_check_file(file_path):
-            burt.checks.check(file_path)
-        elif is_req_file(file_path):
-            take_snapshot(file_path, snap_file, comments, keywords)
-
-        logging.info(f"{file_path} processed.")
+    for req_file in req_files:
+        if not is_req_file(req_file, True):
+            raise ValueError(f"Invalid .req file input: {req_file}.")
 
 
-def _write_to_snap_file(snap_header, snap_footer, snap_file):
-    """Write to the .snap file, making directories if necessary.
+def _check_snapshot_group_params(rgr_file, rqg_file):
+    """Check take_snapshot_group parameters for validity.
 
     Args:
-        snap_header: The .snap file header.
-        snap_footer: The .snap file footer.
-        snap_file: The .snap file destination.
-
-    Raises:
-        OSError: If the new snap file path is invalid.
+        rgr_file: The rgr file.
+        rqg_file: The destination rqg file.
 
     """
-    snap_dir = os.path.abspath(os.path.normpath(os.path.dirname(snap_file)))
-    os.makedirs(snap_dir, exist_ok=True)
-    with open(snap_file, "w") as f:
-        f.write(snap_header + snap_footer + os.linesep)
+    if not is_rqg_file(rqg_file, True):
+        raise ValueError("Invalid .rqg file input.")
+
+    if not is_rgr_file(rgr_file):
+        raise ValueError("Invalid .rgr file destination.")
 
 
-def _gen_snap_header(req_path, comments, keywords):
+def _gen_snap_header(req_files, comments, keywords):
     """Generate the .snap file BURT header as a string.
 
     This will precede the list of PVs in the .snap file and will contain
     some meta information such as the current time, user id, etc.
 
     Args:
-        req_path (str): The path to the .req file.
+        req_files (list): A list of req files to take a snapshot of.
         comments: Optional comments.
         keywords: Optional keywords, with an arbitrary delimiter (or none).
 
@@ -139,112 +159,118 @@ def _gen_snap_header(req_path, comments, keywords):
         str: The .snap file BURT header as a string.
 
     """
+    curr_user, curr_time, directory, gid, uid = _get_snap_header_system_vals()
+
+    # Carriage returns and newlines from user input can malform the BURT header
+    # so write to the snap file as escaped symbols.
+    sanitised_keywords = "" if keywords is None else _sanitise_header_line(keywords)
+    sanitised_comments = "" if comments is None else _sanitise_header_line(comments)
+    logging.debug(f"Keywords: {keywords}")
+    logging.debug(f"Comments: {comments}")
+
+    # Always absolute in current burt implementations.
+    type = snap.TYPE_DEFAULT_VAL
+
+    header_lines = [
+        snap.SNAP_HEADER_START,
+        _gen_padded_header_line(snap.TIME_PREFIX, curr_time),
+        _gen_padded_header_line(snap.LOGINID_PREFIX, curr_user),
+        _gen_padded_header_line(snap.UID_PREFIX, str(uid)),
+        _gen_padded_header_line(snap.GROUPID_PREFIX, str(gid)),
+        _gen_padded_header_line(snap.KEYWORDS_PREFIX, sanitised_keywords),
+        _gen_padded_header_line(snap.COMMENTS_PREFIX, sanitised_comments),
+        _gen_padded_header_line(snap.TYPE_PREFIX, type),
+        _gen_padded_header_line(snap.DIRECTORY_PREFIX, directory),
+    ]
+
+    # 1 or more req files will require additional duplicate prefix entries.
+    for req_file in req_files:
+        header_lines.append(_gen_padded_header_line(snap.REQ_FILE_PREFIX, req_file))
+
+    header_lines.append(snap.SNAP_HEADER_END)
+
+    return os.linesep.join(header_lines)
+
+
+def _get_snap_header_system_vals():
+    """Obtain the required system values for the .snap header.
+
+    Returns:
+        str, str, str, int, int: The current user, current time, directory, gid,
+        and uid, in the format required for the .snap header.
+
+    """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
+    logging.debug(f"Current time: {current_time}")
 
     # Username (Lastname, Initials (Firstname)) format
     username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
     curr_user = username + " (" + ugroup + ")"
-    uid = os.getuid()
-    gid = pwd.getpwnam(getpass.getuser()).pw_gid
-
-    # Carriage returns and newlines from user input can malform the BURT header
-    # so write to the snap file as escaped symbols. This is the behaviour of
-    # the old BURT.
-    keywords = (
-        "" if keywords is None else keywords.replace("\r", "\\r").replace("\n", "\\n")
-    )
-    comments = (
-        "" if comments is None else comments.replace("\r", "\\r").replace("\n", "\\n")
-    )
-
-    type = snap.TYPE_DEFAULT_VAL
-    directory = os.getcwd()
-
-    req_file = req_path
-
-    logging.debug(f"Current time: {current_time}")
     logging.debug(f"Current user: {username}")
     logging.debug(f"Current user group: {ugroup}")
+
+    # Effective user and group ID.
+    uid = os.getuid()
+    gid = pwd.getpwnam(getpass.getuser()).pw_gid
     logging.debug(f"uid: {uid}")
     logging.debug(f"gid: {gid}")
-    logging.debug(f"Keywords: {keywords}")
-    logging.debug(f"Comments: {comments}")
+
+    # Absolute path to current directory.
+    directory = os.getcwd()
     logging.debug(f"Cwd: {directory}")
 
-    header_elements = OrderedDict(
-        [
-            (snap.SNAP_HEADER_START, ""),
-            (snap.TIME_PREFIX, current_time),
-            (snap.LOGINID_PREFIX, curr_user),
-            (snap.UID_PREFIX, uid),
-            (snap.GROUPID_PREFIX, gid),
-            (snap.KEYWORDS_PREFIX, keywords),
-            (snap.COMMENTS_PREFIX, comments),
-            (snap.TYPE_PREFIX, type),
-            (snap.DIRECTORY_PREFIX, directory),
-            (snap.REQ_FILE_PREFIX, req_file),
-            (snap.SNAP_HEADER_END, ""),
-        ]
-    )
-
-    header = r""
-    for prefix in header_elements:
-        if (prefix == snap.SNAP_HEADER_START) or (prefix == snap.SNAP_HEADER_END):
-            header += prefix + os.linesep
-
-        # 11 space alignment from the left after the prefix for the non special
-        # cases.
-        else:
-            left_padding = " " * (11 - len(":") - len(prefix))
-            header += (
-                prefix + ":" + left_padding + str(header_elements[prefix]) + os.linesep
-            )
-
-    return header
+    return curr_user, current_time, directory, gid, uid
 
 
-def _gen_snap_footer(snap_entries):
-    """Generate the .snap file footer as a string.
-
-    This will be the sequence of PVs followed by their reading length and
-    current values. This is simply the provided entries concatenated.
+def _sanitise_header_line(header_text):
+    """Clear a header line from unwanted characters.
 
     Args:
-        snap_entries (List): A list of snap file entries
+        header_text: The header text.
 
     Returns:
-        str: The .snap file footer as a string.
+        str: The sanitised header text.
 
     """
-    return os.linesep.join(snap_entries)
+    return header_text.replace("\r", "\\r").replace("\n", "\\n")
 
 
-def _read_multi(pv_entries):
-    """Take a snapshot of the PV's current state.
-
-    A snapshot is performed by storing the values as a formatted string, which
-    is placed in a .snap file.
-
-    The .snap file PV entries require a 15 width precision number(s) in
-    scientific notation.
+def _gen_padded_header_line(prefix, value):
+    """Generate a header line of a .snap file with 11 space alignment padding.
 
     Args:
+        prefix (str): The prefix in the header (e.g. Directory).
+        value (str): The value to be displayed next to the prefix, after the colon.
+
+    Returns:
+        str: The padded header line.
+
+    """
+    left_padding = " " * (11 - len(":") - len(prefix))
+    header_line = prefix + ":" + left_padding + str(value)
+
+    return header_line
+
+
+def _gen_snap_footer(ca_readings, pv_entries):
+    """Generate the .snap file BURT footer as a string.
+
+    A snapshot of the PVs in the req file(s) is(are) performed by storing the values
+    as a formatted string, which is placed in the bottom of a .snap file.
+
+    Args:
+        ca_readings (list(ca_value)): Values returned by caget()
         pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
 
     Returns:
-        list(str): The .snap file entries for the PV.
+        str: The .snap file footer.
         list(str): PVs for which getting the value failed.
 
     Raises:
         ValueError: If the save length is invalid.
 
     """
-    ca_readings = caget(
-        [pv.name for pv in pv_entries],
-        datatype=cothread.catools.DBR_ENUM_STR,
-        throw=False,
-    )
     logging.debug(f"ca_reading: {ca_readings}")
     logging.debug(f"ca_reading type: {type(ca_readings)}")
 
@@ -255,6 +281,8 @@ def _read_multi(pv_entries):
         ca_reading_len = 1
         ca_reading_str = ""
 
+        # Cothread attaches a .ok and .errorcode attribute to each reading. The error
+        # if present will be stored in the reading itself.
         if hasattr(ca_reading, "ok") and not ca_reading.ok:
             logging.critical(
                 f"caget failure: {ca_reading.errorcode}" f", with error: {ca_reading}:"
@@ -262,6 +290,8 @@ def _read_multi(pv_entries):
             failed_pvs.append(pv_entry.name)
             continue
 
+        # If a save length is specified in the .req file, this is used to shorten the
+        # cothread array length to the desired value.
         elif isinstance(ca_reading, cothread.dbr.ca_array):
             ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
                 ca_reading, pv_entry
@@ -271,17 +301,23 @@ def _read_multi(pv_entries):
         elif isinstance(ca_reading, cothread.dbr.ca_str):
             ca_reading_str = str(ca_reading)
 
+        # Any other augmented scalar value.
         else:
-            ca_reading_str = "{:.15e}".format(ca_reading)
+            ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
 
-        snapshot_entry = _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry)
-        snap_entries.append(snapshot_entry)
+        formatted_snapshot_entry = _format_snap_footer_entry(
+            ca_reading_len, ca_reading_str, pv_entry
+        )
+        snap_entries.append(formatted_snapshot_entry)
 
-    return snap_entries, failed_pvs
+    return os.linesep.join(snap_entries), failed_pvs
 
 
 def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
     """Flatten the ca array into a string and obtain the save length if specified.
+
+    The .snap file PV entries require a 15 width precision number(s) in
+    scientific notation.
 
     Args:
         ca_reading (any): Return value from cothread.
@@ -295,26 +331,26 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
         ValueError: If the save length is invalid.
 
     """
-    ca_reading_len = len(ca_reading)
+    desired_ca_arr_len = len(ca_reading)
 
-    # User specified to save only save_len elements from ca_reading.
     if pv_entry.save_len:
-
-        if pv_entry.save_len > ca_reading_len:
+        if pv_entry.save_len > desired_ca_arr_len:
             raise ValueError(
-                "Save length value specified in .req " "file exceeds length of PV data."
+                "Save length value specified in .req file exceeds length of PV data."
             )
         else:
-            ca_reading_len = pv_entry.save_len
+            desired_ca_arr_len = pv_entry.save_len
 
-    # Flattening ca_array
     ca_reading_str = " ".join(
-        ["{:.15e}".format(reading) for reading in ca_reading[:ca_reading_len]]
+        [
+            SNAP_PRECISION_PYFORMAT.format(reading)
+            for reading in ca_reading[:desired_ca_arr_len]
+        ]
     )
-    return ca_reading_len, ca_reading_str
+    return desired_ca_arr_len, ca_reading_str
 
 
-def _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry):
+def _format_snap_footer_entry(ca_reading_len, ca_reading_str, pv_entry):
     """Generate the final snapshot entry.
 
     Args:
@@ -334,6 +370,25 @@ def _gen_snapshot_entry(ca_reading_len, ca_reading_str, pv_entry):
     snapshot_entry += f"{pv_entry.name} {ca_reading_len} {ca_reading_str}"
 
     return snapshot_entry
+
+
+def _write_to_snap_file(snap_header, snap_footer, snap_file):
+    """Write to the .snap file, making directories if necessary.
+
+    Args:
+        snap_header: The .snap file header.
+        snap_footer: The .snap file footer.
+        snap_file: The .snap file destination.
+
+    Raises:
+        OSError: If the new snap file path is invalid.
+
+    """
+    snap_dir = os.path.abspath(os.path.normpath(os.path.dirname(snap_file)))
+    os.makedirs(snap_dir, exist_ok=True)
+
+    with open(snap_file, "w") as f:
+        f.write(snap_header + os.linesep + snap_footer + os.linesep)
 
 
 def main():

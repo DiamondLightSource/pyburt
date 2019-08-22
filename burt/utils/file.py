@@ -88,7 +88,7 @@ def _is_correct_ext(filename, correct_ext, check_existence=False):
     """
     if check_existence:
         if not os.path.isfile(filename):
-            raise ValueError(f"The file {filename} does not exist")
+            return False
 
     _, parsed_ext = os.path.splitext(filename)
     return parsed_ext == correct_ext

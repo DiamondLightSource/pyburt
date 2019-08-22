@@ -132,6 +132,22 @@ def test_snap_parser_scalars():
     assert correct_pv_snapshots == body
 
 
+def test_snap_parser_multiple_req_paths():
+    """Runs the .snap parser against a case with multiple req paths in the header.
+    """
+    snap_parser = sp(test.MULTIPLE_REQ_PATHS_SNAP)
+    header, body = snap_parser.parse()
+
+    assert test.MULTIPLE_REQ_PATHS_SNAP == snap_parser.path
+    assert [
+        "/home/ops/burt/requestFiles/SR-DI.req",
+        "/home/ops/burt/requestFiles/SR-DI2.req",
+        "/home/ops/burt/requestFiles/SR-DI3.req",
+        "/home/ops/burt/requestFiles/SR-DI4.req",
+        "/home/ops/burt/requestFiles/SR-DI5.req",
+    ] == header[sp.REQ_FILE_PREFIX]
+
+
 def test_snap_parser_ca_arr():
     """Runs the .snap parser against a case with ca arrays.
     """

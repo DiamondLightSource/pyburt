@@ -25,7 +25,7 @@ def test_restore_write_fail(mock_caput):
     # TODO: discuss if anything special needs to occur on write failure.
     # Probable solution is to not do anything.
     with pytest.raises(Exception):
-        burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+        burt.restore(test.ARRAYS_AND_SCALARS_WITH_MODS_SNAP)
 
 
 @mock.patch("burt.write.caput")
@@ -74,6 +74,41 @@ def test_bad_file_arguments(mock_caput):
         burt.restore("goodbyeworld")
     with pytest.raises(ValueError):
         burt.restore("helloworld.snap")
+    with pytest.raises(ValueError):
+        burt.restore_group("")
+    with pytest.raises(ValueError):
+        burt.restore_group("helloworld")
+    with pytest.raises(ValueError):
+        burt.restore_group("helloworld.snap")
+
+
+@mock.patch("burt.write.caput")
+def test_caput_rets(mock_caput):
+    """Checks that the caput error returns are caught as expected.
+    """
+    singleton_return_value = cothread.dbr.ca_str("DummyPVReturn")
+    mock_caput.return_value = [singleton_return_value for i in range(4)]
+
+    for mocked in mock_caput.return_value:
+        mocked.ok = False
+        mocked.errorcode = "dummy"
+
+    failed_pvs = burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+
+    # TODO: on caput return it is not clear if it really does return pvs,
+    #  or the failed values.
+    expected_failed_pvs = [
+        "DummyPVReturn",
+        "DummyPVReturn",
+        "DummyPVReturn",
+        "DummyPVReturn",
+        "DummyPVReturn",
+        "DummyPVReturn",
+        "DummyPVReturn",
+        "DummyPVReturn",
+    ]
+
+    assert failed_pvs == expected_failed_pvs
 
 
 @mock.patch("burt.write.caput")

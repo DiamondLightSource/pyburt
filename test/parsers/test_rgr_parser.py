@@ -38,6 +38,7 @@ def test_inline_comments():
     rgr_parser = rp(test.INLINE_COMMENTS_RGR)
     header, body = rgr_parser.parse()
     assert test.INLINE_COMMENTS_RGR == rgr_parser.path
+    assert "/home/ops/sample.rqg" == header[rp.RQG_PREFIX]
     assert (
         header["Comments"]
         == "LOCO applied for skews only, vertical emittance corrected to"
@@ -117,6 +118,7 @@ def normal_case():
     rgr_parser = rp(test.NORMAL_RGR)
     header, body = rgr_parser.parse()
     assert test.INLINE_COMMENTS_RGR == rgr_parser.path
+    assert "/home/ops/sample.rqg" == header[rp.RQG_PREFIX]
     assert (
         header["Comments"]
         == "LOCO applied for skews only, vertical emittance corrected to"

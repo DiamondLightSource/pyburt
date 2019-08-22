@@ -1,4 +1,4 @@
-"""parsers package."""
+"""Parsers package."""
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
@@ -19,6 +19,7 @@ class BurtParser:
 
     __metaclass__ = ABCMeta
 
+    # Subclasses must define the header elements via this namedtuple.
     HEADER = namedtuple("HEADER", "start_label prefixes end_label")
 
     def __init__(self, path):
@@ -93,10 +94,22 @@ class BurtParser:
             header_lines (list): A newline delimited list of lines in a .*
                 BURT header.
 
+        Raises:
+            ParserException: If the header is malformed.
+
         """
+        actual_prefix_count = len(header_lines)
+        expected_prefix_count = len(self.get_header().prefixes)
+
+        if actual_prefix_count < expected_prefix_count:
+            raise ParserException(
+                f"Missing prefixes in BURT header. Got {actual_prefix_count}. "
+                f"Expected {expected_prefix_count}."
+            )
+
         prefix_to_val = {}
         for line in header_lines:
-            # Ugly wart of .snap files: directory line doesn't have a colon.
+            # Ugly wart of old style .snap files: directory line doesn't have a colon.
             if ":" in line:
                 key, value = (part.strip() for part in line.split(":", 1))
             else:
@@ -105,7 +118,15 @@ class BurtParser:
             if key not in self.get_header().prefixes:
                 raise ParserException("Unexpected BURT header prefix.")
             else:
-                prefix_to_val[key] = value
+                # Duplicated prefix case. Use a list to keep track of duplicated values.
+                if key in prefix_to_val:
+                    if isinstance(prefix_to_val[key], list):
+                        prefix_to_val[key].append(value)
+                    else:
+                        prefix_to_val[key] = [prefix_to_val[key]]
+                        prefix_to_val[key].append(value)
+                else:
+                    prefix_to_val[key] = value
 
         return prefix_to_val
 
@@ -164,9 +185,6 @@ class BurtParser:
 
         header_lines = header.splitlines()[1:]
         body_lines = body.splitlines()
-
-        if len(header_lines) != len(self.get_header().prefixes):
-            raise ParserException("Missing or duplicate prefixes in BURT header.")
 
         return header_lines, body_lines
 

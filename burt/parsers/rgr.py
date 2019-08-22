@@ -29,6 +29,7 @@ class RgrParser(BurtParser):
 
     RGR_HEADER_START = "--- Start Restore Group header"
     RGR_HEADER_END = "--- End Restore Group header"
+    RQG_PREFIX = "Rqg File"
 
     def __init__(self, path):
         """Constructor.
@@ -49,7 +50,9 @@ class RgrParser(BurtParser):
 
         """
         return super(RgrParser, self).HEADER(
-            self.RGR_HEADER_START, (SnapParser.COMMENTS_PREFIX,), self.RGR_HEADER_END
+            self.RGR_HEADER_START,
+            (SnapParser.COMMENTS_PREFIX, self.RQG_PREFIX),
+            self.RGR_HEADER_END,
         )
 
     def read_body_line(self, line):
