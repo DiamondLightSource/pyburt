@@ -284,8 +284,8 @@ def _gen_snap_footer(ca_readings, pv_entries):
         # Cothread attaches a .ok and .errorcode attribute to each reading. The error
         # if present will be stored in the reading itself.
         if hasattr(ca_reading, "ok") and not ca_reading.ok:
-            logging.critical(
-                f"caget failure: {ca_reading.errorcode}" f", with error: {ca_reading}:"
+            logging.warning(
+                f"caget failure {ca_reading.errorcode} from pv {pv_entry.name}"
             )
             failed_pvs.append(pv_entry.name)
             continue
@@ -293,6 +293,10 @@ def _gen_snap_footer(ca_readings, pv_entries):
         # If a save length is specified in the .req file, this is used to shorten the
         # cothread array length to the desired value.
         elif isinstance(ca_reading, cothread.dbr.ca_array):
+            if len(ca_reading) == 0:
+                logging.warning(f"caget failure: no data returned from {pv_entry.name}")
+                failed_pvs.append(pv_entry.name)
+                continue
             ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
                 ca_reading, pv_entry
             )
@@ -416,7 +420,7 @@ def main():
 
     if is_req_file(args.request_file):
         take_snapshot(
-            args.request_file, args.snap_destination, comments=args.c, keywords=args.k
+            [args.request_file], args.snap_destination, comments=args.c, keywords=args.k
         )
 
     elif is_rqg_file(args.request_file):
