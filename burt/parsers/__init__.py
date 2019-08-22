@@ -116,7 +116,7 @@ class BurtParser:
                 key, value = (part.strip() for part in line.split(None, 1))
 
             if key not in self.get_header().prefixes:
-                raise ParserException("Unexpected BURT header prefix.")
+                raise ParserException(f"Unexpected Burt header prefix {key}.")
             else:
                 # Duplicated prefix case. Use a list to keep track of duplicated values.
                 if key in prefix_to_val:
@@ -226,3 +226,10 @@ class ParserException(Exception):
     """Raise when the parsers run into unexpected malformed formats."""
 
     pass
+
+
+# These need to be imported after the Parser class.
+from burt.parsers.req import ReqParser  # noqa
+from burt.parsers.rgr import RgrParser  # noqa
+from burt.parsers.rqg import RqgParser  # noqa
+from burt.parsers.snap import SnapParser  # noqa
