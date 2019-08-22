@@ -88,7 +88,9 @@ class SnapParser(BurtParser):
         pv_snapshot = [segment.strip() for segment in line.split()]
 
         if len(pv_snapshot) < 3:
-            raise ParserException("Malformed .snap body: Too few elements for a PV.")
+            raise ParserException(
+                f"Malformed .snap body {pv_snapshot}: Too few elements for a PV."
+            )
 
         is_modifier_specified = pv_snapshot[0] in (
             burt.READONLY_SPECIFIER,
