@@ -63,10 +63,6 @@ def test_malformed_files():
         snap_parser.parse()
 
     with pytest.raises(ParserException):
-        snap_parser = sp(test.ONLY_HEADER_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
         snap_parser = sp(test.DUPLICATE_BURT_HEADERS_SNAP)
         snap_parser.parse()
 

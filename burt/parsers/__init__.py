@@ -98,16 +98,8 @@ class BurtParser:
             ParserException: If the header is malformed.
 
         """
-        actual_prefix_count = len(header_lines)
-        expected_prefix_count = len(self.get_header().prefixes)
-
-        if actual_prefix_count < expected_prefix_count:
-            raise ParserException(
-                f"Missing prefixes in BURT header. Got {actual_prefix_count}. "
-                f"Expected {expected_prefix_count}."
-            )
-
         prefix_to_val = {}
+
         for line in header_lines:
             # Ugly wart of old style .snap files: directory line doesn't have a colon.
             if ":" in line:
