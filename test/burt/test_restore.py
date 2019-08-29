@@ -45,9 +45,6 @@ def test_restore_bad_snap(mock_caput):
         burt.restore(test.MISORDERED_BURT_HEADER_SNAP)
 
     with pytest.raises(ParserException):
-        burt.restore(test.ONLY_HEADER_SNAP)
-
-    with pytest.raises(ParserException):
         burt.restore(test.DUPLICATE_BURT_HEADERS_SNAP)
 
     with pytest.raises(ParserException):

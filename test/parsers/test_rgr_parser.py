@@ -65,10 +65,6 @@ def test_malformed_files():
         rgr_parser.parse()
 
     with pytest.raises(ParserException):
-        rgr_parser = rp(test.ONLY_HEADER_RGR)
-        rgr_parser.parse()
-
-    with pytest.raises(ParserException):
         rgr_parser = rp(test.DUPLICATE_HEADERS_RGR)
         rgr_parser.parse()
 
