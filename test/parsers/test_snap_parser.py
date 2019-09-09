@@ -1,4 +1,4 @@
-""" Various tests for the snap parser."""
+"""Various tests for the snap parser."""
 import pytest
 import test
 import burt
@@ -7,8 +7,7 @@ from burt.parsers import ParserException
 
 
 def test_base_case():
-    """Runs the .snap parser against mostly blank files.
-    """
+    """Run the .snap parser against mostly blank files."""
     snap_parser = burt.SnapParser(test.BLANK_SNAP)
     assert test.BLANK_SNAP == snap_parser.path
 
@@ -17,8 +16,7 @@ def test_base_case():
 
 
 def test_inline_comments():
-    """Runs the snap parser against a case with inline comments next to PVs.
-    """
+    """Run the snap parser against a case with inline comments next to PVs."""
     correct_pv_snapshots = [
         sp.SNAP_PV("SR01C-DI-COL-01:POS1", 1, ["3.259328000000000e+00"], None),
         sp.SNAP_PV("SR01C-DI-COL-01:POS2", 2, ["-3.276854000000000e+00", "333"], None),
@@ -48,8 +46,7 @@ def test_inline_comments():
 
 
 def test_malformed_files():
-    """Runs the .snap parser against the malformed .snap files.
-    """
+    """Run the .snap parser against the malformed .snap files."""
     with pytest.raises(ParserException):
         snap_parser = sp(test.MISSING_BOTTOM_HEADER_SNAP)
         snap_parser.parse()
@@ -97,8 +94,7 @@ def test_malformed_files():
 
 
 def test_snap_parser_scalars():
-    """Runs the .snap parser against a basic case with only PV scalars.
-    """
+    """Run the .snap parser against a basic case with only PV scalars."""
     correct_pv_snapshots = [
         sp.SNAP_PV("SR01C-DI-COL-01:POS1", 1, ["3.259328000000000e+00"], None),
         sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"], None),
@@ -129,8 +125,7 @@ def test_snap_parser_scalars():
 
 
 def test_snap_parser_multiple_req_paths():
-    """Runs the .snap parser against a case with multiple req paths in the header.
-    """
+    """Run the .snap parser against a case with multiple req paths in the header."""
     snap_parser = sp(test.MULTIPLE_REQ_PATHS_SNAP)
     header, body = snap_parser.parse()
 
@@ -145,8 +140,7 @@ def test_snap_parser_multiple_req_paths():
 
 
 def test_snap_parser_ca_arr():
-    """Runs the .snap parser against a case with ca arrays.
-    """
+    """Run the .snap parser against a case with ca arrays."""
     correct_pv_snapshots = [
         sp.SNAP_PV(
             "SR01C-DI-COL-01:POS1",
@@ -187,8 +181,7 @@ def test_snap_parser_ca_arr():
 
 
 def test_snap_parser_with_modifiers():
-    """Runs the .snap parser against a case with optional modifiers.
-    """
+    """Run the .snap parser against a case with optional modifiers."""
     correct_pv_snapshots = [
         sp.SNAP_PV(
             "SR01C-DI-COL-01:POS1",

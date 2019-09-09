@@ -1,4 +1,4 @@
-""" Various tests for the req parser."""
+"""Various tests for the req parser."""
 import pytest
 import test
 from burt.parsers import ParserException
@@ -6,8 +6,7 @@ from burt import ReqParser as rp
 
 
 def test_base_case():
-    """Runs the .req parser against mostly blank files.
-    """
+    """Run the .req parser against mostly blank files."""
     req_parser = rp(test.BLANK_REQ)
     assert test.BLANK_REQ == req_parser.path
 
@@ -17,9 +16,7 @@ def test_base_case():
 
 
 def test_inline_comments():
-    """Runs the parser against a case with inline comments next to
-    PVs.
-    """
+    """Run the parser against a case with inline comments next to PVs."""
     correct_pv_list = [
         rp.REQ_PV("SR01C-DI-COL-01:CENTRE", None, None),
         rp.REQ_PV("SR01C-DI-COL-01:GAP", None, None),
@@ -34,8 +31,7 @@ def test_inline_comments():
 
 
 def test_malformed_files():
-    """Runs the parser against the malformed .req files.
-    """
+    """Run the parser against the malformed .req files."""
     with pytest.raises(ParserException):
         req_parser = rp(test.MALFORMED_REQ)
         req_parser.parse()
@@ -50,8 +46,7 @@ def test_malformed_files():
 
 
 def test_req_parser_normal():
-    """Runs the .req parser against a basic case.
-    """
+    """Run the .req parser against a basic case."""
     correct_pv_list = [
         rp.REQ_PV("SR01C-DI-COL-01:CENTRE", None, None),
         rp.REQ_PV("SR-DI-PICO-01:BUCKETS", None, None),

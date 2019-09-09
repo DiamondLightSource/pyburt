@@ -1,4 +1,4 @@
-""" Unit tests for the BURT restore functionality."""
+"""Unit tests for the BURT restore functionality."""
 import test
 import pytest
 import burt
@@ -9,8 +9,7 @@ from burt.parsers import ParserException
 
 @mock.patch("burt.write.caput")
 def test_restore_normal(mock_caput):
-    """ Runs BURT restore against a normal case.
-    """
+    """Run BURT restore against a normal case."""
     # ca_nothings have ok=True by default.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 4
     burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
@@ -18,8 +17,7 @@ def test_restore_normal(mock_caput):
 
 @mock.patch("burt.write.caput")
 def test_restore_write_fail(mock_caput):
-    """ Runs BURT restore against a write exception case.
-    """
+    """Run BURT restore against a write exception case."""
     mock_caput.side_effect = Exception
 
     # TODO: discuss if anything special needs to occur on write failure.
@@ -30,9 +28,7 @@ def test_restore_write_fail(mock_caput):
 
 @mock.patch("burt.write.caput")
 def test_restore_bad_snap(mock_caput):
-    """ Runs BURT restore against some bad .snap files.
-    """
-
+    """Run BURT restore against some bad .snap files."""
     with pytest.raises(ParserException):
         burt.restore(test.MISSING_BOTTOM_HEADER_SNAP)
 
@@ -61,9 +57,7 @@ def test_restore_bad_snap(mock_caput):
 
 @mock.patch("burt.write.caput")
 def test_bad_file_arguments(mock_caput):
-    """Runs the burt script against a case where the file arguments are
-    malformed.
-    """
+    """Run the burt script against a case where the file arguments are malformed."""
     with pytest.raises(ValueError):
         burt.restore("")
     with pytest.raises(ValueError):
@@ -103,16 +97,14 @@ def test_restore_returns_pv_names_if_caput_fails(mock_caput):
 
 @mock.patch("burt.write.caput")
 def test_blank_restore(mock_caput):
-    """Runs burt restore against a blank .snap file.
-    """
+    """Run burt restore against a blank .snap file."""
     with pytest.raises(ParserException):
         burt.restore(test.BLANK_SNAP)
 
 
 @mock.patch("burt.write.caput")
 def test_restore_group_normal(mock_caput):
-    """ Runs BURT restore against a normal case.
-    """
+    """Run BURT restore against a normal case."""
     # Just one caput of one PV expected.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")]
     burt.restore_group(test.NORMAL_ALT_RGR, False)
