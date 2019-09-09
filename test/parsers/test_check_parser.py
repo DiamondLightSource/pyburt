@@ -1,8 +1,9 @@
 """Various tests for the check parser."""
 import pytest
+
 import test
-from burt.parsers import ParserException
 from burt import CheckParser as cp
+from burt.parsers import ParserException
 
 
 def test_base_case():
@@ -16,8 +17,6 @@ def test_base_case():
 
 def test_multiline_comments():
     """Run the parser against a case with multi line comments in the header."""
-    correct_pv_list = [cp.CHECK_PV("SR-DI-EBPM-01:BCD_LIMIT", 20, 0)]
-
     check_parser = cp(test.MULTI_LINE_COMMENT_CHECK)
     with pytest.raises(ParserException):
         check_parser.parse()

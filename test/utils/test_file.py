@@ -1,6 +1,4 @@
 """Various tests for the utils file."""
-import test
-import pytest
 import burt.utils.file as f
 
 

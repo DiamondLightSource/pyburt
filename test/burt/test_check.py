@@ -1,10 +1,11 @@
 """Various tests for the check file functionality."""
-import pytest
-import test
-import mock
-import burt
 import cothread
+import mock
+import pytest
 from cothread.catools import ca_nothing
+
+import burt
+import test
 
 
 @mock.patch("burt.checks.caget")

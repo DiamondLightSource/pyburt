@@ -1,6 +1,7 @@
 """Pytest utilities."""
 import sys
 import types
+
 import mock
 import numpy
 

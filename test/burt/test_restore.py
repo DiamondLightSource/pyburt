@@ -1,9 +1,10 @@
 """Unit tests for the BURT restore functionality."""
-import test
-import pytest
-import burt
-import mock
 import cothread
+import mock
+import pytest
+
+import burt
+import test
 from burt.parsers import ParserException
 
 

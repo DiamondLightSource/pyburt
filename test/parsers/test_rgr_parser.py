@@ -1,7 +1,8 @@
 """Various tests for the rgr parser."""
 import pytest
-import test
+
 import burt
+import test
 from burt import RgrParser as rp
 from burt.parsers import ParserException
 

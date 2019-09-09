@@ -1,8 +1,9 @@
 """Various tests for the req parser."""
 import pytest
+
 import test
-from burt.parsers import ParserException
 from burt import ReqParser as rp
+from burt.parsers import ParserException
 
 
 def test_base_case():

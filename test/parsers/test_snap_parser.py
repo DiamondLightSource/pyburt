@@ -1,7 +1,8 @@
 """Various tests for the snap parser."""
 import pytest
-import test
+
 import burt
+import test
 from burt import SnapParser as sp
 from burt.parsers import ParserException
 

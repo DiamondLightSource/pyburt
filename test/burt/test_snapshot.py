@@ -1,11 +1,13 @@
 """Various tests for the main burt module."""
-import pytest
-import test
-import mock
-import burt
-import cothread
 import os
+
+import cothread
+import mock
 import numpy
+import pytest
+
+import burt
+import test
 from burt import SnapParser as sp
 
 
