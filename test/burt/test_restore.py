@@ -11,8 +11,8 @@ from burt.parsers import ParserException
 def test_restore_normal(mock_caput):
     """ Runs BURT restore against a normal case.
     """
-    # Return value is ca_nothing on success.
-    mock_caput.return_value = cothread.catools.ca_nothing
+    # ca_nothings have ok=True by default.
+    mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 4
     burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
 
@@ -32,8 +32,6 @@ def test_restore_write_fail(mock_caput):
 def test_restore_bad_snap(mock_caput):
     """ Runs BURT restore against some bad .snap files.
     """
-    # Return value is ca_nothing on success.
-    mock_caput.return_value = cothread.catools.ca_nothing
 
     with pytest.raises(ParserException):
         burt.restore(test.MISSING_BOTTOM_HEADER_SNAP)
@@ -56,6 +54,7 @@ def test_restore_bad_snap(mock_caput):
     with pytest.raises(ParserException):
         burt.restore(test.MALFORMED_HEADER_COLONS_SNAP)
 
+    mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 2
     # Strange entries, but should not raise an exception.
     burt.restore(test.MALFORMED_HEADER_ENTRIES_SNAP)
 
@@ -80,32 +79,26 @@ def test_bad_file_arguments(mock_caput):
 
 
 @mock.patch("burt.write.caput")
-def test_caput_rets(mock_caput):
-    """Checks that the caput error returns are caught as expected.
-    """
-    scalar_return_value = cothread.dbr.ca_str("DummyPVReturn")
-    mock_caput.return_value = [scalar_return_value for i in range(4)]
+def test_restore_returns_pv_names_if_caput_fails(mock_caput):
+    """Checks that the caput error returns are caught as expected."""
+    pvs_from_snap = [
+        "SR01C-DI-COL-01:POS1",
+        "SR01C-DI-COL-01:POS2",
+        "SR01C-DI-COL-02:POS1",
+        "SR01C-DI-COL-02:POS2",
+    ]
+    return_values = []
+    for pv in pvs_from_snap:
+        return_value = cothread.catools.ca_nothing(pv)
+        return_value.ok = False
+        return_value.errorcode = "dummy"
+        return_values.append(return_value)
 
-    for mocked in mock_caput.return_value:
-        mocked.ok = False
-        mocked.errorcode = "dummy"
+    mock_caput.return_value = return_values
 
     failed_pvs = burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
-    # TODO: on caput return it is not clear if it really does return pvs,
-    #  or the failed values.
-    expected_failed_pvs = [
-        "DummyPVReturn",
-        "DummyPVReturn",
-        "DummyPVReturn",
-        "DummyPVReturn",
-        "DummyPVReturn",
-        "DummyPVReturn",
-        "DummyPVReturn",
-        "DummyPVReturn",
-    ]
-
-    assert failed_pvs == expected_failed_pvs
+    assert failed_pvs == pvs_from_snap
 
 
 @mock.patch("burt.write.caput")
@@ -120,6 +113,6 @@ def test_blank_restore(mock_caput):
 def test_restore_group_normal(mock_caput):
     """ Runs BURT restore against a normal case.
     """
-    # Return value is ca_nothing on success.
-    mock_caput.return_value = cothread.catools.ca_nothing
+    # Just one caput of one PV expected.
+    mock_caput.return_value = [cothread.catools.ca_nothing("dummy")]
     burt.restore_group(test.NORMAL_ALT_RGR, False)
