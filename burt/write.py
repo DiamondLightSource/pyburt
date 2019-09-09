@@ -57,7 +57,7 @@ def restore(snap_file):
     logging.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
-    singleton_pvs_to_restore = OrderedDict()
+    scalar_pvs_to_restore = OrderedDict()
     array_pvs_to_restore = OrderedDict()
 
     # TODO: caput return does not behave similarly to caget, and it looks like it
@@ -75,16 +75,16 @@ def restore(snap_file):
                 print("WO type PVs currently unimplemented.")
             else:
                 if 1 == pv_entry.dtype_len:
-                    singleton_pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+                    scalar_pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
                 else:
                     array_pvs_to_restore[pv_entry.name] = [
                         float(val) for val in pv_entry.vals
                     ]
 
-    singleton_rets = caput(
-        singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values(), throw=False
+    scalar_rets = caput(
+        scalar_pvs_to_restore.keys(), scalar_pvs_to_restore.values(), throw=False
     )
-    all_failed_pvs = singleton_rets
+    all_failed_pvs = scalar_rets
 
     array_rets = caput(
         array_pvs_to_restore.keys(), array_pvs_to_restore.values(), throw=False

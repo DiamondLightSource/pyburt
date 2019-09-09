@@ -83,8 +83,8 @@ def test_bad_file_arguments(mock_caput):
 def test_caput_rets(mock_caput):
     """Checks that the caput error returns are caught as expected.
     """
-    singleton_return_value = cothread.dbr.ca_str("DummyPVReturn")
-    mock_caput.return_value = [singleton_return_value for i in range(4)]
+    scalar_return_value = cothread.dbr.ca_str("DummyPVReturn")
+    mock_caput.return_value = [scalar_return_value for i in range(4)]
 
     for mocked in mock_caput.return_value:
         mocked.ok = False
