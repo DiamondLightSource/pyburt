@@ -116,3 +116,57 @@ def test_restore_group_normal(mock_caput):
     # Just one caput of one PV expected.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")]
     burt.restore_group(test.NORMAL_ALT_RGR, False)
+
+
+@mock.patch("argparse.ArgumentParser")
+@mock.patch("burt.utils.file.isfile")
+@mock.patch("burt.write.restore")
+def test_burt_write_cli_returns_1_if_restore_fails(
+    mock_restore, mock_isfile, mock_argument_parser
+):
+    """Test burt.write.main() returns 1 for a snap file.
+
+    Lots of mocking for this. Note the similarity to the test below.
+
+    """
+    mock_restore.return_value = ["FAILED-PV"]
+    mock_isfile.return_value = True
+    mock_args = mock.MagicMock()
+    mock_args.restore_file = "hello.snap"
+    mock_argument_parser.return_value.parse_args.return_value = mock_args
+    with pytest.raises(SystemExit):
+        burt.write.main()
+
+
+@mock.patch("argparse.ArgumentParser")
+@mock.patch("burt.utils.file.isfile")
+@mock.patch("burt.write.restore_group")
+def test_burt_write_cli_returns_1_if_restore_group_fails(
+    mock_restore_group, mock_isfile, mock_argument_parser
+):
+    """Test burt.write.main() returns 1 for a snap file.
+
+    Lots of mocking for this. Note the similarity to the test above.
+
+    """
+    mock_restore_group.return_value = ["FAILED-PV"]
+    mock_isfile.return_value = True
+    mock_args = mock.MagicMock()
+    mock_args.restore_file = "hello.rgr"
+    mock_argument_parser.return_value.parse_args.return_value = mock_args
+    with pytest.raises(SystemExit):
+        burt.write.main()
+
+
+@mock.patch("argparse.ArgumentParser")
+def test_burt_write_cli_returns_1_if_invalid_file(mock_argument_parser):
+    """Test burt.write.main() returns 1 for an invalid file.
+
+    Lots of mocking for this. Note the similarity to the test above.
+
+    """
+    mock_args = mock.MagicMock()
+    mock_args.restore_file = "hello.dummy"
+    mock_argument_parser.return_value.parse_args.return_value = mock_args
+    with pytest.raises(SystemExit):
+        burt.write.main()

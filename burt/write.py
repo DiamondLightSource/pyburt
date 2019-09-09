@@ -51,7 +51,7 @@ def restore(snap_file):
 
     """
     if not is_snap_file(snap_file, True):
-        raise ValueError("Invalid .snap file.")
+        raise ValueError(f"Invalid .snap file {snap_file}.")
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
@@ -107,7 +107,7 @@ def restore_group(rgr_file, check=True):
 
     """
     if not is_rgr_file(rgr_file):
-        raise ValueError("Invalid .rgr file.")
+        raise ValueError(f"Invalid .rgr file {rgr_file}.")
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
@@ -150,20 +150,14 @@ def main():
 
     if is_snap_file(args.restore_file):
         failed_pvs = restore(args.restore_file)
-        if failed_pvs:
-            logging.warning(f"Restore failed for the following PVs:")
-            for pv in failed_pvs:
-                logging.warning(pv)
-            sys.exit(1)
-
     elif is_rgr_file(args.restore_file):
         failed_pvs = restore_group(args.restore_file)
-        if failed_pvs:
-            logging.warning(f"Restore failed for the following PVs:")
-            for pv in failed_pvs:
-                logging.warning(pv)
-            sys.exit(1)
-
     else:
-        logging.critical("Invalid restore file argument.")
+        logging.critical(f"Invalid restore file argument {args.restore_file}.")
+        sys.exit(1)
+
+    if failed_pvs:
+        logging.warning(f"Restore failed for the following PVs:")
+        for pv in failed_pvs:
+            logging.warning(pv)
         sys.exit(1)
