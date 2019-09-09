@@ -17,6 +17,7 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 """
 import argparse
 import logging
+import sys
 from collections import OrderedDict
 
 import cothread
@@ -148,10 +149,21 @@ def main():
         logging.getLogger().setLevel(logging.INFO)
 
     if is_snap_file(args.restore_file):
-        restore(args.restore_file)
+        failed_pvs = restore(args.restore_file)
+        if failed_pvs:
+            logging.warning(f"Restore failed for the following PVs:")
+            for pv in failed_pvs:
+                logging.warning(pv)
+            sys.exit(1)
 
     elif is_rgr_file(args.restore_file):
-        restore_group(args.restore_file)
+        failed_pvs = restore_group(args.restore_file)
+        if failed_pvs:
+            logging.warning(f"Restore failed for the following PVs:")
+            for pv in failed_pvs:
+                logging.warning(pv)
+            sys.exit(1)
 
     else:
         logging.critical("Invalid restore file argument.")
+        sys.exit(1)
