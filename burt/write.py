@@ -113,8 +113,6 @@ def restore_group(rgr_file, check=True):
     _, body = rgr_parser.parse()
     logging.debug(f"Parsed .snap files: {body}")
 
-    # TODO: caput return does not behave similarly to caget, and it looks like it
-    #  returns the failed values which was being caput-ed. This needs to be changed.
     all_failed_pvs = []
     for file_path in body:
 
