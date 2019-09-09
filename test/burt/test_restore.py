@@ -139,18 +139,23 @@ def test_burt_write_cli_returns_1_if_restore_fails(
 
 
 @mock.patch("argparse.ArgumentParser")
-@mock.patch("burt.utils.file.isfile")
-@mock.patch("burt.write.restore_group")
+@mock.patch("burt.write.is_rgr_file")
+@mock.patch("burt.RgrParser")
+@mock.patch("burt.write.restore")
 def test_burt_write_cli_returns_1_if_restore_group_fails(
-    mock_restore_group, mock_isfile, mock_argument_parser
+    mock_restore, mock_rgr_parser, mock_is_rgr_file, mock_argument_parser
 ):
     """Test burt.write.main() returns 1 for a snap file.
 
-    Lots of mocking for this. Note the similarity to the test above.
+    Lots of mocking for this. We are checking that if restore() returns a PV
+    then the CLI does report a failure.
+
+    Note the similarity to the test above.
 
     """
-    mock_restore_group.return_value = ["FAILED-PV"]
-    mock_isfile.return_value = True
+    mock_restore.return_value = ["FAILED-PV"]
+    mock_rgr_parser.return_value.parse.return_value = "dummy", ["hello.snap"]
+    mock_is_rgr_file.return_value = True
     mock_args = mock.MagicMock()
     mock_args.restore_file = "hello.rgr"
     mock_argument_parser.return_value.parse_args.return_value = mock_args
