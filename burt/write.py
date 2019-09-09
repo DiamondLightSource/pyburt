@@ -17,6 +17,7 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 """
 import argparse
 import logging
+import sys
 from collections import OrderedDict
 
 import cothread
@@ -50,19 +51,17 @@ def restore(snap_file):
 
     """
     if not is_snap_file(snap_file, True):
-        raise ValueError("Invalid .snap file.")
+        raise ValueError(f"Invalid .snap file {snap_file}.")
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
     logging.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
-    singleton_pvs_to_restore = OrderedDict()
-    array_pvs_to_restore = OrderedDict()
+    pvs_to_restore = OrderedDict()
 
     # TODO: caput return does not behave similarly to caget, and it looks like it
     #  returns the failed values which was being caput-ed. This needs to be changed.
-    all_failed_pvs = []
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
@@ -74,27 +73,20 @@ def restore(snap_file):
                 # TODO: write the "correct" value, not the saved ones.
                 print("WO type PVs currently unimplemented.")
             else:
-                if 1 == pv_entry.dtype_len:
-                    singleton_pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+                if pv_entry.dtype_len == 1:
+                    pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
                 else:
-                    array_pvs_to_restore[pv_entry.name] = [
+                    pvs_to_restore[pv_entry.name] = [
                         float(val) for val in pv_entry.vals
                     ]
 
-    singleton_rets = caput(
-        singleton_pvs_to_restore.keys(), singleton_pvs_to_restore.values(), throw=False
-    )
-    all_failed_pvs = singleton_rets
+    failed_pvs = []
+    return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
+    for pv, return_value in zip(pvs_to_restore.keys(), return_values):
+        if not return_value.ok:
+            failed_pvs.append(pv)
 
-    array_rets = caput(
-        array_pvs_to_restore.keys(), array_pvs_to_restore.values(), throw=False
-    )
-    if array_rets is not cothread.catools.ca_nothing:
-        all_failed_pvs.extend(array_rets)
-
-    _check_caput_rets(all_failed_pvs)
-
-    return all_failed_pvs
+    return failed_pvs
 
 
 def restore_group(rgr_file, check=True):
@@ -115,14 +107,12 @@ def restore_group(rgr_file, check=True):
 
     """
     if not is_rgr_file(rgr_file):
-        raise ValueError("Invalid .rgr file.")
+        raise ValueError(f"Invalid .rgr file {rgr_file}.")
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
     logging.debug(f"Parsed .snap files: {body}")
 
-    # TODO: caput return does not behave similarly to caget, and it looks like it
-    #  returns the failed values which was being caput-ed. This needs to be changed.
     all_failed_pvs = []
     for file_path in body:
 
@@ -136,22 +126,6 @@ def restore_group(rgr_file, check=True):
                 all_failed_pvs.extend(failed_pvs)
 
     return all_failed_pvs
-
-
-def _check_caput_rets(caput_rets):
-    """Check caput return codes and log any errors.
-
-    Args:
-        caput_rets (list): List of augmented caput return values.
-
-    """
-    if caput_rets is not cothread.catools.ca_nothing:
-        for caput_ret in caput_rets:
-            if not caput_ret.ok:
-                logging.critical(
-                    f"caput failure: {caput_ret.errorcode}"
-                    f", with error: {caput_ret}:"
-                )
 
 
 def main():
@@ -173,10 +147,15 @@ def main():
         logging.getLogger().setLevel(logging.INFO)
 
     if is_snap_file(args.restore_file):
-        restore(args.restore_file)
-
+        failed_pvs = restore(args.restore_file)
     elif is_rgr_file(args.restore_file):
-        restore_group(args.restore_file)
-
+        failed_pvs = restore_group(args.restore_file)
     else:
-        logging.critical("Invalid restore file argument.")
+        logging.critical(f"Invalid restore file argument {args.restore_file}.")
+        sys.exit(1)
+
+    if failed_pvs:
+        logging.warning(f"Restore failed for the following PVs:")
+        for pv in failed_pvs:
+            logging.warning(pv)
+        sys.exit(1)

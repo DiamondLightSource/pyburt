@@ -1,5 +1,5 @@
 """BURT file related utility functions."""
-import os
+from os.path import isfile, splitext
 
 import burt
 
@@ -87,8 +87,8 @@ def _is_correct_ext(filename, correct_ext, check_existence=False):
 
     """
     if check_existence:
-        if not os.path.isfile(filename):
+        if not isfile(filename):
             return False
 
-    _, parsed_ext = os.path.splitext(filename)
+    _, parsed_ext = splitext(filename)
     return parsed_ext == correct_ext
