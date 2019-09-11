@@ -1,14 +1,14 @@
-""" Various tests for the rgr parser."""
+"""Various tests for the rgr parser."""
 import pytest
-import test
+
 import burt
+import test
 from burt import RgrParser as rp
 from burt.parsers import ParserException
 
 
 def test_base_case():
-    """Runs the .rgr parser against mostly blank files.
-    """
+    """Run the .rgr parser against mostly blank files."""
     rgr_parser = burt.RgrParser(test.BLANK_RGR)
     assert test.BLANK_RGR == rgr_parser.path
 
@@ -17,15 +17,12 @@ def test_base_case():
 
 
 def test_inline_comments():
-    """Runs the rgr parser against a case with inline comments next to paths.
-    """
-
+    """Run the rgr parser against a case with inline comments next to paths."""
     correct_checks = [
         "/home/ops/burt/checkFiles/tune-FFWD.check",
         "/home/ops/burt/checkFiles/fastchic.check",
         "/home/ops/burt/checkFiles/misc.check",
     ]
-
     correct_snaps = [
         "/home/ops/burt/backupFiles/SR01A-TI/SR-rtf26_190226_164119.snap",
         "/home/ops/burt/backupFiles/BS-PC/SR-rtf26_190226_164119.snap",
@@ -50,8 +47,7 @@ def test_inline_comments():
 
 
 def test_malformed_files():
-    """Runs the .rgr parser against the malformed .snap files.
-    """
+    """Run the .rgr parser against the malformed .snap files."""
     with pytest.raises(ParserException):
         rgr_parser = rp(test.MISSING_BOTTOM_HEADER_RGR)
         rgr_parser.parse()
@@ -91,9 +87,7 @@ def test_malformed_files():
 
 
 def normal_case():
-    """Runs the rgr parser against a typical case.
-    """
-
+    """Run the rgr parser against a typical case."""
     correct_checks = [
         "/home/ops/burt/checkFiles/tune-FFWD.check",
         "/home/ops/burt/checkFiles/fastchic.check",

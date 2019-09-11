@@ -1,13 +1,13 @@
-""" Various tests for the check parser."""
+"""Various tests for the check parser."""
 import pytest
+
 import test
-from burt.parsers import ParserException
 from burt import CheckParser as cp
+from burt.parsers import ParserException
 
 
 def test_base_case():
-    """Runs the .req parser against mostly blank files.
-    """
+    """Run the .req parser against mostly blank files."""
     check_parser = cp(test.BLANK_REQ)
     assert test.BLANK_REQ == check_parser.path
 
@@ -16,18 +16,14 @@ def test_base_case():
 
 
 def test_multiline_comments():
-    """Runs the parser against a case with multi line comments in the header.
-    """
-    correct_pv_list = [cp.CHECK_PV("SR-DI-EBPM-01:BCD_LIMIT", 20, 0)]
-
+    """Run the parser against a case with multi line comments in the header."""
     check_parser = cp(test.MULTI_LINE_COMMENT_CHECK)
     with pytest.raises(ParserException):
         check_parser.parse()
 
 
 def test_malformed_files():
-    """Runs the parser against the malformed .check files.
-    """
+    """Run the parser against the malformed .check files."""
     with pytest.raises(ParserException):
         check_parser = cp(test.BAD_PREFIX_CHECK)
         check_parser.parse()
@@ -50,8 +46,7 @@ def test_malformed_files():
 
 
 def test_non_floats():
-    """Runs the parser against cases with non parseable numbers.
-    """
+    """Run the parser against cases with non parseable numbers."""
     with pytest.raises(ParserException):
         check_parser = cp(test.NORMAL_CHECK_1)
         check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL a")
@@ -70,8 +65,7 @@ def test_non_floats():
 
 
 def test_check_parser_normal_1():
-    """Runs the .check parser against a basic case.
-    """
+    """Run the .check parser against a basic case."""
     correct_pv_list = [cp.CHECK_PV("SR-DI-DCCT-01:SIGNAL", 10, 0)]
 
     check_parser = cp(test.NORMAL_CHECK_1)
@@ -85,8 +79,7 @@ def test_check_parser_normal_1():
 
 
 def test_check_parser_normal_2():
-    """Runs the .check parser against a basic case.
-    """
+    """Run the .check parser against a basic case."""
     correct_pv_list = [
         cp.CHECK_PV("SR01A-PC-Q1D-01:OFFSET1.VAL", 0, 0),
         cp.CHECK_PV("SR01A-PC-Q2D-02:OFFSET1.VAL", 2, 1),
@@ -112,8 +105,7 @@ def test_check_parser_normal_2():
 
 
 def test_check_parser_normal_3():
-    """Runs the .check parser against a basic case.
-    """
+    """Run the .check parser against a basic case."""
     correct_pv_list = [
         cp.CHECK_PV("SR09A-PC-FCHIC-01:SETI", 0, 1e-6),
         cp.CHECK_PV("SR09A-PC-FCHIC-02:SETI", 0, 1e-6),

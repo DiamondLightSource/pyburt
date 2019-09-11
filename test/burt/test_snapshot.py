@@ -1,19 +1,19 @@
-""" Various tests for the main burt module.
-"""
-import pytest
-import test
-import mock
-import burt
-import cothread
+"""Various tests for the main burt module."""
 import os
+
+import cothread
+import mock
 import numpy
+import pytest
+
+import burt
+import test
 from burt import SnapParser as sp
 
 
 @mock.patch("burt.read.caget")
 def test_blank_snapshot(mock_caget):
-    """Runs the burt snapshot against a blank .req file.
-    """
+    """Run the burt snapshot against a blank .req file."""
     mock_caget.return_value = cothread.dbr.ca_array(numpy.array([0, 0, 0])).flatten()
     mock_caget.return_value.ok = True
 
@@ -28,9 +28,7 @@ def test_blank_snapshot(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_bad_file_arguments(mock_caget):
-    """Runs the burt script against a case where the file arguments are
-    malformed.
-    """
+    """Run the burt script against a case where the file arguments are malformed."""
     mock_caget.return_value = cothread.catools.ca_nothing
     mock_caget.return_value.ok = False
     mock_caget.return_value.errorcode = "Dummy"
@@ -58,6 +56,7 @@ def test_bad_file_arguments(mock_caget):
 @mock.patch("burt.read.caget")
 @mock.patch("burt.read._get_snap_header_system_vals")
 def test_simple_snapshot(mock_get_vals, mock_caget):
+    """Run a simple snapshot."""
     singleton_return_value = cothread.dbr.ca_array(numpy.array([2]))
     singleton_return_value[0] = 1
     singleton_return_value[1] = 2
@@ -79,9 +78,7 @@ def test_simple_snapshot(mock_get_vals, mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_arrays(mock_caget):
-    """Runs a take snapshot test of a normal .req file with a mocked ca array
-    return value.
-    """
+    """Run a take snapshot test of a normal .req file."""
     # Flattened ndarray is a 12 element list of 40 elements.
     singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
     mock_caget.return_value = [singleton_return_value for i in range(12)]
@@ -153,9 +150,7 @@ def test_snapshot_arrays(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_enum(mock_caget):
-    """Runs a take snapshot test of a normal .req file with a mocked enum
-    return value.
-    """
+    """Runs a take snapshot test of a normal .req file including a mocked enum."""
     singleton_return_value = cothread.dbr.ca_str("DIAD")
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
@@ -223,9 +218,9 @@ def test_snapshot_enum(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_scalar(mock_caget):
-    """Runs a take snapshot test of a normal .req file with a mocked scalar
-    return value. Note that cothread will always return an augmented non scalar
-    value.
+    """Runs a take snapshot test of a normal .req file with a mocked scalar.
+
+    Note that cothread will always return an augmented non scalar value.
     """
     singleton_return_value = -1e-16
     mock_caget.return_value = [singleton_return_value for i in range(12)]
@@ -292,8 +287,9 @@ def test_snapshot_scalar(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_scalar_failed_pvs_ret(mock_caget):
-    """Runs a take snapshot test of a normal .req file with a mocked scalar
-    return value, and tests the failed values for validity.
+    """Run a take snapshot test of a normal .req file with a mocked scalar.
+
+    Test the failed values for validity.
     """
     singleton_return_value = cothread.dbr.ca_str("DIAD")
     mock_caget.return_value = [singleton_return_value for i in range(12)]
@@ -335,8 +331,7 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_multiple_reqs(mock_caget):
-    """Runs a take snapshot test of a .req file with multiple req paths.
-    """
+    """Run a take snapshot test of a .req file with multiple req paths."""
     singleton_return_value = -1e-16
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
@@ -418,8 +413,9 @@ def test_snapshot_multiple_reqs(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_newlines_in_args(mock_caget):
-    """Runs a take snapshot test with the problematic case of newlines in user
-    supplied meta data. The newlines should appear as is in the .snap file,
+    """Run a take snapshot test with newlines in user supplied meta data.
+
+    The newlines should appear as is in the .snap file,
     with the help of an extra backslash, and not interpreted.
     """
     # Flattened ndarray is a 12 element list of 40 elements.
@@ -453,9 +449,9 @@ def test_snapshot_newlines_in_args(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_invalid_save_len(mock_caget):
-    """
-    Try to save a PV with a length specified that is greater than the PV
-    data size. This is a case which would not be caught by the parser.
+    """Try to save a PV with a length that is greater than the PV data size.
+
+    This is a case which would not be caught by the parser.
     """
     # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
     # The requested save length in the .req file is 937.
@@ -466,11 +462,9 @@ def test_snapshot_invalid_save_len(mock_caget):
         burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], test.TMP_PYBURT_OUT)
 
 
-@mock.patch("burt.read.caget")
+@pytest.mark.xfail
 def test_snapshot_group(mock_caget):
-    """Runs a take snapshot group test of a .rqg file.
-    """
+    """Runs a take snapshot group test of a .rqg file."""
     # TODO: this is a broken test with incorrect behaviour. To be changed when
     #  snapshot groups are implemented.
-
-    # Redacted tests.
+    assert False

@@ -1,14 +1,14 @@
-""" Various tests for the rqg parser."""
+"""Various tests for the rqg parser."""
 import pytest
-import test
+
 import burt
+import test
 from burt import RqgParser as rp
 from burt.parsers import ParserException
 
 
 def test_base_case():
-    """Runs the .rqg parser against mostly blank files.
-    """
+    """Run the .rqg parser against mostly blank files."""
     rgr_parser = burt.RgrParser(test.BLANK_RQG)
     assert test.BLANK_RQG == rgr_parser.path
 
@@ -17,11 +17,8 @@ def test_base_case():
 
 
 def test_inline_comments():
-    """Runs the rqg parser against a case with inline comments next to paths.
-    """
-
+    """Run the rqg parser against a case with inline comments next to paths."""
     correct_checks = ["/home/ops/burt/checkFiles/tune-FFWD.check"]
-
     correct_reqs = [
         "/home/ops/burt/requestFiles/LI-RF.req",
         "/home/ops/burt/requestFiles/LI-TI.req",
@@ -45,8 +42,7 @@ def test_inline_comments():
 
 
 def test_malformed_files():
-    """Runs the .rqg parser against the malformed .rqg files.
-    """
+    """Run the .rqg parser against the malformed .rqg files."""
     with pytest.raises(ParserException):
         rqg_parser = burt.RqgParser(test.MALFORMED_RQG)
         rqg_parser.parse()
@@ -57,14 +53,11 @@ def test_malformed_files():
 
 
 def normal_case():
-    """Runs the rqg parser against a typical case.
-    """
-
+    """Run the rqg parser against a typical case."""
     correct_checks = [
         "/home/ops/burt/checkFiles/tune-FFWD.check",
         "/home/ops/burt/checkFiles/fastchic.check",
     ]
-
     correct_reqs = [
         "/home/ops/burt/requestFiles/LI-PC.req",
         "/home/ops/burt/requestFiles/LI-DI.req",

@@ -1,12 +1,9 @@
-""" Various tests for the utils file."""
-import test
-import pytest
+"""Various tests for the utils file."""
 import burt.utils.file as f
 
 
 def test_file_normal():
-    """ Runs file util tests against normal cases.
-    """
+    """Run file util tests against normal cases."""
     assert f.is_rgr_file("sample.rgr")
     assert f.is_rgr_file("/utils/sample.rgr")
     assert f.is_snap_file("sample.snap")
@@ -20,8 +17,7 @@ def test_file_normal():
 
 
 def test_file_fail():
-    """ Runs file util tests against malformed cases.
-    """
+    """Run file util tests against malformed cases."""
     assert not f.is_rgr_file("sample.rg")
     assert not f.is_rgr_file("/utils/sample.req")
     assert not f.is_snap_file("sample.snp")

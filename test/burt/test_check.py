@@ -1,17 +1,16 @@
-""" Various tests for the check file functionality."""
-import pytest
-import test
-import mock
-import burt
+"""Various tests for the check file functionality."""
 import cothread
+import mock
+import pytest
 from cothread.catools import ca_nothing
+
+import burt
+import test
 
 
 @mock.patch("burt.checks.caget")
 def test_bad_file_arguments(mock_caget):
-    """Runs the check against a case where the file arguments are
-    malformed.
-    """
+    """Run the check against a case where the file arguments are malformed."""
     mock_caget.return_value = cothread.catools.ca_nothing
 
     with pytest.raises(ValueError):
@@ -26,8 +25,7 @@ def test_bad_file_arguments(mock_caget):
 
 @mock.patch("burt.checks.caget")
 def test_normal_check(mock_caget):
-    """Runs the check against a normal case with no failures.
-    """
+    """Runs the check against a normal case with no failures."""
     # Zero tolerance
     mock_caget.return_value = 10
     burt.check(test.NORMAL_CHECK_1)
@@ -45,8 +43,7 @@ def test_normal_check(mock_caget):
 
 @mock.patch("burt.checks.caget")
 def test_fail_check(mock_caget):
-    """Runs the check against failure cases.
-    """
+    """Runs the check against failure cases."""
     # Zero tolerance
     with pytest.raises(burt.CheckFailedException):
         mock_caget.return_value = 9

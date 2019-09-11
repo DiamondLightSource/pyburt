@@ -1,12 +1,14 @@
+"""Pytest utilities."""
 import sys
 import types
+
 import mock
 import numpy
 
 
 def pytest_sessionstart():
     """Create a dummy cothread module."""
-
+    # noqa conflict between flake8-docstring and black.
     class ca_nothing(Exception):
         """A minimal mock of the cothread ca_nothing exception class."""
 
