@@ -8,7 +8,7 @@ A check succeeds if |pv-value - target| < tolerance, else it fails.
 
 import logging
 
-from cothread.catools import ca_nothing, caget
+from cothread.catools import caget
 
 import burt
 from burt.utils.file import is_check_file
@@ -50,19 +50,21 @@ def check(check_file):
         raise ValueError("Invalid .check file input.")
 
     check_parser = burt.CheckParser(check_file)
-    _, body = check_parser.parse()
+    _, pvs = check_parser.parse()
 
-    # Each entry is a CHECK_PV named tuple
-    for pv_entry in body:
-        try:
-            current_pv_val = caget(pv_entry.name)
+    ca_readings = caget([pv.name for pv in pvs], throw=False)
 
-            if abs(current_pv_val - pv_entry.target) > pv_entry.tolerance:
-                e = CheckFailedException(pv_entry)
-                logging.debug(e)
-                msg = f"Check {check_file} failed on {pv_entry.name}"
-                logging.critical(msg)
+    for pv, ca_reading in zip(pvs, ca_readings):
+        if hasattr(ca_reading, "ok") and not ca_reading.ok:
+            logging.critical(f"Check {check_file} caget failure on {pv.name}")
+            raise CheckFailedException(pv, "Caget failure.")
 
-                raise e
-        except ca_nothing as e:
-            raise CheckFailedException(pv_entry, str(e))
+        elif abs(ca_reading - pv.target) > pv.tolerance:
+            e = CheckFailedException(pv)
+            logging.debug(e)
+            logging.critical(f"Check {check_file} failed on {pv.name}")
+
+            raise e
+
+        else:
+            logging.debug(f"Check {check_file} passed on {pv.name}.")
