@@ -41,12 +41,16 @@ Static code checks:
 
 # Publish coverage html report to common location
 Publish coverage:
+  before_script:
+    - unset WORKON_HOME
   stage: publish coverage
   extends:
     .template_publish_coverage
 
 # Install the docs for each push to master to "latest"
 Install docs for latest master:
+  before_script:
+    - unset WORKON_HOME
   stage: publish docs
   tags:
     - rhel7
@@ -59,6 +63,8 @@ Install docs for latest master:
 
 # Install the docs for each tag to their own directory
 Install docs for tags:
+  before_script:
+    - unset WORKON_HOME
   stage: publish docs
   tags:
     - rhel7
