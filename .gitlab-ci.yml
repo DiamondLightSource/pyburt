@@ -28,6 +28,8 @@ Unit tests and coverage:
 
 # Run our custom flake8 and black checks
 Static code checks:
+  before_script:
+    - unset WORKON_HOME
   tags:
     - rhel7
   stage: static code checks
