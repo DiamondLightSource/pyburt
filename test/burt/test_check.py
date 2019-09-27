@@ -2,7 +2,6 @@
 import cothread
 import mock
 import pytest
-from cothread.catools import ca_nothing
 
 import burt
 import test
