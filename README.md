@@ -1,44 +1,80 @@
-[![Build Status](https://travis-ci.com/dls-controls/pyburt.svg?branch=master)](https://travis-ci.com/dls-controls/pyburt)
-[![Coverage Status](https://coveralls.io/repos/github/dls-controls/pyburt/badge.svg?branch=master)](https://coveralls.io/github/dls-controls/pyburt?branch=master)
+[![pipeline status](https://gitlab.diamond.ac.uk/controls/python3/pyburt/badges/master/pipeline.svg)](https://gitlab.diamond.ac.uk/controls/python3/pyburt/commits/master)
+[![coverage report](https://gitlab.diamond.ac.uk/controls/python3/pyburt/badges/master/coverage.svg)](https://gitlab.diamond.ac.uk/controls/python3/pyburt/commits/master)
 [![Documentation Status](https://readthedocs.org/projects/pyburt/badge/?version=latest)](https://pyburt.readthedocs.io/en/latest/?badge=latest)
 
 # pyburt
 
-**pyburt** is the Python version of the Burt EPICS extension. It utilizes the
+**pyburt** is the Python version of the Burt EPICS extension. It utilises the
 [cothread](https://cothread.readthedocs.io/en/latest/) python library for
 Channel Access.
 
 ## Documentation
 
-Full documentation is available at [Read the Docs](https://readthedocs.org/projects/pyburt/).
+Full documentation is available at [readthedocs](https://readthedocs.org/projects/pyburt/).
 
-## Usage
+## Installation
+
+It's best to install pyburt using `pipenv`:
+
+```bash
+$ pipenv install --dev pyburt
+$ cd pyburt/
+$ pipenv install -e .
+```
+
+## CLI Usage
+
+```bash
+$ burt-read -h
+usage: burt-read [-h] [-c C] [-k K] [-v] request_file snap_destination
+
+positional arguments:
+  request_file      The path to either a .req or .rqg file.
+  snap_destination  The path to the destination .snap file.
+
+optional arguments:
+  -h, --help        show this help message and exit
+  -c C              Optional snapshot comments.
+  -k K              Optional snapshot keywords.
+  -v                Enable verbose logging (debug) level.
+```
+
+```bash
+$ burt-write -h
+usage: burt-write [-h] [-v] restore_file
+
+positional arguments:
+  restore_file  The path to either a .snap or .rgr file.
+
+optional arguments:
+  -h, --help    show this help message and exit
+  -v            Enable verbose logging (debug) level.
+```
+
+## API Usage
 
 ```python
 import burt
 
-# Saves PV values in a .req file into a .snap file along with some additional
+# Saves PV values in a single .req file into a .snap file along with some additional
 # metadata.
-burt.take_snapshot("/path/to/.req/file.req",
-    "/path/to/.snap/file.snap", "comment", "keywords")
-    
-# Specify a request group to take a snapshot of.
-burt.take_snapshot_group("/path/to/.rqg/file.rqg",
+burt.take_snapshot(["/path/to/.req/file.req"],
     "/path/to/.snap/file.snap", "comment", "keywords")
 
+# As above, except take a snapshot of several .req files, combining the values into
+# one .snap file.
+burt.take_snapshot(["/path/to/.req/file.req", "/path/to/.req/file2.req"],
+    "/path/to/.snap/file.snap", "comment", "keywords")
+    
 # Restores PV values in a .snap file.
 burt.restore("/path/to/.snap/file.snap")
 
 # Specify a restore group to restore.
 burt.restore_group("/path/to/.rgr/file.rgr")
-```
-
-## Installation
-
-To install the latest version of pyburt using pip:
-
-```bash
-$ pip install pyburt
+    
+# TODO: specify a request group to take a snapshot of.
+burt.take_snapshot_group("/path/to/.rqg/file.rqg",
+    "/path/to/.snap/file.snap", "comment", "keywords")
 ```
 
 ## Build
@@ -63,11 +99,8 @@ See [LICENSE]().
 To run the core pytest unit tests:
 
 ```bash
-$ pwd
-.../pyburt
-
 $ pipenv shell
-(pyburt) $ pytest -vv test
+$ pytest -vv test
 ```
 
 Note: the unit tests should be run from the root project directory.
@@ -75,15 +108,10 @@ Note: the unit tests should be run from the root project directory.
 #### DLS Integration Tests
 
 There are separate DLS integration tests for pyburt. These tests run snapshot
-and restore operations against known Diamond PV's. See 
+and restore operations against known Diamond and Pytac PV's. See 
 `integration/README.md` for instructions.
 
 Note that running pytest against `integration` without running the test IOC
  first,
 as described in `integration/README.md`, will cause the tests to
 fail.
-
-#### Pytac Integration Tests
-
-Similarly, there are integration tests designed for testing against known PV's
-defined in Pytac.
