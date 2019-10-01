@@ -24,7 +24,7 @@ def test_bad_file_arguments(mock_caget):
 
 @mock.patch("burt.checks.caget")
 def test_normal_check(mock_caget):
-    """Runs the check against a normal case with no failures."""
+    """Run the check against a normal case with no failures."""
     # Zero tolerance
     mock_caget.return_value = [test.aug_float(10)]
     burt.check(test.NORMAL_CHECK_1)
@@ -37,7 +37,7 @@ def test_normal_check(mock_caget):
 
 @mock.patch("burt.checks.caget")
 def test_fail_check(mock_caget):
-    """Runs the check against failure cases."""
+    """Run the check against failure cases."""
     # Zero tolerance
     for val in (9, 0, 11, 9.99, 10.01, -10):
         with pytest.raises(burt.CheckFailedException):
@@ -48,3 +48,11 @@ def test_fail_check(mock_caget):
         with pytest.raises(burt.CheckFailedException):
             mock_caget.return_value = [test.aug_float(val)]
             burt.check(test.NORMAL_CHECK_3)
+
+
+@mock.patch("burt.checks.caget")
+def test_check_fails_if_ok_False(mock_caget):
+    """Run the check and simulate caget returning .ok as False."""
+    mock_caget.return_value = [test.aug_float(1, ok=False)]
+    with pytest.raises(burt.CheckFailedException):
+        burt.check(test.NORMAL_CHECK_1)
