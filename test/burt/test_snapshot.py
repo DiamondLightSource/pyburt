@@ -60,6 +60,7 @@ def test_simple_snapshot(mock_get_vals, mock_caget):
     singleton_return_value = cothread.dbr.ca_array(numpy.array([2]))
     singleton_return_value[0] = 1
     singleton_return_value[1] = 2
+    singleton_return_value.ok = True
     mock_caget.return_value = [singleton_return_value]
     mock_get_vals.return_value = ("user", "time", "dir", "group", 100)
 
@@ -81,6 +82,7 @@ def test_snapshot_arrays(mock_caget):
     """Run a take snapshot test of a normal .req file."""
     # Flattened ndarray is a 12 element list of 40 elements.
     singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    singleton_return_value.ok = True
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
@@ -152,6 +154,7 @@ def test_snapshot_arrays(mock_caget):
 def test_snapshot_enum(mock_caget):
     """Runs a take snapshot test of a normal .req file including a mocked enum."""
     singleton_return_value = cothread.dbr.ca_str("DIAD")
+    singleton_return_value.ok = True
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
@@ -222,7 +225,7 @@ def test_snapshot_scalar(mock_caget):
 
     Note that cothread will always return an augmented non scalar value.
     """
-    singleton_return_value = -1e-16
+    singleton_return_value = test.aug_float(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
@@ -332,7 +335,7 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget):
 @mock.patch("burt.read.caget")
 def test_snapshot_multiple_reqs(mock_caget):
     """Run a take snapshot test of a .req file with multiple req paths."""
-    singleton_return_value = -1e-16
+    singleton_return_value = test.aug_float(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
@@ -420,6 +423,8 @@ def test_snapshot_newlines_in_args(mock_caget):
     """
     # Flattened ndarray is a 12 element list of 40 elements.
     singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    singleton_return_value.ok = False
+    singleton_return_value.errorcode = 1
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "\nHello\r\n \nWorld\r\n\r"
@@ -456,6 +461,7 @@ def test_snapshot_invalid_save_len(mock_caget):
     # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
     # The requested save length in the .req file is 937.
     singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
+    singleton_return_value.ok = True
     mock_caget.return_value = [singleton_return_value]
 
     with pytest.raises(ValueError):

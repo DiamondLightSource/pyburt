@@ -77,3 +77,14 @@ NORMAL_CHECK_3 = "testables/check/normal_3.check"
 
 # Tmp snap file to be deleted after a test run.
 TMP_PYBURT_OUT = "test/tmp.snap"
+
+
+def aug_float(int_val, ok=True):
+    """Create an augmented value as returned by cothread."""
+    # noqa D202  https://github.com/PyCQA/pydocstyle/pull/395
+    class AugFloat(float):
+        pass
+
+    f = AugFloat(int_val)
+    f.ok = ok
+    return f
