@@ -2,7 +2,6 @@
 import cothread
 import mock
 import pytest
-from cothread.catools import ca_nothing
 
 import burt
 import test
@@ -27,62 +26,25 @@ def test_bad_file_arguments(mock_caget):
 def test_normal_check(mock_caget):
     """Runs the check against a normal case with no failures."""
     # Zero tolerance
-    mock_caget.return_value = 10
+    mock_caget.return_value = [test.aug_float(10)]
     burt.check(test.NORMAL_CHECK_1)
 
     # 1E-6 tolerance
-    mock_caget.return_value = 0
-    burt.check(test.NORMAL_CHECK_3)
-    mock_caget.return_value = 1e-6
-    burt.check(test.NORMAL_CHECK_3)
-    mock_caget.return_value = 1e-7
-    burt.check(test.NORMAL_CHECK_3)
-    mock_caget.return_value = -1e-7
-    burt.check(test.NORMAL_CHECK_3)
+    for vai in (0, 1e-6, 1e-7, -1e-7):
+        mock_caget.return_value = [test.aug_float(0)]
+        burt.check(test.NORMAL_CHECK_3)
 
 
 @mock.patch("burt.checks.caget")
 def test_fail_check(mock_caget):
     """Runs the check against failure cases."""
     # Zero tolerance
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 9
-        burt.check(test.NORMAL_CHECK_1)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 0
-        burt.check(test.NORMAL_CHECK_1)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 11
-        burt.check(test.NORMAL_CHECK_1)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 9.99
-        burt.check(test.NORMAL_CHECK_1)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 10.01
-        burt.check(test.NORMAL_CHECK_1)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = -10
-        burt.check(test.NORMAL_CHECK_1)
-
+    for val in (9, 0, 11, 9.99, 10.01, -10):
+        with pytest.raises(burt.CheckFailedException):
+            mock_caget.return_value = [test.aug_float(val)]
+            burt.check(test.NORMAL_CHECK_1)
     # 1E-6 tolerance
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 1
-        burt.check(test.NORMAL_CHECK_3)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = -1
-        burt.check(test.NORMAL_CHECK_3)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 10
-        burt.check(test.NORMAL_CHECK_3)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = 1e-5
-        burt.check(test.NORMAL_CHECK_3)
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.return_value = -1e-5
-        burt.check(test.NORMAL_CHECK_3)
-
-    # ca_nothing caget failure
-    with pytest.raises(burt.CheckFailedException):
-        mock_caget.side_effect = ca_nothing("mock_bad_caget")
-        mock_caget.return_value = 0
-        burt.check(test.NORMAL_CHECK_3)
+    for val in (1, -1, 10, 1e-5, -1e-5):
+        with pytest.raises(burt.CheckFailedException):
+            mock_caget.return_value = [test.aug_float(val)]
+            burt.check(test.NORMAL_CHECK_3)

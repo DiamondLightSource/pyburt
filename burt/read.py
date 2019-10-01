@@ -283,7 +283,7 @@ def _gen_snap_footer(ca_readings, pv_entries):
 
         # Cothread attaches a .ok and .errorcode attribute to each reading. The error
         # if present will be stored in the reading itself.
-        if hasattr(ca_reading, "ok") and not ca_reading.ok:
+        if not ca_reading.ok:
             logging.warning(
                 f"caget failure {ca_reading.errorcode} from pv {pv_entry.name}"
             )
