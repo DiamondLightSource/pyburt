@@ -1,6 +1,6 @@
 include:
   - project: 'controls/reports/ci_templates'
-    ref: 0-9
+    ref: dev
     file: 'all_templates.yml'
 
 stages:
@@ -11,8 +11,6 @@ stages:
 
 # Run unit tests, make coverage report and build docs
 Unit tests and coverage:
-  before_script:
-    - unset WORKON_HOME
   stage: run tests
   extends:
     - .template_py3_pytest_and_coverage
@@ -28,8 +26,6 @@ Unit tests and coverage:
 
 # Run our custom flake8 and black checks
 Static code checks:
-  before_script:
-    - unset WORKON_HOME
   tags:
     - rhel7
   stage: static code checks
