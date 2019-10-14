@@ -1,6 +1,6 @@
 include:
   - project: 'controls/reports/ci_templates'
-    ref: dev
+    ref: 0-10
     file: 'all_templates.yml'
 
 stages:
