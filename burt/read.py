@@ -409,10 +409,15 @@ def main():
     cli.add_argument(
         "-v", help="Enable verbose logging (debug) level.", action="store_true"
     )
+    cli.add_argument("-l", type=str, help="Optional backup log file location.")
 
     args = cli.parse_args()
 
-    logging.basicConfig()
+    if args.l is not None:
+        logging.basicConfig(filename=args.l)
+    else:
+        logging.basicConfig()
+
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
     else:
