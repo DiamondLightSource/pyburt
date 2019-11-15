@@ -31,7 +31,7 @@ from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 
-def take_snapshot(req_files, snap_file, comments=None, keywords=None):
+def take_snapshot(req_files, snap_file, comments=None, keywords=None, logfile=None):
     """Save the PVs and their state to the specified snap file, with metadata.
 
     If more than one .req file is given as a list or iterable, then the snapshot values
@@ -43,6 +43,7 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
             header.
+        logfile (str): The path to the log file; if empty will just use stdout.
 
     Returns:
         list: A list of the PV names where something went wrong.
@@ -53,6 +54,9 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
 
     """
     _check_snapshot_params(req_files, snap_file)
+
+    if logfile:
+        logging.basicConfig(filename=logfile)
 
     snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
@@ -85,7 +89,9 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     return all_req_failed_pvs
 
 
-def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=True):
+def take_snapshot_group(
+    rqg_file, rgr_file, comments=None, keywords=None, check=True, logfile=None
+):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
@@ -95,6 +101,7 @@ def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=
         keywords (str): A delimited string of keywords to append to the BURT
             header.
         check (bool): Whether to inspect .check files or not.
+        logfile (str): The path to the log file; if empty will just use stdout.
 
     Returns:
         list: A list of the PV names where something went wrong.
@@ -415,8 +422,6 @@ def main():
 
     if args.l is not None:
         logging.basicConfig(filename=args.l)
-    else:
-        logging.basicConfig()
 
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
