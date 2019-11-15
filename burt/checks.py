@@ -31,13 +31,14 @@ class CheckFailedException(Exception):
         )
 
 
-def check(check_file):
+def check(check_file, logfile=None):
     """Check if the check file conditions are met.
 
     A check succeeds if |pv-value - target| < tolerance, else it fails.
 
     Args:
         check_file (str): The path to the .check file.
+        logfile (str): The path to the log file; if empty will just use stdout.
 
     Raises:
         ValueError: If the check file has an invalid extension, or if it does
@@ -48,6 +49,9 @@ def check(check_file):
     """
     if not is_check_file(check_file, True):
         raise ValueError("Invalid .check file input.")
+
+    if logfile:
+        logging.basicConfig(filename=logfile)
 
     check_parser = burt.CheckParser(check_file)
     _, pvs = check_parser.parse()
