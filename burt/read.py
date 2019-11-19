@@ -26,6 +26,7 @@ from cothread.catools import caget
 import burt
 from burt.parsers.snap import SnapParser as snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
+from burt.utils.logging import configure_root_logger
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
@@ -55,8 +56,7 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None, logfile=No
     """
     _check_snapshot_params(req_files, snap_file)
 
-    if logfile:
-        logging.basicConfig(filename=logfile)
+    configure_root_logger(log_file_path=logfile)
 
     snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
@@ -112,6 +112,8 @@ def take_snapshot_group(
         CheckFailedException: If a Burt check failed.
 
     """
+    configure_root_logger(log_file_path=logfile)
+
     # See Git history for a partial implementation.
     # It is unclear how to decide how the all the new snap files are laid out.
     raise NotImplementedError("Not yet implemented.")
@@ -420,13 +422,10 @@ def main():
 
     args = cli.parse_args()
 
-    if args.l is not None:
-        logging.basicConfig(filename=args.l)
+    configure_root_logger(log_file_path=args.l)
 
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
 
     if is_req_file(args.request_file):
         take_snapshot(

@@ -25,6 +25,7 @@ from cothread.catools import caput
 
 import burt
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
+from burt.utils.logging import configure_root_logger
 
 
 def restore(snap_file, logfile=None):
@@ -54,8 +55,7 @@ def restore(snap_file, logfile=None):
     if not is_snap_file(snap_file, True):
         raise ValueError(f"Invalid .snap file {snap_file}.")
 
-    if logfile:
-        logging.basicConfig(filename=logfile)
+    configure_root_logger(log_file_path=logfile)
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
@@ -64,18 +64,16 @@ def restore(snap_file, logfile=None):
     # Improve performance by putting all at once later on.
     pvs_to_restore = OrderedDict()
 
-    # TODO: caput return does not behave similarly to caget, and it looks like it
-    #  returns the failed values which was being caput-ed. This needs to be changed.
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
-            print("RON type PVs currently unimplemented.")
+            logging.warning("RON type PVs currently unimplemented.")
 
         elif pv_entry.modifier != burt.READONLY_SPECIFIER:
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
-                print("WO type PVs currently unimplemented.")
+                logging.warning("WO type PVs currently unimplemented.")
             else:
                 if pv_entry.dtype_len == 1:
                     pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
@@ -114,8 +112,7 @@ def restore_group(rgr_file, check=True, logfile=None):
     if not is_rgr_file(rgr_file):
         raise ValueError(f"Invalid .rgr file {rgr_file}.")
 
-    if logfile:
-        logging.basicConfig(filename=logfile)
+    configure_root_logger(log_file_path=logfile)
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
@@ -149,13 +146,10 @@ def main():
 
     args = cli.parse_args()
 
-    if args.l is not None:
-        logging.basicConfig(filename=args.l)
+    configure_root_logger(log_file_path=args.l)
 
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
 
     if is_snap_file(args.restore_file):
         failed_pvs = restore(args.restore_file)

@@ -12,6 +12,7 @@ from cothread.catools import caget
 
 import burt
 from burt.utils.file import is_check_file
+from burt.utils.logging import configure_root_logger
 
 
 class CheckFailedException(Exception):
@@ -50,8 +51,7 @@ def check(check_file, logfile=None):
     if not is_check_file(check_file, True):
         raise ValueError("Invalid .check file input.")
 
-    if logfile:
-        logging.basicConfig(filename=logfile)
+    configure_root_logger(log_file_path=logfile)
 
     check_parser = burt.CheckParser(check_file)
     _, pvs = check_parser.parse()
