@@ -2,8 +2,8 @@
 import logging
 import sys
 
-# 2019-11-19 22:20:02,165 - tph19377 - INFO - Dummy log message
-DEFAULT_LOG_FORMAT = "%(asctime)-15s | %(user)-10s | %(levelname)-8s | %(message)s"
+# E.g.) 2019-11-19 15:16:08,970 - root - WARNING - caget failure SR01C-DI-COL-01:C
+DEFAULT_LOG_FORMAT = "%(asctime)-15s - %(name)s - %(levelname)s - %(message)s"
 
 
 def configure_root_logger(level=logging.INFO, log_file_path=None):
@@ -23,8 +23,11 @@ def configure_root_logger(level=logging.INFO, log_file_path=None):
     handlers = [stdout_handler]
 
     if log_file_path:
-        log_file_handler = logging.FileHandler(log_file_path, mode="w+")
-        handlers.append(log_file_handler)
+        try:
+            log_file_handler = logging.FileHandler(log_file_path, mode="a+")
+            handlers.append(log_file_handler)
+        except FileNotFoundError as e:
+            logging.warning(f"Problem opening BURT logfile: {e}")
 
     for handler in handlers:
         handler.setLevel(level)
