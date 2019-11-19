@@ -35,7 +35,7 @@ def configure_root_logger(level=logging.INFO, log_file_path=None):
         root_logger.addHandler(handler)
 
 
-def add_handler(handler, formatter=None):
+def add_handler(handler, level=logging.INFO, formatter=None):
     """Add a new handler for the root logger.
 
     Args:
@@ -45,4 +45,5 @@ def add_handler(handler, formatter=None):
     if formatter is None:
         handler.setFormatter(logging.Formatter(DEFAULT_LOG_FORMAT))
 
+    handler.setLevel(level)
     logging.getLogger().addHandler(handler)
