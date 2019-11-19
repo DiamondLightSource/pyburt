@@ -12,7 +12,6 @@ from cothread.catools import caget
 
 import burt
 from burt.utils.file import is_check_file
-from burt.utils.logging import configure_root_logger
 
 
 class CheckFailedException(Exception):
@@ -32,14 +31,13 @@ class CheckFailedException(Exception):
         )
 
 
-def check(check_file, logfile=None):
+def check(check_file):
     """Check if the check file conditions are met.
 
     A check succeeds if |pv-value - target| < tolerance, else it fails.
 
     Args:
         check_file (str): The path to the .check file.
-        logfile (str): The path to the log file; if empty will just use stdout.
 
     Raises:
         ValueError: If the check file has an invalid extension, or if it does
@@ -50,8 +48,6 @@ def check(check_file, logfile=None):
     """
     if not is_check_file(check_file, True):
         raise ValueError("Invalid .check file input.")
-
-    configure_root_logger(log_file_path=logfile)
 
     check_parser = burt.CheckParser(check_file)
     _, pvs = check_parser.parse()

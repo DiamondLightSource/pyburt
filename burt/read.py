@@ -32,7 +32,7 @@ from burt.utils.logging import configure_root_logger
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 
-def take_snapshot(req_files, snap_file, comments=None, keywords=None, logfile=None):
+def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     """Save the PVs and their state to the specified snap file, with metadata.
 
     If more than one .req file is given as a list or iterable, then the snapshot values
@@ -55,8 +55,6 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None, logfile=No
 
     """
     _check_snapshot_params(req_files, snap_file)
-
-    configure_root_logger(log_file_path=logfile)
 
     snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
@@ -89,9 +87,7 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None, logfile=No
     return all_req_failed_pvs
 
 
-def take_snapshot_group(
-    rqg_file, rgr_file, comments=None, keywords=None, check=True, logfile=None
-):
+def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=True):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
@@ -112,8 +108,6 @@ def take_snapshot_group(
         CheckFailedException: If a Burt check failed.
 
     """
-    configure_root_logger(log_file_path=logfile)
-
     # See Git history for a partial implementation.
     # It is unclear how to decide how the all the new snap files are laid out.
     raise NotImplementedError("Not yet implemented.")

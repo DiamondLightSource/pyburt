@@ -28,7 +28,7 @@ from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
 from burt.utils.logging import configure_root_logger
 
 
-def restore(snap_file, logfile=None):
+def restore(snap_file):
     """Restores the state of the PVs in the .snap file.
 
     This function does nothing for PVs marked with RO or RON specifiers.
@@ -42,7 +42,6 @@ def restore(snap_file, logfile=None):
 
     Args:
         snap_file (str): The path to the .snap file.
-        logfile (str): The path to the log file; if empty will just use stdout.
 
     Returns:
         list(str): The list of pvs which failed to be caput-ed to.
@@ -54,8 +53,6 @@ def restore(snap_file, logfile=None):
     """
     if not is_snap_file(snap_file, True):
         raise ValueError(f"Invalid .snap file {snap_file}.")
-
-    configure_root_logger(log_file_path=logfile)
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
@@ -91,7 +88,7 @@ def restore(snap_file, logfile=None):
     return failed_pvs
 
 
-def restore_group(rgr_file, check=True, logfile=None):
+def restore_group(rgr_file, check=True):
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
@@ -111,8 +108,6 @@ def restore_group(rgr_file, check=True, logfile=None):
     """
     if not is_rgr_file(rgr_file):
         raise ValueError(f"Invalid .rgr file {rgr_file}.")
-
-    configure_root_logger(log_file_path=logfile)
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
