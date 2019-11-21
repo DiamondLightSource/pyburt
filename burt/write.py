@@ -25,7 +25,7 @@ from cothread.catools import caput
 
 import burt
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
-from burt.utils.logging import configure_root_logger
+from . import logconfig
 
 
 def restore(snap_file):
@@ -141,7 +141,7 @@ def main():
 
     args = cli.parse_args()
 
-    configure_root_logger(log_file_path=args.l)
+    logconfig.setup_logging(log_file_path=args.l)
 
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)

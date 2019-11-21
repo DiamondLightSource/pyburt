@@ -26,7 +26,7 @@ from cothread.catools import caget
 import burt
 from burt.parsers.snap import SnapParser as snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
-from burt.utils.logging import configure_root_logger
+from . import logconfig
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
@@ -44,7 +44,6 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
             header.
-        logfile (str): The path to the log file; if empty will just use stdout.
 
     Returns:
         list: A list of the PV names where something went wrong.
@@ -97,7 +96,6 @@ def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=
         keywords (str): A delimited string of keywords to append to the BURT
             header.
         check (bool): Whether to inspect .check files or not.
-        logfile (str): The path to the log file; if empty will just use stdout.
 
     Returns:
         list: A list of the PV names where something went wrong.
@@ -172,7 +170,7 @@ def _gen_snap_header(req_files, comments, keywords):
     logging.debug(f"Comments: {comments}")
 
     # Always absolute in current burt implementations.
-    type = snap.TYPE_DEFAULT_VAL
+    snap_type = snap.TYPE_DEFAULT_VAL
 
     header_lines = [
         snap.SNAP_HEADER_START,
@@ -182,7 +180,7 @@ def _gen_snap_header(req_files, comments, keywords):
         _gen_padded_header_line(snap.GROUPID_PREFIX, str(gid)),
         _gen_padded_header_line(snap.KEYWORDS_PREFIX, sanitised_keywords),
         _gen_padded_header_line(snap.COMMENTS_PREFIX, sanitised_comments),
-        _gen_padded_header_line(snap.TYPE_PREFIX, type),
+        _gen_padded_header_line(snap.TYPE_PREFIX, snap_type),
         _gen_padded_header_line(snap.DIRECTORY_PREFIX, directory),
     ]
 
@@ -282,7 +280,6 @@ def _gen_snap_footer(ca_readings, pv_entries):
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
         ca_reading_len = 1
-        ca_reading_str = ""
 
         # Cothread attaches a .ok and .errorcode attribute to each reading. The error
         # if present will be stored in the reading itself.
@@ -416,7 +413,7 @@ def main():
 
     args = cli.parse_args()
 
-    configure_root_logger(log_file_path=args.l)
+    logconfig.setup_logging(log_file_path=args.l)
 
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
