@@ -1,5 +1,10 @@
 """Modified logconfig.py from dls_ade."""
+import getpass
 import logging.config
+import os
+
+GRAYLOG_HOST = "graylog2.diamond.ac.uk"
+GRAYLOG_PORT = 12201
 
 DEFAULT_LOG_FORMAT = (
     "%(asctime)5s - %(filename)s:%(lineno)d - %(name)s - %("
@@ -25,19 +30,30 @@ DEFAULT_CONFIG = {
             "mode": "a+",
             "delay": True,
         },
+        "graylog_handler": {
+            "class": "pygelf.GelfUdpHandler",
+            "level": "INFO",
+            "host": GRAYLOG_HOST,
+            "port": GRAYLOG_PORT,
+            "debug": True,
+            "include_extra_fields": True,
+            "username": getpass.getuser(),
+            "pid": os.getpid(),
+            "package": __package__,
+            "application": "pyburt",
+        },
     },
     "loggers": {
-        "pyburt": {
-            # Set the level here to be the default minimum level of log record to be
-            # produced
-            # If you set a handler to level DEBUG you will need to set either this
-            # level, or
-            # the level of one of the loggers above to DEBUG or you won't see any DEBUG
-            # messages
+        "console_entry": {
             "level": "INFO",
-            "handlers": ["logfile_handler"],
+            "handlers": ["graylog_handler"],
             "propagate": True,
-        }
+        },
+        "console_entry_with_logfile": {
+            "level": "INFO",
+            "handlers": ["graylog_handler", "logfile_handler"],
+            "propagate": True,
+        },
     },
     "root": {
         # Set the level here to be the default minimum level of log record to be
@@ -76,7 +92,6 @@ def setup_logging(default_level=logging.INFO, log_file_path=None):
     """
     try:
         if log_file_path is not None:
-
             try:
                 DEFAULT_CONFIG["handlers"]["logfile_handler"].update(
                     {"filename": log_file_path}
