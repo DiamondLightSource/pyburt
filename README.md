@@ -1,6 +1,8 @@
 [![pipeline status](https://gitlab.diamond.ac.uk/controls/python3/pyburt/badges/master/pipeline.svg)](https://gitlab.diamond.ac.uk/controls/python3/pyburt/commits/master)
 [![coverage report](https://gitlab.diamond.ac.uk/controls/python3/pyburt/badges/master/coverage.svg)](https://gitlab.diamond.ac.uk/controls/python3/pyburt/commits/master)
 [![Documentation Status](https://readthedocs.org/projects/pyburt/badge/?version=latest)](https://pyburt.readthedocs.io/en/latest/?badge=latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 # pyburt
 

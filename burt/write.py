@@ -25,9 +25,10 @@ from cothread.catools import caput
 
 import burt
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
+from . import logconfig
 
 
-def restore(snap_file):
+def restore(snap_file, _logger=logging.getLogger()):
     """Restores the state of the PVs in the .snap file.
 
     This function does nothing for PVs marked with RO or RON specifiers.
@@ -41,6 +42,7 @@ def restore(snap_file):
 
     Args:
         snap_file (str): The path to the .snap file.
+        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         list(str): The list of pvs which failed to be caput-ed to.
@@ -55,23 +57,21 @@ def restore(snap_file):
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
-    logging.debug(f"Parsed .snap PVs: {body}")
+    _logger.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
     pvs_to_restore = OrderedDict()
 
-    # TODO: caput return does not behave similarly to caget, and it looks like it
-    #  returns the failed values which was being caput-ed. This needs to be changed.
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
-            print("RON type PVs currently unimplemented.")
+            _logger.warning("RON type PVs currently unimplemented.")
 
         elif pv_entry.modifier != burt.READONLY_SPECIFIER:
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
-                print("WO type PVs currently unimplemented.")
+                _logger.warning("WO type PVs currently unimplemented.")
             else:
                 if pv_entry.dtype_len == 1:
                     pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
@@ -89,7 +89,7 @@ def restore(snap_file):
     return failed_pvs
 
 
-def restore_group(rgr_file, check=True):
+def restore_group(rgr_file, check=True, _logger=logging.getLogger()):
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
@@ -97,6 +97,7 @@ def restore_group(rgr_file, check=True):
     Args:
         rgr_file (str): The path to the .rgr file.
         check (bool): Whether to inspect .check files or not.
+        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         list(str): The list of pvs which failed to be caput-ed to.
@@ -111,7 +112,7 @@ def restore_group(rgr_file, check=True):
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
-    logging.debug(f"Parsed .snap files: {body}")
+    _logger.debug(f"Parsed .snap files: {body}")
 
     all_failed_pvs = []
     for file_path in body:
@@ -137,19 +138,24 @@ def main():
     cli.add_argument(
         "-v", help="Enable verbose logging (debug) level.", action="store_true"
     )
+    cli.add_argument("-l", type=str, help="Optional restore log file location.")
 
     args = cli.parse_args()
 
-    logging.basicConfig()
+    logconfig.setup_logging(log_file_path=args.l)
+
+    if args.l:
+        restore_logger = logging.getLogger("console_entry_with_logfile")
+    else:
+        restore_logger = logging.getLogger("console_entry")
+
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
 
     if is_snap_file(args.restore_file):
-        failed_pvs = restore(args.restore_file)
+        failed_pvs = restore(args.restore_file, restore_logger)
     elif is_rgr_file(args.restore_file):
-        failed_pvs = restore_group(args.restore_file)
+        failed_pvs = restore_group(args.restore_file, _logger=restore_logger)
     else:
         logging.critical(f"Invalid restore file argument {args.restore_file}.")
         sys.exit(1)
