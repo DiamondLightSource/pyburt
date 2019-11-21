@@ -27,7 +27,7 @@ DEFAULT_CONFIG = {
         },
     },
     "loggers": {
-        "": {
+        "pyburt": {
             # Set the level here to be the default minimum level of log record to be
             # produced
             # If you set a handler to level DEBUG you will need to set either this
@@ -35,15 +35,24 @@ DEFAULT_CONFIG = {
             # the level of one of the loggers above to DEBUG or you won't see any DEBUG
             # messages
             "level": "INFO",
-            "handlers": ["console", "logfile_handler"],
+            "handlers": ["logfile_handler"],
             "propagate": True,
         }
+    },
+    "root": {
+        # Set the level here to be the default minimum level of log record to be
+        # produced
+        # If you set a handler to level DEBUG you will need to set either this level, or
+        # the level of one of the loggers above to DEBUG or you won't see any DEBUG
+        # messages
+        "level": "INFO",
+        "handlers": ["console"],
     },
 }
 
 
 def setup_logging(default_level=logging.INFO, log_file_path=None):
-    """Setup logging configuration
+    """Set logging configuration.
 
     Call this only once from the application main() function or __main__ module!
 
@@ -63,9 +72,11 @@ def setup_logging(default_level=logging.INFO, log_file_path=None):
         log_file_path (str): path to optional logfile.
 
     Returns: None
+
     """
     try:
         if log_file_path is not None:
+
             try:
                 DEFAULT_CONFIG["handlers"]["logfile_handler"].update(
                     {"filename": log_file_path}

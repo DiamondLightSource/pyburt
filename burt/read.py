@@ -26,6 +26,7 @@ from cothread.catools import caget
 import burt
 from burt.parsers.snap import SnapParser as snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
+from . import _PYBURT_LOGGER
 from . import logconfig
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
@@ -56,7 +57,7 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     _check_snapshot_params(req_files, snap_file)
 
     snap_header = _gen_snap_header(req_files, comments, keywords)
-    logging.debug(f"Generated .snap header: {snap_header}")
+    _PYBURT_LOGGER.debug(f"Generated .snap header: {snap_header}")
 
     all_req_failed_pvs = []
     all_req_snap_footer_entries = []
@@ -64,7 +65,7 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     for req_file in req_files:
         req_parser = burt.ReqParser(req_file)
         _, pvs = req_parser.parse()
-        logging.debug(f"Parsed PVs: {pvs}")
+        _PYBURT_LOGGER.debug(f"Parsed PVs: {pvs}")
 
         ca_readings = caget(
             [pv.name for pv in pvs], datatype=cothread.catools.DBR_ENUM_STR, throw=False
@@ -74,10 +75,10 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
         )
 
         all_req_snap_footer_entries.append(singleton_req_snap_footer)
-        logging.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
+        _PYBURT_LOGGER.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
 
         all_req_failed_pvs.extend(singleton_req_failed_pvs)
-        logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
+        _PYBURT_LOGGER.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
 
     snap_footer = os.linesep.join(all_req_snap_footer_entries)
 
@@ -166,8 +167,8 @@ def _gen_snap_header(req_files, comments, keywords):
     # so write to the snap file as escaped symbols.
     sanitised_keywords = "" if keywords is None else _sanitise_header_line(keywords)
     sanitised_comments = "" if comments is None else _sanitise_header_line(comments)
-    logging.debug(f"Keywords: {keywords}")
-    logging.debug(f"Comments: {comments}")
+    _PYBURT_LOGGER.debug(f"Keywords: {keywords}")
+    _PYBURT_LOGGER.debug(f"Comments: {comments}")
 
     # Always absolute in current burt implementations.
     snap_type = snap.TYPE_DEFAULT_VAL
@@ -203,23 +204,23 @@ def _get_snap_header_system_vals():
     """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
-    logging.debug(f"Current time: {current_time}")
+    _PYBURT_LOGGER.debug(f"Current time: {current_time}")
 
     # Username (Lastname, Initials (Firstname)) format
     username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
     curr_user = username + " (" + ugroup + ")"
-    logging.debug(f"Current user: {username}")
-    logging.debug(f"Current user group: {ugroup}")
+    _PYBURT_LOGGER.debug(f"Current user: {username}")
+    _PYBURT_LOGGER.debug(f"Current user group: {ugroup}")
 
     # Effective user and group ID.
     uid = os.getuid()
     gid = pwd.getpwnam(getpass.getuser()).pw_gid
-    logging.debug(f"uid: {uid}")
-    logging.debug(f"gid: {gid}")
+    _PYBURT_LOGGER.debug(f"uid: {uid}")
+    _PYBURT_LOGGER.debug(f"gid: {gid}")
 
     # Absolute path to current directory.
     directory = os.getcwd()
-    logging.debug(f"Cwd: {directory}")
+    _PYBURT_LOGGER.debug(f"Cwd: {directory}")
 
     return curr_user, current_time, directory, gid, uid
 
@@ -272,8 +273,8 @@ def _gen_snap_footer(ca_readings, pv_entries):
         ValueError: If the save length is invalid.
 
     """
-    logging.debug(f"ca_reading: {ca_readings}")
-    logging.debug(f"ca_reading type: {type(ca_readings)}")
+    _PYBURT_LOGGER.debug(f"ca_reading: {ca_readings}")
+    _PYBURT_LOGGER.debug(f"ca_reading type: {type(ca_readings)}")
 
     snap_entries = []
     failed_pvs = []

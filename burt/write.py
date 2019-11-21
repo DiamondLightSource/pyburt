@@ -25,6 +25,7 @@ from cothread.catools import caput
 
 import burt
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
+from . import _PYBURT_LOGGER
 from . import logconfig
 
 
@@ -56,7 +57,7 @@ def restore(snap_file):
 
     snap_parser = burt.SnapParser(snap_file)
     _, body = snap_parser.parse()
-    logging.debug(f"Parsed .snap PVs: {body}")
+    _PYBURT_LOGGER.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
     pvs_to_restore = OrderedDict()
@@ -64,13 +65,13 @@ def restore(snap_file):
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
-            logging.warning("RON type PVs currently unimplemented.")
+            _PYBURT_LOGGER.warning("RON type PVs currently unimplemented.")
 
         elif pv_entry.modifier != burt.READONLY_SPECIFIER:
 
             if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
                 # TODO: write the "correct" value, not the saved ones.
-                logging.warning("WO type PVs currently unimplemented.")
+                _PYBURT_LOGGER.warning("WO type PVs currently unimplemented.")
             else:
                 if pv_entry.dtype_len == 1:
                     pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
@@ -111,7 +112,7 @@ def restore_group(rgr_file, check=True):
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
-    logging.debug(f"Parsed .snap files: {body}")
+    _PYBURT_LOGGER.debug(f"Parsed .snap files: {body}")
 
     all_failed_pvs = []
     for file_path in body:
