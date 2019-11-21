@@ -14,8 +14,5 @@ flake8-import-order = "*"
 black = "==19.3b0"
 sphinx = "*"
 
-[requires]
-python_version = "3.7"
-
 [packages]
 cothread = ">=2.15"
