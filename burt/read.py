@@ -24,14 +24,17 @@ import cothread
 from cothread.catools import caget
 
 import burt
-from burt.parsers.snap import SnapParser as snap
+from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
+from . import logconfig
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 
-def take_snapshot(req_files, snap_file, comments=None, keywords=None):
+def take_snapshot(
+    req_files, snap_file, comments=None, keywords=None, _logger=logging.getLogger()
+):
     """Save the PVs and their state to the specified snap file, with metadata.
 
     If more than one .req file is given as a list or iterable, then the snapshot values
@@ -43,6 +46,7 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
         comments (str): Comments to append to the BURT header.
         keywords (str): A delimited string of keywords to append to the BURT
             header.
+        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         list: A list of the PV names where something went wrong.
@@ -54,8 +58,8 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     """
     _check_snapshot_params(req_files, snap_file)
 
-    snap_header = _gen_snap_header(req_files, comments, keywords)
-    logging.debug(f"Generated .snap header: {snap_header}")
+    snap_header = _gen_snap_header(req_files, comments, keywords, _logger)
+    _logger.debug(f"Generated .snap header: {snap_header}")
 
     all_req_failed_pvs = []
     all_req_snap_footer_entries = []
@@ -63,20 +67,20 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     for req_file in req_files:
         req_parser = burt.ReqParser(req_file)
         _, pvs = req_parser.parse()
-        logging.debug(f"Parsed PVs: {pvs}")
+        _logger.debug(f"Parsed PVs: {pvs}")
 
         ca_readings = caget(
             [pv.name for pv in pvs], datatype=cothread.catools.DBR_ENUM_STR, throw=False
         )
         singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(
-            ca_readings, pvs
+            ca_readings, pvs, _logger
         )
 
         all_req_snap_footer_entries.append(singleton_req_snap_footer)
-        logging.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
+        _logger.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
 
         all_req_failed_pvs.extend(singleton_req_failed_pvs)
-        logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
+        _logger.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
 
     snap_footer = os.linesep.join(all_req_snap_footer_entries)
 
@@ -85,7 +89,14 @@ def take_snapshot(req_files, snap_file, comments=None, keywords=None):
     return all_req_failed_pvs
 
 
-def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=True):
+def take_snapshot_group(
+    rqg_file,
+    rgr_file,
+    comments=None,
+    keywords=None,
+    check=True,
+    _logger=logging.getLogger(),
+):
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
@@ -95,6 +106,7 @@ def take_snapshot_group(rqg_file, rgr_file, comments=None, keywords=None, check=
         keywords (str): A delimited string of keywords to append to the BURT
             header.
         check (bool): Whether to inspect .check files or not.
+        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         list: A list of the PV names where something went wrong.
@@ -144,7 +156,7 @@ def _check_snapshot_group_params(rgr_file, rqg_file):
         raise ValueError("Invalid .rgr file destination.")
 
 
-def _gen_snap_header(req_files, comments, keywords):
+def _gen_snap_header(req_files, comments, keywords, _logger):
     """Generate the .snap file BURT header as a string.
 
     This will precede the list of PVs in the .snap file and will contain
@@ -154,46 +166,50 @@ def _gen_snap_header(req_files, comments, keywords):
         req_files (list): A list of req files to take a snapshot of.
         comments: Optional comments.
         keywords: Optional keywords, with an arbitrary delimiter (or none).
+        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         str: The .snap file BURT header as a string.
 
     """
-    curr_user, curr_time, directory, gid, uid = _get_snap_header_system_vals()
+    curr_user, curr_time, directory, gid, uid = _get_snap_header_system_vals(_logger)
 
     # Carriage returns and newlines from user input can malform the BURT header
     # so write to the snap file as escaped symbols.
     sanitised_keywords = "" if keywords is None else _sanitise_header_line(keywords)
     sanitised_comments = "" if comments is None else _sanitise_header_line(comments)
-    logging.debug(f"Keywords: {keywords}")
-    logging.debug(f"Comments: {comments}")
+    _logger.debug(f"Keywords: {keywords}")
+    _logger.debug(f"Comments: {comments}")
 
     # Always absolute in current burt implementations.
-    type = snap.TYPE_DEFAULT_VAL
+    snap_type = Snap.TYPE_DEFAULT_VAL
 
     header_lines = [
-        snap.SNAP_HEADER_START,
-        _gen_padded_header_line(snap.TIME_PREFIX, curr_time),
-        _gen_padded_header_line(snap.LOGINID_PREFIX, curr_user),
-        _gen_padded_header_line(snap.UID_PREFIX, str(uid)),
-        _gen_padded_header_line(snap.GROUPID_PREFIX, str(gid)),
-        _gen_padded_header_line(snap.KEYWORDS_PREFIX, sanitised_keywords),
-        _gen_padded_header_line(snap.COMMENTS_PREFIX, sanitised_comments),
-        _gen_padded_header_line(snap.TYPE_PREFIX, type),
-        _gen_padded_header_line(snap.DIRECTORY_PREFIX, directory),
+        Snap.SNAP_HEADER_START,
+        _gen_padded_header_line(Snap.TIME_PREFIX, curr_time),
+        _gen_padded_header_line(Snap.LOGINID_PREFIX, curr_user),
+        _gen_padded_header_line(Snap.UID_PREFIX, str(uid)),
+        _gen_padded_header_line(Snap.GROUPID_PREFIX, str(gid)),
+        _gen_padded_header_line(Snap.KEYWORDS_PREFIX, sanitised_keywords),
+        _gen_padded_header_line(Snap.COMMENTS_PREFIX, sanitised_comments),
+        _gen_padded_header_line(Snap.TYPE_PREFIX, snap_type),
+        _gen_padded_header_line(Snap.DIRECTORY_PREFIX, directory),
     ]
 
     # 1 or more req files will require additional duplicate prefix entries.
     for req_file in req_files:
-        header_lines.append(_gen_padded_header_line(snap.REQ_FILE_PREFIX, req_file))
+        header_lines.append(_gen_padded_header_line(Snap.REQ_FILE_PREFIX, req_file))
 
-    header_lines.append(snap.SNAP_HEADER_END)
+    header_lines.append(Snap.SNAP_HEADER_END)
 
     return os.linesep.join(header_lines)
 
 
-def _get_snap_header_system_vals():
+def _get_snap_header_system_vals(_logger):
     """Obtain the required system values for the .snap header.
+
+    Args:
+        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         str, str, str, int, int: The current user, current time, directory, gid,
@@ -202,23 +218,23 @@ def _get_snap_header_system_vals():
     """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
-    logging.debug(f"Current time: {current_time}")
+    _logger.debug(f"Current time: {current_time}")
 
     # Username (Lastname, Initials (Firstname)) format
     username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
     curr_user = username + " (" + ugroup + ")"
-    logging.debug(f"Current user: {username}")
-    logging.debug(f"Current user group: {ugroup}")
+    _logger.debug(f"Current user: {username}")
+    _logger.debug(f"Current user group: {ugroup}")
 
     # Effective user and group ID.
     uid = os.getuid()
     gid = pwd.getpwnam(getpass.getuser()).pw_gid
-    logging.debug(f"uid: {uid}")
-    logging.debug(f"gid: {gid}")
+    _logger.debug(f"uid: {uid}")
+    _logger.debug(f"gid: {gid}")
 
     # Absolute path to current directory.
     directory = os.getcwd()
-    logging.debug(f"Cwd: {directory}")
+    _logger.debug(f"Cwd: {directory}")
 
     return curr_user, current_time, directory, gid, uid
 
@@ -253,7 +269,7 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
-def _gen_snap_footer(ca_readings, pv_entries):
+def _gen_snap_footer(ca_readings, pv_entries, _logger):
     """Generate the .snap file BURT footer as a string.
 
     A snapshot of the PVs in the req file(s) is(are) performed by storing the values
@@ -262,6 +278,7 @@ def _gen_snap_footer(ca_readings, pv_entries):
     Args:
         ca_readings (list(ca_value)): Values returned by caget()
         pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
+        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         str: The .snap file footer.
@@ -271,15 +288,14 @@ def _gen_snap_footer(ca_readings, pv_entries):
         ValueError: If the save length is invalid.
 
     """
-    logging.debug(f"ca_reading: {ca_readings}")
-    logging.debug(f"ca_reading type: {type(ca_readings)}")
+    _logger.debug(f"ca_reading: {ca_readings}")
+    _logger.debug(f"ca_reading type: {type(ca_readings)}")
 
     snap_entries = []
     failed_pvs = []
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
         ca_reading_len = 1
-        ca_reading_str = ""
 
         # Cothread attaches a .ok and .errorcode attribute to each reading. The error
         # if present will be stored in the reading itself.
@@ -409,23 +425,36 @@ def main():
     cli.add_argument(
         "-v", help="Enable verbose logging (debug) level.", action="store_true"
     )
+    cli.add_argument("-l", type=str, help="Optional backup log file location.")
 
     args = cli.parse_args()
 
-    logging.basicConfig()
+    logconfig.setup_logging(log_file_path=args.l)
+
+    if args.l:
+        snapshot_logger = logging.getLogger("console_entry_with_logfile")
+    else:
+        snapshot_logger = logging.getLogger("console_entry")
+
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
-    else:
-        logging.getLogger().setLevel(logging.INFO)
 
     if is_req_file(args.request_file):
         take_snapshot(
-            [args.request_file], args.snap_destination, comments=args.c, keywords=args.k
+            [args.request_file],
+            args.snap_destination,
+            comments=args.c,
+            keywords=args.k,
+            _logger=snapshot_logger,
         )
 
     elif is_rqg_file(args.request_file):
         take_snapshot_group(
-            args.request_file, args.snap_destination, comments=args.c, keywords=args.k
+            args.request_file,
+            args.snap_destination,
+            comments=args.c,
+            keywords=args.k,
+            _logger=snapshot_logger,
         )
 
     else:
