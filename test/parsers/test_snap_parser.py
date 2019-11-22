@@ -220,3 +220,20 @@ def test_snap_parser_with_modifiers():
     assert "/home/ops/burt/backupFiles" == header[sp.DIRECTORY_PREFIX]
     assert "/home/ops/burt/requestFiles/SR-DI.req" == header[sp.REQ_FILE_PREFIX]
     assert correct_pv_snapshots == body
+
+
+def test_snap_parser_enums():
+    """Run the .snap parser against a case with enums."""
+    correct_pv_snapshots = [
+        sp.SNAP_PV("SR01C-DI-COL-01:ENUM", 1, ["NIL"], None),
+        sp.SNAP_PV("SR01C-DI-COL-01:ENUM2", 1, ["lower voltage"], None),
+        sp.SNAP_PV("SR01C-DI-COL-01:ENUM3", 2, ["lower voltage", "no voltage"], None),
+        sp.SNAP_PV("SR01C-DI-COL-01:ENUM4", 1, ["lower voltage no voltage"], None),
+    ]
+
+    snap_parser = sp(test.ENUM_SNAP)
+    header, body = snap_parser.parse()
+
+    assert test.ENUM_SNAP == snap_parser.path
+    assert 4 == len(body)
+    assert correct_pv_snapshots == body

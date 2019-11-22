@@ -12,6 +12,7 @@ MALFORMED_SAVE_LEN_TOO_LARGE_REQ = "testables/req/malformed_save_len_too_large.r
 
 # Shared test .snap files.
 SIMPLE_SNAP = "testables/snap/simple.snap"
+ENUM_SNAP = "testables/snap/enum_with_spaces.snap"
 ARRAYS_AND_SCALARS_SNAP = "testables/snap/arrays_and_scalars.snap"
 ARRAYS_AND_SCALARS_WITH_MODS_SNAP = "testables/snap/arrays_and_scalars_with_mods.snap"
 BLANK_SNAP = "testables/snap/blank.snap"

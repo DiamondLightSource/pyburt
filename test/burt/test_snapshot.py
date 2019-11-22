@@ -152,10 +152,17 @@ def test_snapshot_arrays(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_enum(mock_caget):
-    """Runs a take snapshot test of a normal .req file including a mocked enum."""
+    """Run a take snapshot test of a normal .req file.
+
+    Including a mocked enum, with spaces.
+    """
     singleton_return_value = cothread.dbr.ca_str("DIAD")
     singleton_return_value.ok = True
     mock_caget.return_value = [singleton_return_value for i in range(12)]
+    mock_caget.return_value[1] = cothread.dbr.ca_str(".5 fill")
+    mock_caget.return_value[1].ok = True
+    mock_caget.return_value[2] = cothread.dbr.ca_str("stop filling start beam")
+    mock_caget.return_value[2].ok = True
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -184,10 +191,14 @@ def test_snapshot_enum(mock_caget):
 
     assert body[0].name == "SR01C-DI-COL-01:CENTRE"
     assert len(body[0].vals) == 1
+    assert body[0].vals[0] == "DIAD"
     assert body[1].name == "SR-DI-PICO-01:BUCKETS"
     assert len(body[1].vals) == 1
+    assert body[1].vals[0] == ".5 fill"
     assert body[2].name == "SR01C-DI-COL-02:CENTRE"
     assert len(body[2].vals) == 1
+    assert body[2].vals[0] == "stop filling start beam"
+
     assert body[3].name == "SR01C-DI-COL-02:GAP"
     assert len(body[3].vals) == 1
     assert body[4].name == "SR-DI-PICO-01:BUCKETS"
