@@ -152,8 +152,9 @@ def test_snapshot_arrays(mock_caget):
 
 @mock.patch("burt.read.caget")
 def test_snapshot_enum(mock_caget):
-    """Runs a take snapshot test of a normal .req file Including a mocked enum,
-    with spaces.
+    """Run a take snapshot test of a normal .req file.
+
+    Including a mocked enum, with spaces.
     """
     singleton_return_value = cothread.dbr.ca_str("DIAD")
     singleton_return_value.ok = True

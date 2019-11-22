@@ -1,0 +1,15 @@
+--- Start BURT header
+Time:      time
+Login ID:  user
+Eff  UID:  100
+Group ID:  group
+Keywords:  cool,snap,file
+Comments:  Hello World
+Type:      Absolute
+Directory: dir
+Req File:  testables/req/normal.req
+--- End BURT header
+SR01C-DI-COL-01:ENUM 1 NIL
+SR01C-DI-COL-01:ENUM2 1 "lower voltage"
+SR01C-DI-COL-01:ENUM3 2 "lower voltage" "no voltage"
+SR01C-DI-COL-01:ENUM4 1 "lower voltage no voltage"
