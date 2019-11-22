@@ -1,4 +1,5 @@
 """Snap parser class which reads the information from a .snap BURT file."""
+import shlex
 from collections import namedtuple
 
 import burt
@@ -85,7 +86,8 @@ class SnapParser(BurtParser):
                 .snap body line.
 
         """
-        pv_snapshot = [segment.strip() for segment in line.split()]
+        # Shlex preserves quoted substrings. E.g: 1 3.4 "fill 1" -> [1, 3.4, "fill 1"]
+        pv_snapshot = [segment.strip() for segment in shlex.split(line)]
 
         if len(pv_snapshot) < 3:
             raise ParserException(

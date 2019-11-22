@@ -321,6 +321,10 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
         elif isinstance(ca_reading, cothread.dbr.ca_str):
             ca_reading_str = str(ca_reading)
 
+            # Whitespace, e.g. "stop filling"
+            if " " in ca_reading_str:
+                ca_reading_str = f'"{ca_reading_str}"'
+
         # Any other augmented scalar value.
         else:
             ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
