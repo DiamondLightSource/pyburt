@@ -299,16 +299,20 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
 
         # Cothread attaches a .ok and .errorcode attribute to each reading. The error
         # if present will be stored in the reading itself.
-        if not ca_reading.ok:
-            logging.warning(
-                f"caget failure {ca_reading.errorcode} from pv {pv_entry.name}"
-            )
-            failed_pvs.append(pv_entry.name)
+        try:
+            if not ca_reading.ok:
+                logging.warning(
+                    f"Caget failure {ca_reading.errorcode} from pv {pv_entry.name}"
+                )
+                failed_pvs.append(pv_entry.name)
+                continue
+        except AttributeError as e:
+            logging.warning(f"Malformed cothread object: {e}")
             continue
 
         # If a save length is specified in the .req file, this is used to shorten the
         # cothread array length to the desired value.
-        elif isinstance(ca_reading, cothread.dbr.ca_array):
+        if isinstance(ca_reading, cothread.dbr.ca_array):
             if len(ca_reading) == 0:
                 logging.warning(f"caget failure: no data returned from {pv_entry.name}")
                 failed_pvs.append(pv_entry.name)
