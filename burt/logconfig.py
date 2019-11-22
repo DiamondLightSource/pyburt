@@ -40,7 +40,7 @@ DEFAULT_CONFIG = {
             "username": getpass.getuser(),
             "pid": os.getpid(),
             "package": __package__,
-            "application": "pyburt",
+            "application_name": "pyburt",
         },
     },
     "loggers": {
