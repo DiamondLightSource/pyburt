@@ -8,7 +8,7 @@
 
 **pyburt** is the Python version of the Burt EPICS extension. It utilises the
 [cothread](https://cothread.readthedocs.io/en/latest/) python library for
-Channel Access.
+Channel Access operations.
 
 ## Documentation
 
@@ -16,41 +16,8 @@ Full documentation is available at [readthedocs](https://readthedocs.org/project
 
 ## Installation
 
-It's best to install pyburt using `pipenv`:
-
 ```bash
-$ pipenv install --dev pyburt
-$ cd pyburt/
-$ pipenv install -e .
-```
-
-## CLI Usage
-
-```bash
-$ burt-read -h
-usage: burt-read [-h] [-c C] [-k K] [-v] request_file snap_destination
-
-positional arguments:
-  request_file      The path to either a .req or .rqg file.
-  snap_destination  The path to the destination .snap file.
-
-optional arguments:
-  -h, --help        show this help message and exit
-  -c C              Optional snapshot comments.
-  -k K              Optional snapshot keywords.
-  -v                Enable verbose logging (debug) level.
-```
-
-```bash
-$ burt-write -h
-usage: burt-write [-h] [-v] restore_file
-
-positional arguments:
-  restore_file  The path to either a .snap or .rgr file.
-
-optional arguments:
-  -h, --help    show this help message and exit
-  -v            Enable verbose logging (debug) level.
+$ pipenv install pyburt
 ```
 
 ## API Usage
@@ -79,7 +46,51 @@ burt.take_snapshot_group("/path/to/.rqg/file.rqg",
     "/path/to/.snap/file.snap", "comment", "keywords")
 ```
 
-## Build
+## CLI Usage
+
+```bash
+$ burt-read -h
+usage: burt-read [-h] [-c C] [-k K] [-v] [-l L] request_file snap_destination
+
+positional arguments:
+  request_file      The path to either a .req or .rqg file.
+  snap_destination  The path to the destination .snap file.
+
+optional arguments:
+  -h, --help        show this help message and exit
+  -c C              Optional snapshot comments.
+  -k K              Optional snapshot keywords.
+  -v                Enable verbose logging (debug) level.
+  -l L              Optional backup log file destination.
+```
+
+```bash
+$ burt-write -h
+usage: burt-write [-h] [-v] [-l L] restore_file
+
+positional arguments:
+  restore_file  The path to either a .snap or .rgr file.
+
+optional arguments:
+  -h, --help    show this help message and exit
+  -v            Enable verbose logging (debug) level.
+  -l L          Optional restore log file destination.
+```
+
+## License
+
+See [LICENSE](). 
+
+## Development
+
+```bash
+$ git clone git@gitlab.diamond.ac.uk:controls/python3/pyburt.git
+$ cd pyburt
+$ pipenv install -d
+$ python setup.py install
+```
+
+### Build
  
 To build the Sphinx documentation:
 
@@ -91,13 +102,9 @@ $ pipenv shell
 
 The generated pages are in `docs/_build/html`.
 
-## Licence
+### Tests
 
-See [LICENSE](). 
-
-## Tests
-
-#### Unit Tests
+##### Unit Tests
 To run the core pytest unit tests:
 
 ```bash
@@ -107,7 +114,7 @@ $ pytest -vv test
 
 Note: the unit tests should be run from the root project directory.
 
-#### DLS Integration Tests
+##### DLS Integration Tests
 
 There are separate DLS integration tests for pyburt. These tests run snapshot
 and restore operations against known Diamond and Pytac PV's. See 
