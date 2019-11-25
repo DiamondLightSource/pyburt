@@ -198,7 +198,9 @@ def _gen_snap_header(req_files, comments, keywords, _logger):
 
     # 1 or more req files will require additional duplicate prefix entries.
     for req_file in req_files:
-        header_lines.append(_gen_padded_header_line(Snap.REQ_FILE_PREFIX, req_file))
+        # NOTE: to keep compatible with the legacy burtinter implementation, no padding
+        # just for this header entry!
+        header_lines.append(Snap.REQ_FILE_PREFIX + ": " + req_file)
 
     header_lines.append(Snap.SNAP_HEADER_END)
 
