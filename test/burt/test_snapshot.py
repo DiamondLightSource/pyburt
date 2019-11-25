@@ -78,6 +78,89 @@ def test_simple_snapshot(mock_get_vals, mock_caget):
 
 
 @mock.patch("burt.read.caget")
+@mock.patch("burt.read._get_snap_header_system_vals")
+def test_space_simple_snapshot(mock_get_vals, mock_caget):
+    """Run a simple snapshot."""
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([2]))
+    singleton_return_value[0] = 1
+    singleton_return_value[1] = 2
+    singleton_return_value.ok = True
+    mock_caget.return_value = [singleton_return_value]
+    mock_get_vals.return_value = ("user", "time", "dir", "group", 100)
+
+    test_comment = "Hello World"
+    test_keywords = "cool,snap,file"
+
+    burt.take_snapshot(
+        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
+    )
+    with open(test.TMP_PYBURT_OUT) as f1:
+        with open(test.SIMPLE_SNAP) as f2:
+            assert f1.read() == f2.read()
+    # cleanup
+    os.remove(test.TMP_PYBURT_OUT)
+
+
+def test_burtinter_req_file_prefix_compatability():
+    """Test the header logic from the old burtinter."""
+    import logging
+
+    test_pyburt_header_1 = burt.read._gen_snap_header(
+        ["/home/DUMMY.req"], "dummy", "dummy", logging.getLogger()
+    )
+    test_pyburt_header_2 = burt.read._gen_snap_header(
+        ["/home/DUMMY.req", "/home/DUMMY2.req", "/home/DUMMY3.req"],
+        "dummy",
+        "dummy",
+        logging.getLogger(),
+    )
+
+    bad_req_entry_1 = "Req File:  /home/space.req"
+    bad_req_entry_2 = "Req File:                  /home/space.req"
+    ok_req_entry = "Req File: /home/onespaceonly.req"
+
+    # Req file prefix entry is in the second to last line.
+    req_file_prefix_entries = [
+        header.split("\n")[-2]
+        for header in (test_pyburt_header_1, test_pyburt_header_2)
+    ]
+
+    for req_file_prefix_entry in req_file_prefix_entries:
+        try:
+            _old_req_file_header_burtinter_code(req_file_prefix_entry)
+        except IndexError:
+            pytest.fail(
+                "Old burtinter code detected more than one space in req "
+                f"prefix: {req_file_prefix_entry}"
+            )
+
+    try:
+        _old_req_file_header_burtinter_code(bad_req_entry_1)
+        pytest.fail(
+            "This test should throw as old burtinter cannot handle more than "
+            "one space."
+        )
+    except IndexError:
+        # Expected.
+        pass
+
+    try:
+        _old_req_file_header_burtinter_code(bad_req_entry_2)
+        pytest.fail(
+            "This test should throw as old burtinter cannot handle more than "
+            "one space."
+        )
+    except IndexError:
+        # Expected.
+        pass
+
+    try:
+        _old_req_file_header_burtinter_code(ok_req_entry)
+    except IndexError:
+        pytest.fail("This test should not throw as old burtinter expects one space")
+
+
+@mock.patch("burt.read.caget")
 def test_snapshot_arrays(mock_caget):
     """Run a take snapshot test of a normal .req file."""
     # Flattened ndarray is a 12 element list of 40 elements.
@@ -485,3 +568,20 @@ def test_snapshot_group(mock_caget):
     # TODO: this is a broken test with incorrect behaviour. To be changed when
     #  snapshot groups are implemented.
     assert False
+
+
+def _old_req_file_header_burtinter_code(snapshotString):
+    """Remnant in old burtinter code."""
+    # Old code start
+    if snapshotString[0:9] == "Req File:":
+        requestFileName = snapshotString.split(" ")[2].split("\n")[0]
+        fileNameParts = requestFileName.split("/")
+        if fileNameParts[1] == "mt":
+            fileNameParts[1] = ""
+            requestFileName = "/".join(fileNameParts[1:])
+    # Old code end
+    else:
+        pytest.fail(
+            f"Last prefix entry is unexpectedly not Req File: {snapshotString}",
+            snapshotString,
+        )
