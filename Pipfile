@@ -16,4 +16,4 @@ sphinx = "*"
 
 [packages]
 cothread = ">=2.15"
-pygelf = "==0.3.5"
+pygelf = "*"
