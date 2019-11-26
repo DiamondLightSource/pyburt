@@ -103,4 +103,6 @@ def setup_logging(default_level=logging.INFO, log_file_path=None):
 
     except Exception as e:
         logging.basicConfig(level=default_level)
-        logging.warning(f"Logging configuration failed to load: {str(e)}")
+        logging.warning(
+            f"Logging configuration failed to load: {str(e.with_traceback())}"
+        )
