@@ -21,6 +21,15 @@ Full documentation is available at [readthedocs](https://readthedocs.org/project
 $ pipenv install pyburt
 ```
 
+## Development
+
+```bash
+$ git clone git@gitlab.diamond.ac.uk:controls/python3/pyburt.git
+$ cd pyburt
+$ pipenv install -d
+$ python setup.py install
+```
+
 ## API Usage
 
 ```python
@@ -81,15 +90,6 @@ optional arguments:
 ## License
 
 See [LICENSE](). 
-
-## Development
-
-```bash
-$ git clone git@gitlab.diamond.ac.uk:controls/python3/pyburt.git
-$ cd pyburt
-$ pipenv install -d
-$ python setup.py install
-```
 
 ### Build
  
