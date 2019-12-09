@@ -31,7 +31,7 @@ class CheckFailedException(Exception):
         )
 
 
-def check(check_file):
+def check(check_file: str) -> None:
     """Check if the check file conditions are met.
 
     A check succeeds if |pv-value - target| < tolerance, else it fails.

@@ -19,6 +19,7 @@ import logging
 import os
 import pwd
 import time
+from typing import List
 
 import cothread
 from cothread.catools import caget
@@ -33,8 +34,12 @@ SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 
 def take_snapshot(
-    req_files, snap_file, comments=None, keywords=None, _logger=logging.getLogger()
-):
+    req_files: List[str],
+    snap_file: List[str],
+    comments: str = None,
+    keywords: str = None,
+    _logger=logging.getLogger(),
+) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
     If more than one .req file is given as a list or iterable, then the snapshot values
@@ -90,13 +95,13 @@ def take_snapshot(
 
 
 def take_snapshot_group(
-    rqg_file,
-    rgr_file,
-    comments=None,
-    keywords=None,
-    check=True,
+    rqg_file: str,
+    rgr_file: str,
+    comments: str = None,
+    keywords: str = None,
+    check: bool = True,
     _logger=logging.getLogger(),
-):
+) -> List[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:

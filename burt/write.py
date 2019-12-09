@@ -19,6 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
+from typing import List
 
 import cothread
 from cothread.catools import caput
@@ -28,7 +29,7 @@ from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
 from . import logconfig
 
 
-def restore(snap_file, _logger=logging.getLogger()):
+def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     """Restores the state of the PVs in the .snap file.
 
     This function does nothing for PVs marked with RO or RON specifiers.
@@ -89,7 +90,9 @@ def restore(snap_file, _logger=logging.getLogger()):
     return failed_pvs
 
 
-def restore_group(rgr_file, check=True, _logger=logging.getLogger()):
+def restore_group(
+    rgr_file: str, check: bool = True, _logger=logging.getLogger()
+) -> List[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
