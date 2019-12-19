@@ -2,6 +2,7 @@
 import getpass
 import logging.config
 import os
+import sys
 
 GRAYLOG_HOST = "graylog2.diamond.ac.uk"
 GRAYLOG_PORT = 12201
@@ -67,7 +68,7 @@ DEFAULT_CONFIG = {
 }
 
 
-def setup_logging(default_level=logging.INFO, log_file_path=None):
+def setup_logging(default_level: int = logging.INFO, log_file_path: str = None):
     """Set logging configuration.
 
     Call this only once from the application main() function or __main__ module!
@@ -93,7 +94,9 @@ def setup_logging(default_level=logging.INFO, log_file_path=None):
     try:
         if log_file_path is not None:
             try:
-                DEFAULT_CONFIG["handlers"]["logfile_handler"].update(
+                # Mypy inner dicts issue, see:
+                # https://stackoverflow.com/questions/54786574/
+                DEFAULT_CONFIG["handlers"]["logfile_handler"].update(  # type: ignore
                     {"filename": log_file_path}
                 )
             except KeyError:
@@ -103,6 +106,7 @@ def setup_logging(default_level=logging.INFO, log_file_path=None):
 
     except Exception as e:
         logging.basicConfig(level=default_level)
+        tb = sys.exc_info()[2]
         logging.warning(
-            f"Logging configuration failed to load: {str(e.with_traceback())}"
+            f"Logging configuration failed to load: {str(e.with_traceback(tb))}"
         )

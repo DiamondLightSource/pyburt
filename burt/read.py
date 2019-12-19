@@ -66,7 +66,7 @@ def take_snapshot(
     snap_header = _gen_snap_header(req_files, comments, keywords, _logger)
     _logger.debug(f"Generated .snap header: {snap_header}")
 
-    all_req_failed_pvs = []
+    all_req_failed_pvs: List[str] = []
     all_req_snap_footer_entries = []
 
     for req_file in req_files:

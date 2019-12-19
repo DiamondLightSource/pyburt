@@ -55,7 +55,7 @@ class RgrParser(BurtParser):
             self.RGR_HEADER_END,
         )
 
-    def read_body_line(self, line):
+    def read_body_line(self, line) -> str:
         """Check and read a file path in the .rgr file body.
 
         Returns:

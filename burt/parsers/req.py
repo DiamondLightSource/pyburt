@@ -33,7 +33,7 @@ class ReqParser(BurtParser):
         """
         super(ReqParser, self).__init__(path)
 
-    def read_body_line(self, line):
+    def read_body_line(self, line) -> REQ_PV:
         """Store a PV entry in the .req file into a namedtuple object.
 
         Args:

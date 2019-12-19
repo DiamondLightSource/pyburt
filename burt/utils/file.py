@@ -4,7 +4,7 @@ from os.path import isfile, splitext
 import burt
 
 
-def is_req_file(filename, check_existence=False):
+def is_req_file(filename: str, check_existence: bool = False) -> bool:
     """Check if a given filename refers to a .req file.
 
     Args:
@@ -18,7 +18,7 @@ def is_req_file(filename, check_existence=False):
     return _is_correct_ext(filename, burt.REQ_FILE_EXT, check_existence)
 
 
-def is_snap_file(filename, check_existence=False):
+def is_snap_file(filename: str, check_existence: bool = False) -> bool:
     """Check if a given filename refers to a .snap file.
 
     Args:
@@ -32,7 +32,7 @@ def is_snap_file(filename, check_existence=False):
     return _is_correct_ext(filename, burt.SNAP_FILE_EXT, check_existence)
 
 
-def is_rqg_file(filename, check_existence=False):
+def is_rqg_file(filename: str, check_existence: bool = False) -> bool:
     """Check if a given filename refers to a .rqg file.
 
     Args:
@@ -46,7 +46,7 @@ def is_rqg_file(filename, check_existence=False):
     return _is_correct_ext(filename, burt.RQG_FILE_EXT, check_existence)
 
 
-def is_rgr_file(filename, check_existence=False):
+def is_rgr_file(filename: str, check_existence: bool = False) -> bool:
     """Check if a given filename refers to a .rgr file.
 
     Args:
@@ -60,7 +60,7 @@ def is_rgr_file(filename, check_existence=False):
     return _is_correct_ext(filename, burt.RGR_FILE_EXT, check_existence)
 
 
-def is_check_file(filename, check_existence=False):
+def is_check_file(filename: str, check_existence: bool = False) -> bool:
     """Check if a given filename refers to a .check file.
 
     Args:
@@ -74,7 +74,9 @@ def is_check_file(filename, check_existence=False):
     return _is_correct_ext(filename, burt.CHECK_FILE_EXT, check_existence)
 
 
-def _is_correct_ext(filename, correct_ext, check_existence=False):
+def _is_correct_ext(
+    filename: str, correct_ext: str, check_existence: bool = False
+) -> bool:
     """Check if a given filename has the expected file extension.
 
     Args:

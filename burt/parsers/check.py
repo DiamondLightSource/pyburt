@@ -55,7 +55,7 @@ class CheckParser(BurtParser):
             self.CHECK_HEADER_START, (self.COMMENTS_PREFIX,), self.CHECK_HEADER_END
         )
 
-    def read_body_line(self, line):
+    def read_body_line(self, line) -> CHECK_PV:
         """Store a PV in the .snap body into a namedtuple object.
 
         Returns:

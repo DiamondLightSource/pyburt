@@ -78,7 +78,7 @@ class SnapParser(BurtParser):
             self.SNAP_HEADER_END,
         )
 
-    def read_body_line(self, line):
+    def read_body_line(self, line) -> SNAP_PV:
         """Store a PV in the .snap body into a namedtuple object.
 
         Returns:

@@ -19,7 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
-from typing import List
+from typing import List, Dict
 
 import cothread
 from cothread.catools import caput
@@ -61,7 +61,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     _logger.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
-    pvs_to_restore = OrderedDict()
+    pvs_to_restore: Dict[str, List[object]] = OrderedDict()
 
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
@@ -83,6 +83,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
     failed_pvs = []
     return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
+
     for pv, return_value in zip(pvs_to_restore.keys(), return_values):
         if not return_value.ok:
             failed_pvs.append(pv)
