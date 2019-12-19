@@ -19,3 +19,6 @@
 
 # Virtualenvs
 /venv*/
+
+# mypy cache
+/.mypy_cache/

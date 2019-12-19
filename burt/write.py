@@ -19,6 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
+from typing import Dict, List
 
 import cothread
 from cothread.catools import caput
@@ -28,7 +29,7 @@ from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
 from . import logconfig
 
 
-def restore(snap_file, _logger=logging.getLogger()):
+def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     """Restores the state of the PVs in the .snap file.
 
     This function does nothing for PVs marked with RO or RON specifiers.
@@ -60,7 +61,7 @@ def restore(snap_file, _logger=logging.getLogger()):
     _logger.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
-    pvs_to_restore = OrderedDict()
+    pvs_to_restore: Dict[str, List[object]] = OrderedDict()
 
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
@@ -82,6 +83,7 @@ def restore(snap_file, _logger=logging.getLogger()):
 
     failed_pvs = []
     return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
+
     for pv, return_value in zip(pvs_to_restore.keys(), return_values):
         if not return_value.ok:
             failed_pvs.append(pv)
@@ -89,7 +91,9 @@ def restore(snap_file, _logger=logging.getLogger()):
     return failed_pvs
 
 
-def restore_group(rgr_file, check=True, _logger=logging.getLogger()):
+def restore_group(
+    rgr_file: str, check: bool = True, _logger=logging.getLogger()
+) -> List[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Cothread returns cothread.catools.ca_nothing upon a successful caput(s).

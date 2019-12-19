@@ -1,6 +1,7 @@
 """Parsers package."""
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
+from typing import Any, Dict, List, Tuple
 
 # Global inline comment prefix.
 INLINE_COMMENT = "%"
@@ -22,8 +23,8 @@ class BurtParser:
     # Subclasses must define the header elements via this namedtuple.
     HEADER = namedtuple("HEADER", "start_label prefixes end_label")
 
-    def __init__(self, path):
-        """Constructor.
+    def __init__(self, path: str):
+        """Class constructor.
 
         Args:
             path (str): The path to the .* BURT file.
@@ -32,7 +33,7 @@ class BurtParser:
         self.path = path
 
     @abstractmethod
-    def read_body_line(self, line):
+    def read_body_line(self, line: str) -> object:
         """Store a line in the body as a namedtuple/tuple or other object.
 
         Every BURT parser has a unique format for the body; this method must
@@ -51,7 +52,7 @@ class BurtParser:
         """
         pass
 
-    def get_header(self):
+    def get_header(self) -> "HEADER":
         """Get the header elements.
 
         A header is specified as a namedtuple HEADER object. If there is no
@@ -62,9 +63,9 @@ class BurtParser:
                 header, or an empty tuple if there is no header (default).
 
         """
-        return ()
+        return self.HEADER(None, None, None)
 
-    def parse(self):
+    def parse(self) -> Tuple[Dict[str, List[str]], List[Any]]:
         """Parse the .* BURT file located at self.path.
 
         Returns:
@@ -76,7 +77,7 @@ class BurtParser:
         with open(self.path, "r") as f:
             file_contents = f.read()
 
-            if self.get_header():
+            if self.get_header() and self.get_header().prefixes is not None:
                 header_lines, body_lines = self._extract_header_and_body(file_contents)
                 header_vals = self.parse_header(header_lines)
             else:
@@ -87,18 +88,21 @@ class BurtParser:
 
             return header_vals, body_vals
 
-    def parse_header(self, header_lines):
+    def parse_header(self, header_lines) -> Dict[str, List[str]]:
         """Parse the header portion of a .* BURT file.
 
         Args:
             header_lines (list): A newline delimited list of lines in a .*
                 BURT header.
 
+        Returns:
+            dict: BURT header prefix to header value mapping.
+
         Raises:
             ParserException: If the header is malformed.
 
         """
-        prefix_to_val = {}
+        prefix_to_val: Dict[str, List[str]] = {}
 
         for line in header_lines:
             # Ugly wart of old style .snap files: directory line doesn't have a colon.
@@ -115,14 +119,17 @@ class BurtParser:
                     if isinstance(prefix_to_val[key], list):
                         prefix_to_val[key].append(value)
                     else:
-                        prefix_to_val[key] = [prefix_to_val[key]]
+                        currval_as_list = [prefix_to_val[key]]
+                        # Mypy can't seem to handle if dict val is Union[List, str]
+                        # TODO: refactor to only one type.
+                        prefix_to_val[key] = currval_as_list  # type: ignore
                         prefix_to_val[key].append(value)
                 else:
                     prefix_to_val[key] = value
 
         return prefix_to_val
 
-    def parse_body(self, body_lines):
+    def parse_body(self, body_lines) -> List[object]:
         """Parse the body portion of a .* BURT file.
 
         Args:
@@ -148,15 +155,15 @@ class BurtParser:
 
         return body_objs
 
-    def _extract_header_and_body(self, file_contents):
+    def _extract_header_and_body(self, file_contents) -> Tuple[List[str], List[str]]:
         """Get the contents from a BURT file with both a header and a footer.
 
         Args:
             file_contents (str): The contents of the BURT file as a str.
 
         Returns:
-            str: The newline delimited lines in the BURT header.
-            str: The newline delimited lines in the BURT footer.
+            list: The newline delimited lines in the BURT header.
+            list: The newline delimited lines in the BURT footer.
 
         Raises:
             ParserException: If the BURT file is malformed.
@@ -181,7 +188,7 @@ class BurtParser:
         return header_lines, body_lines
 
     @staticmethod
-    def _skippable_line(line):
+    def _skippable_line(line) -> bool:
         """Determine if a line should be skipped.
 
         Args:
@@ -197,7 +204,7 @@ class BurtParser:
         return is_comment_line or is_blank_line
 
     @staticmethod
-    def _clean_line(line):
+    def _clean_line(line) -> str:
         """Preprocess the line for parsing.
 
         Args:

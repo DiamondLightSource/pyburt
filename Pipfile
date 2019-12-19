@@ -13,6 +13,7 @@ flake8-docstrings = "*"
 flake8-import-order = "*"
 black = "==19.3b0"
 sphinx = "*"
+mypy = "*"
 
 [packages]
 cothread = ">=2.15"

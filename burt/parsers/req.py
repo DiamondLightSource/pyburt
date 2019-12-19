@@ -25,7 +25,7 @@ class ReqParser(BurtParser):
     REQ_PV = namedtuple("PV", "name save_len modifier")
 
     def __init__(self, path):
-        """Constructor.
+        """Class constructor.
 
         Args:
             path (str): The path to the .req file.
@@ -33,7 +33,7 @@ class ReqParser(BurtParser):
         """
         super(ReqParser, self).__init__(path)
 
-    def read_body_line(self, line):
+    def read_body_line(self, line) -> "REQ_PV":
         """Store a PV entry in the .req file into a namedtuple object.
 
         Args:

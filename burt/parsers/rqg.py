@@ -25,7 +25,7 @@ class RqgParser(BurtParser):
     """
 
     def __init__(self, path):
-        """Constructor.
+        """Class constructor.
 
         Args:
             path (str): The path to the .rgr file.
@@ -35,7 +35,7 @@ class RqgParser(BurtParser):
 
         self._is_req_section = False
 
-    def read_body_line(self, line):
+    def read_body_line(self, line) -> str:
         """Check and read a file path in the .rgr file body.
 
         Returns:

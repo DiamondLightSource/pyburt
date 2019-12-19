@@ -24,7 +24,7 @@ Unit tests and coverage:
       - docs/_build/html/
     expire_in: 10 min
 
-# Run our custom flake8 and black checks
+# Run our custom static checks
 Static code checks:
   tags:
     - rhel7
@@ -34,6 +34,8 @@ Static code checks:
     BLACK_MODULES: burt test
   extends:
     - .flake8_and_black
+  script:
+    - pipenv run mypy burt
 
 # Publish coverage html report to common location
 Publish coverage:
