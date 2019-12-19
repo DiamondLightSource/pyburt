@@ -63,7 +63,7 @@ class BurtParser:
                 header, or an empty tuple if there is no header (default).
 
         """
-        return ()
+        return self.HEADER(None, None, None)
 
     def parse(self) -> Tuple[Dict[str, List[str]], List[Any]]:
         """Parse the .* BURT file located at self.path.
@@ -77,7 +77,7 @@ class BurtParser:
         with open(self.path, "r") as f:
             file_contents = f.read()
 
-            if self.get_header():
+            if self.get_header() and self.get_header().prefixes is not None:
                 header_lines, body_lines = self._extract_header_and_body(file_contents)
                 header_vals = self.parse_header(header_lines)
             else:
@@ -120,7 +120,9 @@ class BurtParser:
                         prefix_to_val[key].append(value)
                     else:
                         currval_as_list = [prefix_to_val[key]]
-                        prefix_to_val[key] = currval_as_list
+                        # Mypy can't seem to handle if dict val is Union[List, str]
+                        # TODO: refactor to only one type.
+                        prefix_to_val[key] = currval_as_list  # type: ignore
                         prefix_to_val[key].append(value)
                 else:
                     prefix_to_val[key] = value
