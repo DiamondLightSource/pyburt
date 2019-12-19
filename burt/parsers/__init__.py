@@ -63,7 +63,7 @@ class BurtParser:
                 header, or an empty tuple if there is no header (default).
 
         """
-        return self.HEADER(None, None, None)
+        return ()
 
     def parse(self) -> Tuple[Dict[str, List[str]], List[Any]]:
         """Parse the .* BURT file located at self.path.
@@ -116,10 +116,10 @@ class BurtParser:
             else:
                 # Duplicated prefix case. Use a list to keep track of duplicated values.
                 if key in prefix_to_val:
-                    if isinstance(prefix_to_val[key], str):
+                    if isinstance(prefix_to_val[key], list):
                         prefix_to_val[key].append(value)
                     else:
-                        currval_as_list = list(prefix_to_val[key])
+                        currval_as_list = [prefix_to_val[key]]
                         prefix_to_val[key] = currval_as_list
                         prefix_to_val[key].append(value)
                 else:
