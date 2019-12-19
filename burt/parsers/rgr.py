@@ -32,7 +32,7 @@ class RgrParser(BurtParser):
     RQG_PREFIX = "Rqg File"
 
     def __init__(self, path):
-        """Constructor.
+        """Class constructor.
 
         Args:
             path (str): The path to the .rgr file.

@@ -47,7 +47,7 @@ class SnapParser(BurtParser):
     SNAP_PV = namedtuple("SNAP_PV", "name dtype_len vals modifier")
 
     def __init__(self, path):
-        """Constructor.
+        """Class constructor.
 
         Args:
             path (str): The path to the .snap file.
@@ -78,7 +78,7 @@ class SnapParser(BurtParser):
             self.SNAP_HEADER_END,
         )
 
-    def read_body_line(self, line) -> SNAP_PV:
+    def read_body_line(self, line) -> "SNAP_PV":
         """Store a PV in the .snap body into a namedtuple object.
 
         Returns:
@@ -110,10 +110,10 @@ class SnapParser(BurtParser):
 
         dtype_len = pv_snapshot[dtype_len_index]
         try:
-            dtype_len = int(dtype_len)
+            dtype_len_int = int(dtype_len)
         except ValueError:
             raise ParserException(
                 "Malformed .snap file: data type length is a non integer."
             )
 
-        return self.SNAP_PV(pv_name, dtype_len, vals, modifier)
+        return self.SNAP_PV(pv_name, dtype_len_int, vals, modifier)

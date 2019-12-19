@@ -24,7 +24,7 @@ class BurtParser:
     HEADER = namedtuple("HEADER", "start_label prefixes end_label")
 
     def __init__(self, path: str):
-        """Constructor.
+        """Class constructor.
 
         Args:
             path (str): The path to the .* BURT file.
@@ -52,7 +52,7 @@ class BurtParser:
         """
         pass
 
-    def get_header(self) -> HEADER:
+    def get_header(self) -> "HEADER":
         """Get the header elements.
 
         A header is specified as a namedtuple HEADER object. If there is no
@@ -116,10 +116,11 @@ class BurtParser:
             else:
                 # Duplicated prefix case. Use a list to keep track of duplicated values.
                 if key in prefix_to_val:
-                    if isinstance(prefix_to_val[key], list):
+                    if isinstance(prefix_to_val[key], str):
                         prefix_to_val[key].append(value)
                     else:
-                        prefix_to_val[key] = [prefix_to_val[key]]
+                        currval_as_list = list(prefix_to_val[key])
+                        prefix_to_val[key] = currval_as_list
                         prefix_to_val[key].append(value)
                 else:
                     prefix_to_val[key] = value

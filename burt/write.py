@@ -19,7 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
-from typing import List, Dict
+from typing import Dict, List
 
 import cothread
 from cothread.catools import caput

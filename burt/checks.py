@@ -18,7 +18,7 @@ class CheckFailedException(Exception):
     """Raise when a check unexpectedly fails. Encapsulate failed check info."""
 
     def __init__(self, check_pv, msg=""):
-        """Constructor.
+        """Class constructor.
 
         Args:
             check_pv: A CHECK_PV named tuple of the PV which failed the check.
