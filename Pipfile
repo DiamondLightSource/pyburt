@@ -7,7 +7,6 @@ verify_ssl = true
 pytest = "*"
 pytest-cov = "*"
 mock = "*"
-coveralls = "*"
 flake8 = "*"
 flake8-docstrings = "*"
 flake8-import-order = "*"
