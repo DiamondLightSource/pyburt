@@ -35,7 +35,7 @@ SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 def take_snapshot(
     req_files: List[str],
-    snap_file: List[str],
+    snap_file: str,
     comments: str = None,
     keywords: str = None,
     _logger=logging.getLogger(),
@@ -127,7 +127,7 @@ def take_snapshot_group(
     raise NotImplementedError("Not yet implemented.")
 
 
-def _check_snapshot_params(req_files, snap_file):
+def _check_snapshot_params(req_files: List[str], snap_file: str) -> None:
     """Check take_snapshot parameters for validity.
 
     Args:

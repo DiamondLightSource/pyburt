@@ -47,6 +47,10 @@ def test_restore_long():
     # CA long PV.
     burt.restore(integration.LONG_SNAP)
 
+    # Before fixing #34 this value would incorrectly read 1.
+    new_val = caget(integration.IOC_LOCAL_PV_LONG)
+    assert new_val == 14
+
 
 def test_restore_enum():
     """Runs burt restore against a .snap file with an enum datatype.
