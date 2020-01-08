@@ -75,7 +75,14 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
                 _logger.warning("WO type PVs currently unimplemented.")
             else:
                 if pv_entry.dtype_len == 1:
-                    pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+                    # Try to interpret value as a number and only leave it as a string
+                    # if that fails. What if a numerical value wants to be put to a PV
+                    # of type string?
+                    try:
+                        val = float(pv_entry.vals[0])
+                    except ValueError:
+                        val = pv_entry.vals[0]
+                    pvs_to_restore[pv_entry.name] = val
                 else:
                     pvs_to_restore[pv_entry.name] = [
                         float(val) for val in pv_entry.vals
