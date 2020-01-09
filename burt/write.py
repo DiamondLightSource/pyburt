@@ -19,7 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import cothread
 from cothread.catools import caput
@@ -61,7 +61,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     _logger.debug(f"Parsed .snap PVs: {body}")
 
     # Improve performance by putting all at once later on.
-    pvs_to_restore: Dict[str, List[object]] = OrderedDict()
+    pvs_to_restore: Dict[str, Any] = OrderedDict()
 
     for pv_entry in body:
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
@@ -75,7 +75,14 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
                 _logger.warning("WO type PVs currently unimplemented.")
             else:
                 if pv_entry.dtype_len == 1:
-                    pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+                    # Try to interpret value as a number and only leave it as a string
+                    # if that fails. What if a numerical value wants to be put to a PV
+                    # of type string?
+                    try:
+                        val = float(pv_entry.vals[0])
+                    except ValueError:
+                        val = pv_entry.vals[0]
+                    pvs_to_restore[pv_entry.name] = val
                 else:
                     pvs_to_restore[pv_entry.name] = [
                         float(val) for val in pv_entry.vals

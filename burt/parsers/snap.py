@@ -113,7 +113,7 @@ class SnapParser(BurtParser):
             dtype_len_int = int(dtype_len)
         except ValueError:
             raise ParserException(
-                "Malformed .snap file: data type length is a non integer."
+                f"Malformed .snap file: data type length {dtype_len} is a non integer."
             )
 
         return self.SNAP_PV(pv_name, dtype_len_int, vals, modifier)

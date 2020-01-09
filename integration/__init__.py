@@ -3,6 +3,7 @@ import subprocess
 
 # Shared test .req files.
 NORMAL_REQ = "testables/req/normal.req"
+BCDORBIT_REQ = "/home/ops/burt/requestFiles/bcdorbit.req"
 
 # Shared test .snap files.
 ARR_SNAP = "testables/snap/ioc_restore_array.snap"

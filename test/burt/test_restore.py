@@ -14,6 +14,12 @@ def test_restore_normal(mock_caput):
     # ca_nothings have ok=True by default.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 4
     burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+    args, _ = mock_caput.call_args_list[0]
+    keys, values = args
+    # Pick an integer value such as has caused problems with restoring
+    # long PVs. This should now put a float.
+    assert list(keys)[3] == "SR01C-DI-COL-02:POS2"
+    assert list(values)[3] == 12.0
 
 
 @mock.patch("burt.write.caput")
