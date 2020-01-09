@@ -19,7 +19,7 @@ import logging
 import os
 import pwd
 import time
-from typing import List
+from typing import Any, List, Tuple
 
 import cothread
 from cothread.catools import caget
@@ -246,7 +246,7 @@ def _get_snap_header_system_vals(_logger):
     return curr_user, current_time, directory, gid, uid
 
 
-def _sanitise_header_line(header_text):
+def _sanitise_header_line(header_text: str) -> str:
     """Clear a header line from unwanted characters.
 
     Args:
@@ -276,6 +276,57 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
+class InvalidReadingException(Exception):
+    """Exception used to denote an incorrect CA reading."""
+
+
+def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
+    """Format a reading returned from caget into a string for a snap file.
+
+    Args:
+        ca_reading: reading from caget
+        save_length: requested length of array to store
+
+    Returns:
+        str: formatted string
+        int: actual saved length
+
+    """
+    saved_length = 1
+    # Cothread attaches a .ok and .errorcode attribute to each reading. The error
+    # if present will be stored in the reading itself.
+    try:
+        if not ca_reading.ok:
+            raise InvalidReadingException(f"caget failure {ca_reading.errorcode}")
+    except AttributeError as e:
+        raise InvalidReadingException(f"Malformed cothread object: {e}")
+
+    # If a save length is specified in the .req file, this is used to shorten the
+    # cothread array length to the desired value.
+    if isinstance(ca_reading, cothread.dbr.ca_array):
+        if len(ca_reading) == 0:
+            raise InvalidReadingException(
+                f"caget failure: array of length zero returned"
+            )
+        saved_length, ca_reading_str = _flatten_ca_array_and_extract_save_len(
+            ca_reading, save_length
+        )
+
+    # A DBR enum, e.g. "DIAD".
+    elif isinstance(ca_reading, cothread.dbr.ca_str):
+        ca_reading_str = str(ca_reading)
+
+        # Whitespace, e.g. "stop filling"
+        if " " in ca_reading_str:
+            ca_reading_str = f'"{ca_reading_str}"'
+
+    # Any other augmented scalar value.
+    else:
+        ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
+
+    return saved_length, ca_reading_str
+
+
 def _gen_snap_footer(ca_readings, pv_entries, _logger):
     """Generate the .snap file BURT footer as a string.
 
@@ -302,53 +353,20 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
     failed_pvs = []
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
-        ca_reading_len = 1
-
-        # Cothread attaches a .ok and .errorcode attribute to each reading. The error
-        # if present will be stored in the reading itself.
         try:
-            if not ca_reading.ok:
-                logging.warning(
-                    f"Caget failure {ca_reading.errorcode} from pv {pv_entry.name}"
-                )
-                failed_pvs.append(pv_entry.name)
-                continue
-        except AttributeError as e:
-            logging.warning(f"Malformed cothread object: {e}")
-            continue
-
-        # If a save length is specified in the .req file, this is used to shorten the
-        # cothread array length to the desired value.
-        if isinstance(ca_reading, cothread.dbr.ca_array):
-            if len(ca_reading) == 0:
-                logging.warning(f"caget failure: no data returned from {pv_entry.name}")
-                failed_pvs.append(pv_entry.name)
-                continue
-            ca_reading_len, ca_reading_str = _flatten_ca_array_and_extract_save_len(
-                ca_reading, pv_entry
+            length, ca_reading_str = format_ca_value(ca_reading, pv_entry.save_len)
+            formatted_snapshot_entry = _format_snap_footer_entry(
+                length, ca_reading_str, pv_entry
             )
-
-        # A DBR enum, e.g. "DIAD".
-        elif isinstance(ca_reading, cothread.dbr.ca_str):
-            ca_reading_str = str(ca_reading)
-
-            # Whitespace, e.g. "stop filling"
-            if " " in ca_reading_str:
-                ca_reading_str = f'"{ca_reading_str}"'
-
-        # Any other augmented scalar value.
-        else:
-            ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
-
-        formatted_snapshot_entry = _format_snap_footer_entry(
-            ca_reading_len, ca_reading_str, pv_entry
-        )
-        snap_entries.append(formatted_snapshot_entry)
+            snap_entries.append(formatted_snapshot_entry)
+        except InvalidReadingException as e:
+            logging.warning(f"Problem getting {pv_entry.name}: {e}")
+            failed_pvs.append(pv_entry.name)
 
     return os.linesep.join(snap_entries), failed_pvs
 
 
-def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
+def _flatten_ca_array_and_extract_save_len(ca_reading, requested_length):
     """Flatten the ca array into a string and obtain the save length if specified.
 
     The .snap file PV entries require a 15 width precision number(s) in
@@ -356,7 +374,7 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
 
     Args:
         ca_reading (any): Return value from cothread.
-        pv_entry (namedtuple(PV)): A PV entry in a .req file.
+        requested_length (int): length specified in .req file.
 
     Returns:
         int: The shortest reading length.
@@ -368,13 +386,13 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, pv_entry):
     """
     desired_ca_arr_len = len(ca_reading)
 
-    if pv_entry.save_len:
-        if pv_entry.save_len > desired_ca_arr_len:
+    if requested_length:
+        if requested_length > desired_ca_arr_len:
             raise ValueError(
                 "Save length value specified in .req file exceeds length of PV data."
             )
         else:
-            desired_ca_arr_len = pv_entry.save_len
+            desired_ca_arr_len = requested_length
 
     ca_reading_str = " ".join(
         [
