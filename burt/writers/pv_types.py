@@ -17,7 +17,7 @@ python string -> DBR_STRING
 import logging
 from abc import ABCMeta, abstractmethod
 from functools import singledispatch
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import cothread
 
@@ -30,36 +30,37 @@ SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 class PvVisitor:
     """Abstract base class for PV visitors."""
+
     __metaclass__ = ABCMeta
 
     @singledispatch
     def visit(self, dbr_val: object) -> None:
-        """Generic case."""
+        """Handle generic case."""
         logging.warning(f"Unexpected cothread DBR type: {type(dbr_val)}, {dbr_val}.")
         return None
 
     @abstractmethod
     @visit.register(cothread.dbr.ca_str)
     def visit(self, dbr_val: cothread.dbr.ca_str) -> Any:
-        """String (DBR_STRING) type."""
+        """Handle string (DBR_STRING) type."""
         pass
 
     @abstractmethod
     @visit.register(cothread.dbr.ca_int)
     def visit(self, dbr_val: cothread.dbr.ca_int) -> Any:
-        """Int (DBR_LONG) type."""
+        """Handle int (DBR_LONG) type."""
         pass
 
     @abstractmethod
     @visit.register(cothread.dbr.ca_float)
     def visit(self, dbr_val: cothread.dbr.ca_float) -> Any:
-        """Float (DBR_DOUBLE) type."""
+        """Handle float (DBR_DOUBLE) type."""
         pass
 
     @abstractmethod
     @visit.register(cothread.dbr.ca_array)
     def visit(self, dbr_val: cothread.dbr.ca_array) -> Any:
-        """CA array type."""
+        """Handle CA array type."""
         pass
 
 
@@ -68,27 +69,27 @@ class PvReadVisitor(PvVisitor):
 
     @singledispatch
     def visit(self, dbr_val: object) -> str:
-        """Generic case."""
+        """Handle generic case."""
         return SNAP_PRECISION_PYFORMAT.format(dbr_val)
 
     @visit.register(cothread.dbr.ca_str)
     def visit(self, dbr_val: cothread.dbr.ca_str) -> str:
-        """String (DBR_STRING) type."""
+        """Handle string (DBR_STRING) type."""
         return str(dbr_val)
 
     @visit.register(cothread.dbr.ca_int)
     def visit(self, dbr_val: cothread.dbr.ca_int) -> str:
-        """Int (DBR_LONG) type."""
+        """Handle int (DBR_LONG) type."""
         return SNAP_PRECISION_PYFORMAT.format(dbr_val)
 
     @visit.register(cothread.dbr.ca_float)
     def visit(self, dbr_val: cothread.dbr.ca_float) -> str:
-        """Float (DBR_DOUBLE) type."""
+        """Handle float (DBR_DOUBLE) type."""
         return SNAP_PRECISION_PYFORMAT.format(dbr_val)
 
     @visit.register(cothread.dbr.ca_array)
     def visit(self, dbr_val: cothread.dbr.ca_array) -> list:
-        """CA array type."""
+        """Handle CA array type."""
         return [SNAP_PRECISION_PYFORMAT.format(reading) for reading in dbr_val[:]]
 
 
@@ -97,27 +98,27 @@ class PvWriteVisitor(PvVisitor):
 
     @singledispatch
     def visit(self, dbr_val: object) -> str:
-        """Generic case."""
+        """Handle generic case."""
         return str(dbr_val)
 
     @visit.register(cothread.dbr.ca_str)
     def visit(self, dbr_val: cothread.dbr.ca_str) -> str:
-        """String (DBR_STRING) type."""
+        """Handle string (DBR_STRING) type."""
         return str(dbr_val)
 
     @visit.register(cothread.dbr.ca_int)
     def visit(self, dbr_val: cothread.dbr.ca_int) -> int:
-        """Int (DBR_LONG) type."""
+        """Handle int (DBR_LONG) type."""
         return int(dbr_val)
 
     @visit.register(cothread.dbr.ca_float)
     def visit(self, dbr_val: cothread.dbr.ca_float) -> float:
-        """Float (DBR_DOUBLE) type."""
+        """Handle float (DBR_DOUBLE) type."""
         return float(dbr_val)
 
     @visit.register(cothread.dbr.ca_array)
     def visit(self, dbr_val: cothread.dbr.ca_array) -> list:
-        """CA array type."""
+        """Handle CA array type."""
         return [self.visit(val) for val in dbr_val]
 
 
@@ -125,7 +126,7 @@ class PvTypeDBR:
     """Encapsulate PV types and convert to DBR format."""
 
     def __init__(self, dbr_val) -> None:
-        """Constructor."""
+        """Init constructor."""
         self.dbr_val = dbr_val
 
     def accept(self, type_visitor: PvVisitor) -> Any:
