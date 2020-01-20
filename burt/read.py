@@ -33,12 +33,16 @@ from . import logconfig
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 
+class InvalidReadingException(Exception):
+    """Exception used to denote an incorrect CA reading."""
+
+
 def take_snapshot(
-    req_files: List[str],
-    snap_file: str,
-    comments: str = None,
-    keywords: str = None,
-    _logger=logging.getLogger(),
+        req_files: List[str],
+        snap_file: str,
+        comments: str = None,
+        keywords: str = None,
+        _logger=logging.getLogger(),
 ) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
@@ -95,12 +99,12 @@ def take_snapshot(
 
 
 def take_snapshot_group(
-    rqg_file: str,
-    rgr_file: str,
-    comments: str = None,
-    keywords: str = None,
-    check: bool = True,
-    _logger=logging.getLogger(),
+        rqg_file: str,
+        rgr_file: str,
+        comments: str = None,
+        keywords: str = None,
+        check: bool = True,
+        _logger=logging.getLogger(),
 ) -> List[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
@@ -274,10 +278,6 @@ def _gen_padded_header_line(prefix, value):
     header_line = prefix + ":" + left_padding + str(value)
 
     return header_line
-
-
-class InvalidReadingException(Exception):
-    """Exception used to denote an incorrect CA reading."""
 
 
 def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
