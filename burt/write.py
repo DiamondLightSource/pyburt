@@ -24,14 +24,14 @@ from typing import Any, Dict, List
 import cothread
 from cothread.catools import caput, connect
 from cothread.catools import (
+    DBR_CHAR,
     DBR_DOUBLE,
-    DBR_LONG,
-    DBR_STRING,
-    DBR_FLOAT,
     DBR_ENUM,
     DBR_ENUM_STR,
+    DBR_FLOAT,
+    DBR_LONG,
     DBR_SHORT,
-    DBR_CHAR,
+    DBR_STRING,
 )
 
 import burt
@@ -236,6 +236,13 @@ def _convert_to_ca_type(
 
         elif ca_info.datatype == DBR_DOUBLE or ca_info.datatype == DBR_FLOAT:
             pvs_to_restore[pv_entry.name] = float(pv_entry.vals[0])
+
+        # Fall back on older technique with trying to convert by force.
+        else:
+            try:
+                pvs_to_restore[pv_entry.name] = float(pv_entry.vals[0])
+            except ValueError:
+                pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
 
     else:
         pvs_to_restore[pv_entry.name] = [float(val) for val in pv_entry.vals]

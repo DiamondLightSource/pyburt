@@ -7,15 +7,43 @@ import burt
 import test
 from burt.parsers import ParserException
 
+from cothread.catools import (
+    DBR_DOUBLE,
+    DBR_LONG,
+    DBR_STRING,
+    DBR_FLOAT,
+    DBR_ENUM,
+    DBR_ENUM_STR,
+    DBR_SHORT,
+    DBR_CHAR,
+)
+
+
+class MockCainfo:
+    """Mock cainfo struct."""
+
+    def __init__(self, datatype=None, ok=True):
+        self.datatype = datatype
+        self.ok = True
+
 
 @mock.patch("burt.write.caput")
-def test_restore_normal(mock_caput):
+@mock.patch("burt.write.connect")
+def test_restore_normal(mock_connect, mock_caput):
     """Run BURT restore against a normal case."""
     # ca_nothings have ok=True by default.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 4
+    mock_connect.return_value = [
+        MockCainfo(),
+        MockCainfo(),
+        MockCainfo(),
+        MockCainfo(DBR_FLOAT),
+    ]
+
     burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
     args, _ = mock_caput.call_args_list[0]
     keys, values = args
+
     # Pick an integer value such as has caused problems with restoring
     # long PVs. This should now put a float.
     assert list(keys)[3] == "SR01C-DI-COL-02:POS2"
@@ -23,7 +51,8 @@ def test_restore_normal(mock_caput):
 
 
 @mock.patch("burt.write.caput")
-def test_restore_write_fail(mock_caput):
+@mock.patch("burt.write.connect")
+def test_restore_write_fail(mock_connect, mock_caput):
     """Run BURT restore against a write exception case."""
     mock_caput.side_effect = Exception
 
@@ -34,7 +63,8 @@ def test_restore_write_fail(mock_caput):
 
 
 @mock.patch("burt.write.caput")
-def test_restore_bad_snap(mock_caput):
+@mock.patch("burt.write.connect")
+def test_restore_bad_snap(mock_connect, mock_caput):
     """Run BURT restore against some bad .snap files."""
     with pytest.raises(ParserException):
         burt.restore(test.MISSING_BOTTOM_HEADER_SNAP)
@@ -63,7 +93,8 @@ def test_restore_bad_snap(mock_caput):
 
 
 @mock.patch("burt.write.caput")
-def test_bad_file_arguments(mock_caput):
+@mock.patch("burt.write.connect")
+def test_bad_file_arguments(mock_connect, mock_caput):
     """Run the burt script against a case where the file arguments are malformed."""
     with pytest.raises(ValueError):
         burt.restore("")
@@ -80,7 +111,8 @@ def test_bad_file_arguments(mock_caput):
 
 
 @mock.patch("burt.write.caput")
-def test_restore_returns_pv_names_if_caput_fails(mock_caput):
+@mock.patch("burt.write.connect")
+def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
     """Checks that the caput error returns are caught as expected."""
     pvs_from_snap = [
         "SR01C-DI-COL-01:POS1",
@@ -94,8 +126,9 @@ def test_restore_returns_pv_names_if_caput_fails(mock_caput):
         return_value.ok = False
         return_value.errorcode = "dummy"
         return_values.append(return_value)
-
     mock_caput.return_value = return_values
+
+    mock_connect.return_value = [MockCainfo()] * 4
 
     failed_pvs = burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
@@ -103,14 +136,16 @@ def test_restore_returns_pv_names_if_caput_fails(mock_caput):
 
 
 @mock.patch("burt.write.caput")
-def test_blank_restore(mock_caput):
+@mock.patch("burt.write.connect")
+def test_blank_restore(mock_connect, mock_caput):
     """Run burt restore against a blank .snap file."""
     with pytest.raises(ParserException):
         burt.restore(test.BLANK_SNAP)
 
 
 @mock.patch("burt.write.caput")
-def test_restore_group_normal(mock_caput):
+@mock.patch("burt.write.connect")
+def test_restore_group_normal(mock_connect, mock_caput):
     """Run BURT restore against a normal case."""
     # Just one caput of one PV expected.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")]
