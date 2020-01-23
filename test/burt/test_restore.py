@@ -1,5 +1,6 @@
 """Unit tests for the BURT restore functionality."""
 import cothread
+import io
 import mock
 import pytest
 
@@ -27,6 +28,12 @@ class MockCainfo:
         self.ok = True
 
 
+def mock_str_io(io_str):
+    """Generate a mock io string for testing."""
+    return io.StringIO(io_str)
+
+
+@mock.patch
 @mock.patch("burt.write.caput")
 @mock.patch("burt.write.connect")
 def test_restore_normal(mock_connect, mock_caput):
