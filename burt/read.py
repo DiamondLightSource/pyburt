@@ -27,7 +27,6 @@ from cothread.catools import caget
 import burt
 from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
-from burt.writers.types import PvReadVisitor, PvTypeDBR
 from . import logconfig
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
@@ -39,11 +38,11 @@ class InvalidReadingException(Exception):
 
 
 def take_snapshot(
-    req_files: List[str],
-    snap_file: str,
-    comments: str = None,
-    keywords: str = None,
-    _logger=logging.getLogger(),
+        req_files: List[str],
+        snap_file: str,
+        comments: str = None,
+        keywords: str = None,
+        _logger=logging.getLogger(),
 ) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
@@ -100,12 +99,12 @@ def take_snapshot(
 
 
 def take_snapshot_group(
-    rqg_file: str,
-    rgr_file: str,
-    comments: str = None,
-    keywords: str = None,
-    check: bool = True,
-    _logger=logging.getLogger(),
+        rqg_file: str,
+        rgr_file: str,
+        comments: str = None,
+        keywords: str = None,
+        check: bool = True,
+        _logger=logging.getLogger(),
 ) -> List[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
@@ -301,8 +300,6 @@ def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
             raise InvalidReadingException(f"caget failure {ca_reading.errorcode}")
     except AttributeError as e:
         raise InvalidReadingException(f"Malformed cothread object: {e}")
-
-    read_visitor = PvReadVisitor()
 
     # If a save length is specified in the .req file, this is used to shorten the
     # cothread array length to the desired value.
