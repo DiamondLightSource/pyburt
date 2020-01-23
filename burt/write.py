@@ -23,8 +23,19 @@ from typing import Any, Dict, List
 
 import cothread
 from cothread.catools import caput, connect
+from cothread.catools import (
+    DBR_DOUBLE,
+    DBR_LONG,
+    DBR_STRING,
+    DBR_FLOAT,
+    DBR_ENUM,
+    DBR_ENUM_STR,
+    DBR_SHORT,
+    DBR_CHAR,
+)
 
 import burt
+from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
 from . import logconfig
 
@@ -43,7 +54,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
     Args:
         snap_file (str): The path to the .snap file.
-        _logger (logging.Logger): Internal logger, do not specify.
+        _logger (logging.Logger): Internal logger, do not override.
 
     Returns:
         list(str): The list of pvs which failed to be caput-ed to.
@@ -56,40 +67,18 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     if not is_snap_file(snap_file, True):
         raise ValueError(f"Invalid .snap file {snap_file}.")
 
-    snap_parser = burt.SnapParser(snap_file)
-    _, body = snap_parser.parse()
-    _logger.debug(f"Parsed .snap PVs: {body}")
+    pvs = _get_pvs_in_snap(snap_file, _logger)
 
     # Improve performance by putting all at once later on.
     pvs_to_restore: Dict[str, Any] = OrderedDict()
 
-    # Query for the channel type for each pv, for converting to the caput type.
-    ca_infos = connect([pv_entry.name for pv_entry in body], cainfo=True, throw=False)
+    # Obtain for the channel type prior to the put for each pv, so we can put the
+    # correct type.
+    ca_infos = connect([pv_entry.name for pv_entry in pvs], cainfo=True, throw=False)
 
-    for pv_entry, ca_info in zip(body, ca_infos):
-        if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
-            # TODO: write to the no write snapshot file
-            _logger.warning("RON type PVs currently unimplemented.")
-
-        elif pv_entry.modifier != burt.READONLY_SPECIFIER:
-
-            if pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
-                # TODO: write the "correct" value, not the saved ones.
-                _logger.warning("WO type PVs currently unimplemented.")
-            else:
-                if pv_entry.dtype_len == 1:
-                    # Try to interpret value as a number and only leave it as a string
-                    # if that fails. What if a numerical value wants to be put to a PV
-                    # of type string?
-                    try:
-                        val = float(pv_entry.vals[0])
-                    except ValueError:
-                        val = pv_entry.vals[0]
-                    pvs_to_restore[pv_entry.name] = val
-                else:
-                    pvs_to_restore[pv_entry.name] = [
-                        float(val) for val in pv_entry.vals
-                    ]
+    for pv_entry, ca_info in zip(pvs, ca_infos):
+        if _is_write_instr(pv_entry, _logger):
+            _convert_to_ca_type(pv_entry, ca_info, pvs_to_restore, _logger)
 
     failed_pvs = []
     return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
@@ -179,3 +168,74 @@ def main():
         for pv in failed_pvs:
             logging.warning(pv)
         sys.exit(1)
+
+
+def _is_write_instr(pv_entry: SnapParser.SNAP_PV, _logger) -> bool:
+    """Check pv modifier prefix for write/no write instructions.
+
+    Args:
+        pv_entry: PV currently being checked.
+        _logger: Internal logger, do not override.
+
+    Returns:
+        True if writing to PV, False if flagged otherwise.
+    """
+    ret = True
+
+    if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
+        # TODO: write to the no write snapshot file
+        _logger.warning("RON type PVs currently unimplemented.")
+        ret = False
+
+    elif pv_entry.modifier == burt.READONLY_SPECIFIER:
+        _logger.debug(f"Readonly PV {pv_entry.name}. Skipping write.")
+        ret = False
+
+    elif pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
+        # TODO: write the "correct" value, not the saved ones.
+        _logger.warning("WO type PVs currently unimplemented.")
+        ret = False
+
+    return ret
+
+
+def _get_pvs_in_snap(snap_file, _logger):
+    """Parse and extract the PV entries in a snap file."""
+    snap_parser = SnapParser(snap_file)
+    _, body = snap_parser.parse()
+    _logger.debug(f"Parsed .snap PVs: {body}")
+    return body
+
+
+def _convert_to_ca_type(
+    pv_entry: SnapParser.SNAP_PV,
+    ca_info: cothread.catools.ca_info,
+    pvs_to_restore: dict,
+    _logger,
+):
+    """Coerce the correct ca type from the channel type."""
+    if not ca_info.ok:
+        _logger.warning(f"Could not coerce channel type, skipping: {ca_info.__str__()}")
+        return
+
+    # Non CA array case.
+    elif pv_entry.dtype_len == 1:
+        if (
+            ca_info.datatype == DBR_STRING
+            or ca_info.datatype == DBR_CHAR
+            or ca_info.datatype == DBR_ENUM_STR
+        ):
+            pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+
+        elif (
+            ca_info.datatype == DBR_LONG
+            or ca_info.datatype == DBR_SHORT
+            or ca_info.datatype == DBR_ENUM
+        ):
+            pvs_to_restore[pv_entry.name] = int(pv_entry.vals[0])
+
+        elif ca_info.datatype == DBR_DOUBLE or ca_info.datatype == DBR_FLOAT:
+            pvs_to_restore[pv_entry.name] = float(pv_entry.vals[0])
+
+    else:
+        pvs_to_restore[pv_entry.name] = [float(val) for val in pv_entry.vals]
