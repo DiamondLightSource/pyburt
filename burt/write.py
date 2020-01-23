@@ -63,7 +63,10 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     # Improve performance by putting all at once later on.
     pvs_to_restore: Dict[str, Any] = OrderedDict()
 
-    for pv_entry in body:
+    # Query for the channel type for each pv, for converting to the caput type.
+    ca_infos = connect([pv_entry.name for pv_entry in body], cainfo=True, throw=False)
+
+    for pv_entry, ca_info in zip(body, ca_infos):
         if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
             # TODO: write to the no write snapshot file
             _logger.warning("RON type PVs currently unimplemented.")
@@ -99,7 +102,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
 
 def restore_group(
-        rgr_file: str, check: bool = True, _logger=logging.getLogger()
+    rgr_file: str, check: bool = True, _logger=logging.getLogger()
 ) -> List[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 

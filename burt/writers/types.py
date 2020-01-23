@@ -28,6 +28,10 @@ MAX_DBR_STR_LEN = 39
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
 
 
+class InvalidReadingException(Exception):
+    """Exception used to denote an incorrect CA reading."""
+
+
 class PvVisitor:
     """Abstract base class for PV visitors."""
 
@@ -75,7 +79,15 @@ class PvReadVisitor(PvVisitor):
     @visit.register(cothread.dbr.ca_str)
     def visit(self, dbr_val: cothread.dbr.ca_str) -> str:
         """Handle string (DBR_STRING) type."""
-        return str(dbr_val)
+        out_dbr_val = dbr_val
+        if len(dbr_val) > MAX_DBR_STR_LEN:
+            out_dbr_val = dbr_val[:39]
+            logging.warning(
+                f"'{dbr_val}' longer than EPICS 39 characters max limit. "
+                f"Truncated to: {out_dbr_val}"
+            )
+
+        return str(out_dbr_val)
 
     @visit.register(cothread.dbr.ca_int)
     def visit(self, dbr_val: cothread.dbr.ca_int) -> str:
@@ -90,6 +102,10 @@ class PvReadVisitor(PvVisitor):
     @visit.register(cothread.dbr.ca_array)
     def visit(self, dbr_val: cothread.dbr.ca_array) -> list:
         """Handle CA array type."""
+        if len(dbr_val) == 0:
+            raise InvalidReadingException(
+                f"caget failure: array of length zero returned"
+            )
         return [SNAP_PRECISION_PYFORMAT.format(reading) for reading in dbr_val[:]]
 
 
@@ -129,6 +145,6 @@ class PvTypeDBR:
         """Init constructor."""
         self.dbr_val = dbr_val
 
-    def accept(self, type_visitor: PvVisitor) -> Any:
+    def accept(self, v: PvVisitor) -> Any:
         """Single dispatch on the DBR type to get the desired value."""
-        return type_visitor.visit(self.dbr_val)
+        return v.visit(self.dbr_val)
