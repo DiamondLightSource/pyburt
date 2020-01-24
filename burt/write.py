@@ -194,7 +194,7 @@ def _is_write_instr(pv_entry: SnapParser.SNAP_PV, _logger) -> bool:
     elif pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
         # TODO: write the "correct" value, not the saved ones.
         _logger.warning("WO type PVs currently unimplemented.")
-        ret = False
+        ret = True
 
     return ret
 
@@ -225,7 +225,7 @@ def _convert_to_ca_type(
             or ca_info.datatype == DBR_CHAR
             or ca_info.datatype == DBR_ENUM_STR
         ):
-            pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+            pvs_to_restore[pv_entry.name] = str(pv_entry.vals[0])
 
         elif (
             ca_info.datatype == DBR_LONG
@@ -244,5 +244,6 @@ def _convert_to_ca_type(
             except ValueError:
                 pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
 
+    # Arrays are always coerced as floats.
     else:
         pvs_to_restore[pv_entry.name] = [float(val) for val in pv_entry.vals]

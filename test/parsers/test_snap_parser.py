@@ -227,7 +227,7 @@ def test_snap_parser_enums():
     correct_pv_snapshots = [
         sp.SNAP_PV("SR01C-DI-COL-01:ENUM", 1, ["NIL"], None),
         sp.SNAP_PV("SR01C-DI-COL-01:ENUM2", 1, ["lower voltage"], None),
-        sp.SNAP_PV("SR01C-DI-COL-01:ENUM3", 2, ["lower voltage", "no voltage"], None),
+        sp.SNAP_PV("SR01C-DI-COL-01:ENUM3", 1, ["no voltage"], None),
         sp.SNAP_PV("SR01C-DI-COL-01:ENUM4", 1, ["lower voltage no voltage"], None),
     ]
 

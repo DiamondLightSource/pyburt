@@ -77,30 +77,6 @@ def test_simple_snapshot(mock_get_vals, mock_caget):
     os.remove(test.TMP_PYBURT_OUT)
 
 
-@mock.patch("burt.read.caget")
-@mock.patch("burt.read._get_snap_header_system_vals")
-def test_simple_snapshot(mock_get_header_vals, mock_caget):
-    """Run a simple snapshot."""
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([2]))
-    singleton_return_value[0] = 1
-    singleton_return_value[1] = 2
-    singleton_return_value.ok = True
-    mock_caget.return_value = [singleton_return_value]
-    mock_get_header_vals.return_value = ("user", "time", "dir", "group", 100)
-
-    test_comment = "Hello World"
-    test_keywords = "cool,snap,file"
-
-    burt.take_snapshot(
-        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
-    )
-    with open(test.TMP_PYBURT_OUT) as f1:
-        with open(test.SIMPLE_SNAP) as f2:
-            assert f1.read() == f2.read()
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
-
-
 def test_burtinter_req_file_prefix_compatability():
     """Test the header logic from the old burtinter."""
     import logging
