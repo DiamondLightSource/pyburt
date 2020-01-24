@@ -283,6 +283,9 @@ def _gen_padded_header_line(prefix, value):
 def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
     """Format a reading returned from caget into a string for a snap file.
 
+    Cothread automatically converts a DBR channel access type into its python
+    equivalent, and stores it as a type of one of ca_array, ca_str, ca_int, or ca_float.
+
     Args:
         ca_reading: reading from caget
         save_length: requested length of array to store
@@ -306,22 +309,30 @@ def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
     if isinstance(ca_reading, cothread.dbr.ca_array):
         if len(ca_reading) == 0:
             raise InvalidReadingException(
-                f"caget failure: array of length zero returned"
+                f"Cothread failure: array of length zero returned:"
+                f" {ca_reading.__str__()}."
             )
         saved_length, ca_reading_str = _flatten_ca_array_and_extract_save_len(
             ca_reading, save_length
         )
 
-    # A DBR enum, e.g. "DIAD".
     elif isinstance(ca_reading, cothread.dbr.ca_str):
         ca_reading_str = str(ca_reading)
 
-        # Whitespace, e.g. "stop filling"
+        # Whitespace, e.g. "stop filling" in an enum.
         if " " in ca_reading_str:
             ca_reading_str = f'"{ca_reading_str}"'
 
-    # Any other augmented scalar value.
+    elif isinstance(ca_reading, cothread.dbr.ca_int) or isinstance(
+        ca_reading, cothread.dbr.ca_float
+    ):
+        ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
+
     else:
+        logging.warning(
+            f"Unexpected cothread type: {ca_reading.__str__()}. "
+            f"Coercing to default format: {SNAP_PRECISION_PYFORMAT}."
+        )
         ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
 
     return saved_length, ca_reading_str
