@@ -5,6 +5,16 @@ import cothread
 import mock
 import numpy
 import pytest
+from cothread.catools import (
+    DBR_CHAR,
+    DBR_DOUBLE,
+    DBR_ENUM,
+    DBR_ENUM_STR,
+    DBR_FLOAT,
+    DBR_LONG,
+    DBR_SHORT,
+    DBR_STRING,
+)
 
 import burt
 import test
@@ -217,11 +227,15 @@ def test_snapshot_enum(mock_caget):
     """
     singleton_return_value = cothread.dbr.ca_str("DIAD")
     singleton_return_value.ok = True
+    singleton_return_value.element_count = 1
+    singleton_return_value.datatype = DBR_FLOAT
     mock_caget.return_value = [singleton_return_value for i in range(12)]
     mock_caget.return_value[1] = cothread.dbr.ca_str(".5 fill")
     mock_caget.return_value[1].ok = True
+    mock_caget.return_value[1].datatype = DBR_STRING
     mock_caget.return_value[2] = cothread.dbr.ca_str("stop filling start beam")
     mock_caget.return_value[2].ok = True
+    mock_caget.return_value[2].datatype = DBR_STRING
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -532,6 +546,7 @@ def test_snapshot_invalid_save_len(mock_caget):
     # The requested save length in the .req file is 937.
     singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
     singleton_return_value.ok = True
+    singleton_return_value.element_count = 936
     mock_caget.return_value = [singleton_return_value]
 
     with pytest.raises(ValueError):

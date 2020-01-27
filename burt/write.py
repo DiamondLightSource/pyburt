@@ -220,25 +220,18 @@ def _convert_to_ca_type(
 
     # Non CA array case.
     elif pv_entry.dtype_len == 1:
-        if (
-            ca_info.datatype == DBR_STRING
-            or ca_info.datatype == DBR_CHAR
-            or ca_info.datatype == DBR_ENUM_STR
-        ):
+        if ca_info.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
             pvs_to_restore[pv_entry.name] = str(pv_entry.vals[0])
 
-        elif (
-            ca_info.datatype == DBR_LONG
-            or ca_info.datatype == DBR_SHORT
-            or ca_info.datatype == DBR_ENUM
-        ):
+        elif ca_info.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
             pvs_to_restore[pv_entry.name] = int(pv_entry.vals[0])
 
-        elif ca_info.datatype == DBR_DOUBLE or ca_info.datatype == DBR_FLOAT:
+        elif ca_info.datatype in (DBR_FLOAT, DBR_DOUBLE):
             pvs_to_restore[pv_entry.name] = float(pv_entry.vals[0])
 
-        # Fall back on older technique with trying to convert by force.
+        # Fall back on older technique wth trying to convert by force.
         else:
+            logging.warning(f"Unexpected channel type: {ca_info.__str__()}.")
             try:
                 pvs_to_restore[pv_entry.name] = float(pv_entry.vals[0])
             except ValueError:
