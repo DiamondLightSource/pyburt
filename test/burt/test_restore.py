@@ -214,29 +214,28 @@ def test_restore_write_fail(mock_connect, mock_caput):
 
 @mock.patch("burt.write.caput")
 @mock.patch("burt.write.connect")
-def test_restore_bad_snap(mock_connect, mock_caput):
+@pytest.mark.parametrize(
+    "snapfile",
+    [
+        test.MISSING_BOTTOM_HEADER_SNAP,
+        test.MISSING_TOP_HEADER_SNAP,
+        test.MISORDERED_BURT_HEADER_SNAP,
+        test.DUPLICATE_BURT_HEADERS_SNAP,
+        test.MALFORMED_HEADER_TYPO_SNAP,
+        test.MALFORMED_BODY_SNAP,
+        test.MALFORMED_HEADER_COLONS_SNAP,
+    ],
+)
+def test_restore_bad_snap(mock_connect, mock_caput, snapfile):
     """Run BURT restore against some bad .snap files."""
     with pytest.raises(ParserException):
-        burt.restore(test.MISSING_BOTTOM_HEADER_SNAP)
+        burt.restore(snapfile)
 
-    with pytest.raises(ParserException):
-        burt.restore(test.MISSING_TOP_HEADER_SNAP)
 
-    with pytest.raises(ParserException):
-        burt.restore(test.MISORDERED_BURT_HEADER_SNAP)
-
-    with pytest.raises(ParserException):
-        burt.restore(test.DUPLICATE_BURT_HEADERS_SNAP)
-
-    with pytest.raises(ParserException):
-        burt.restore(test.MALFORMED_HEADER_TYPO_SNAP)
-
-    with pytest.raises(ParserException):
-        burt.restore(test.MALFORMED_BODY_SNAP)
-
-    with pytest.raises(ParserException):
-        burt.restore(test.MALFORMED_HEADER_COLONS_SNAP)
-
+@mock.patch("burt.write.caput")
+@mock.patch("burt.write.connect")
+def test_restore_ok_snap(mock_connect, mock_caput):
+    """Run BURT restore against ok .snap file."""
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 2
     # Strange entries, but should not raise an exception.
     burt.restore(test.MALFORMED_HEADER_ENTRIES_SNAP)
