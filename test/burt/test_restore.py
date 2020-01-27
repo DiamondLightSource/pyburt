@@ -62,20 +62,87 @@ def test_restore_normal(mock_connect, mock_caput):
 
 @mock.patch("burt.write.caput")
 @mock.patch("burt.write.connect")
-def test_restore_channel_converted_normal_vals(mock_connect, mock_caput):
-    """Run BURT restore against several channel types and check the coerced val."""
-    # ca_nothings have ok=True by default.
+@pytest.mark.parametrize(
+    "mock_channel_types,expected_converted_vals",
+    (
+        (
+            [
+                MockCainfo(DBR_FLOAT),
+                MockCainfo(DBR_SHORT),
+                MockCainfo(DBR_STRING),
+                MockCainfo(DBR_ENUM_STR),
+                MockCainfo(DBR_ENUM_STR),
+                MockCainfo(DBR_SHORT),
+                MockCainfo(DBR_DOUBLE),
+                MockCainfo(DBR_FLOAT),
+            ],
+            [
+                [3.259328000000000e00, -3.259328, 3.259328],
+                [3.0000000000, 4, 2.00e00],
+                "enumstr",
+                "enumstr with spaces",
+                "DIAD",
+                2,
+                2.000,
+                1.200000000000000e01,
+            ],
+        ),
+        (
+            [
+                MockCainfo(DBR_FLOAT),
+                MockCainfo(DBR_FLOAT),
+                MockCainfo(DBR_STRING),
+                MockCainfo(DBR_ENUM_STR),
+                MockCainfo(DBR_ENUM_STR),
+                MockCainfo(DBR_FLOAT),
+                MockCainfo(DBR_FLOAT),
+                MockCainfo(DBR_FLOAT),
+            ],
+            [
+                [3.259328000000000e00, -3.259328, 3.259328],
+                [3.0000000000, 4, 2.00e00],
+                "enumstr",
+                "enumstr with spaces",
+                "DIAD",
+                2,
+                2.000,
+                1.200000000000000e01,
+            ],
+        ),
+        (
+            [
+                MockCainfo(DBR_STRING),
+                MockCainfo(DBR_STRING),
+                MockCainfo(DBR_CHAR),
+                MockCainfo(DBR_STRING),
+                MockCainfo(DBR_ENUM_STR),
+                MockCainfo(DBR_CHAR),
+                MockCainfo(DBR_STRING),
+                MockCainfo(DBR_STRING),
+            ],
+            [
+                [3.259328000000000e00, -3.259328, 3.259328],
+                [3, 4, 2],
+                "enumstr",
+                "enumstr with spaces",
+                "DIAD",
+                "2",
+                "2.000",
+                "1.200000000000000e+01",
+            ],
+        ),
+    ),
+)
+def test_restore_channel_converted_vals(
+    mock_connect, mock_caput, mock_channel_types, expected_converted_vals
+):
+    """Run BURT restore against several channel types and check the coerced val.
+
+    Case 1: Normal case.
+    Case 2: Int promotion.
+    Case 3: Primitives to strings.
+    """
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 7
-    mock_channel_types = [
-        MockCainfo(DBR_FLOAT),
-        MockCainfo(DBR_SHORT),
-        MockCainfo(DBR_STRING),
-        MockCainfo(DBR_ENUM_STR),
-        MockCainfo(DBR_ENUM_STR),
-        MockCainfo(DBR_SHORT),
-        MockCainfo(DBR_DOUBLE),
-        MockCainfo(DBR_FLOAT),
-    ]
     mock_connect.return_value = mock_channel_types
 
     # Expected case
@@ -84,81 +151,10 @@ def test_restore_channel_converted_normal_vals(mock_connect, mock_caput):
     keys, values = args
     converted_vals = list(values)
 
-    assert converted_vals[0] == [3.259328000000000e00, -3.259328, 3.259328]
-    assert converted_vals[1] == [3, 4, 2]
-    assert converted_vals[2] == "enumstr"
-    assert converted_vals[3] == "enumstr with spaces"
-    assert converted_vals[4] == "DIAD"
-    assert converted_vals[5] == 2
-    assert converted_vals[6] == 2.000
-    assert converted_vals[7] == 1.200000000000000e01
-
-
-@mock.patch("burt.write.caput")
-@mock.patch("burt.write.connect")
-def test_restore_channel_converted_int_promotion_vals(mock_connect, mock_caput):
-    """Run BURT restore against several channel types and check the coerced val."""
-    # ca_nothings have ok=True by default.
-    mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 7
-    # Int promotion to float.
-    mock_channel_types = [
-        MockCainfo(DBR_FLOAT),
-        MockCainfo(DBR_FLOAT),
-        MockCainfo(DBR_STRING),
-        MockCainfo(DBR_ENUM_STR),
-        MockCainfo(DBR_ENUM_STR),
-        MockCainfo(DBR_FLOAT),
-        MockCainfo(DBR_FLOAT),
-        MockCainfo(DBR_FLOAT),
-    ]
-    mock_connect.return_value = mock_channel_types
-
-    burt.restore(test.VARIETY_SNAP)
-    args, _ = mock_caput.call_args_list[0]
-    keys, values = args
-    converted_vals = list(values)
-
-    assert converted_vals[0] == [3.259328000000000e00, -3.259328, 3.259328]
-    assert converted_vals[1] == [3.0000000000, 4, 2.00e00]
-    assert converted_vals[2] == "enumstr"
-    assert converted_vals[3] == "enumstr with spaces"
-    assert converted_vals[4] == "DIAD"
-    assert converted_vals[5] == 2
-    assert converted_vals[6] == 2.000
-    assert converted_vals[7] == 1.200000000000000e01
-
-
-@mock.patch("burt.write.caput")
-@mock.patch("burt.write.connect")
-def test_restore_channel_converted_str_vals(mock_connect, mock_caput):
-    """Run BURT restore against several channel types and check the coerced val."""
-    # ca_nothings have ok=True by default.
-    mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 7
-    mock_channel_types = [
-        MockCainfo(DBR_STRING),
-        MockCainfo(DBR_STRING),
-        MockCainfo(DBR_CHAR),
-        MockCainfo(DBR_STRING),
-        MockCainfo(DBR_ENUM_STR),
-        MockCainfo(DBR_CHAR),
-        MockCainfo(DBR_STRING),
-        MockCainfo(DBR_STRING),
-    ]
-    mock_connect.return_value = mock_channel_types
-
-    burt.restore(test.VARIETY_SNAP)
-    args, _ = mock_caput.call_args_list[0]
-    keys, values = args
-    converted_vals = list(values)
-
-    assert converted_vals[0] == [3.259328000000000e00, -3.259328, 3.259328]
-    assert converted_vals[1] == [3, 4, 2]
-    assert converted_vals[2] == "enumstr"
-    assert converted_vals[3] == "enumstr with spaces"
-    assert converted_vals[4] == "DIAD"
-    assert converted_vals[5] == "2"
-    assert converted_vals[6] == "2.000"
-    assert converted_vals[7] == "1.200000000000000e+01"
+    for converted_val, expected_converted_val in zip(
+        converted_vals, expected_converted_vals
+    ):
+        assert converted_val == expected_converted_val
 
 
 @mock.patch("burt.write.caput")
@@ -177,11 +173,13 @@ def test_restore_channel_types(mock_connect, mock_caput):
     for int_channel_type in INT_CHANNEL_TYPES:
         mock_channel_types[0] = MockCainfo(int_channel_type)
         burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+
     # Trying to convert float from an int channel type.
     for int_channel_type in INT_CHANNEL_TYPES:
         mock_channel_types[1] = MockCainfo(int_channel_type)
         with pytest.raises(ValueError):
             burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+
     # Trying to convert float from a string channel type.
     for str_channel_type in STR_CHANNEL_TYPES:
         mock_channel_types[1] = MockCainfo(str_channel_type)
