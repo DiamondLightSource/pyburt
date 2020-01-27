@@ -19,8 +19,8 @@ import burt
 import test
 from burt.parsers import ParserException
 
-INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG, DBR_ENUM)
-STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR)
+INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
+STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM)
 
 
 class MockCainfo:

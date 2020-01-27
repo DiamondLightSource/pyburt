@@ -220,10 +220,10 @@ def _convert_to_ca_type(
 
     # Non CA array case.
     elif pv_entry.dtype_len == 1:
-        if ca_info.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
+        if ca_info.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM):
             pvs_to_restore[pv_entry.name] = str(pv_entry.vals[0])
 
-        elif ca_info.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+        elif ca_info.datatype in (DBR_SHORT, DBR_LONG):
             pvs_to_restore[pv_entry.name] = int(pv_entry.vals[0])
 
         elif ca_info.datatype in (DBR_FLOAT, DBR_DOUBLE):
