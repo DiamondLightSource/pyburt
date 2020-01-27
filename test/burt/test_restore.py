@@ -78,7 +78,7 @@ def test_restore_normal(mock_connect, mock_caput):
             ],
             [
                 [3.259328000000000e00, -3.259328, 3.259328],
-                [3.0000000000, 4, 2.00e00],
+                [3, 4, 2],
                 "enumstr",
                 "enumstr with spaces",
                 "DIAD",
