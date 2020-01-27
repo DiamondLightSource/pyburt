@@ -220,6 +220,7 @@ def _convert_to_ca_type(
 
     # Non CA array case.
     elif pv_entry.dtype_len == 1:
+        # Enums are stored in snap files as their string value.
         if ca_info.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM):
             pvs_to_restore[pv_entry.name] = str(pv_entry.vals[0])
 
