@@ -1,4 +1,5 @@
 """The test package."""
+from cothread.catools import DBR_FLOAT
 
 # Shared test .req files.
 BLANK_REQ = "testables/req/blank.req"
@@ -21,6 +22,7 @@ INLINE_COMMENTS_SNAP = "testables/snap/inline_comments.snap"
 MODIFIERS_SNAP = "testables/snap/modifiers.snap"
 MULTIPLE_REQ_PATHS_SNAP = "testables/snap/multiple_req_paths.snap"
 LONG_SNAP = "testables/snap/ioc_restore_long.snap"
+VARIETY_SNAP = "testables/snap/type_variety.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = "testables/snap/duplicate_burt_headers.snap"
 MALFORMED_BODY_SNAP = "testables/snap/malformed_body.snap"
@@ -81,7 +83,7 @@ NORMAL_CHECK_3 = "testables/check/normal_3.check"
 TMP_PYBURT_OUT = "test/tmp.snap"
 
 
-def aug_float(int_val, ok=True):
+def aug_float(int_val, ok=True, element_count=1):
     """Create an augmented value as returned by cothread."""
     # noqa D202  https://github.com/PyCQA/pydocstyle/pull/395
     class AugFloat(float):
@@ -89,4 +91,7 @@ def aug_float(int_val, ok=True):
 
     f = AugFloat(int_val)
     f.ok = ok
+    f.element_count = element_count
+    f.datatype = DBR_FLOAT
+
     return f

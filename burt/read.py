@@ -23,6 +23,16 @@ from typing import Any, List, Tuple
 
 import cothread
 from cothread.catools import caget
+from cothread.catools import (
+    DBR_CHAR,
+    DBR_DOUBLE,
+    DBR_ENUM,
+    DBR_ENUM_STR,
+    DBR_FLOAT,
+    DBR_LONG,
+    DBR_SHORT,
+    DBR_STRING,
+)
 
 import burt
 from burt.parsers.snap import SnapParser as Snap
@@ -31,6 +41,10 @@ from . import logconfig
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
+
+
+class InvalidReadingException(Exception):
+    """Exception used to denote an incorrect CA reading."""
 
 
 def take_snapshot(
@@ -276,12 +290,11 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
-class InvalidReadingException(Exception):
-    """Exception used to denote an incorrect CA reading."""
-
-
 def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
     """Format a reading returned from caget into a string for a snap file.
+
+    Cothread automatically converts a DBR channel access type into its python
+    equivalent, and stores it as a type of one of ca_array, ca_str, ca_int, or ca_float.
 
     Args:
         ca_reading: reading from caget
@@ -297,32 +310,35 @@ def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
     # if present will be stored in the reading itself.
     try:
         if not ca_reading.ok:
-            raise InvalidReadingException(f"caget failure {ca_reading.errorcode}")
+            raise InvalidReadingException(f"Caget failure: {ca_reading.errorcode}.")
     except AttributeError as e:
-        raise InvalidReadingException(f"Malformed cothread object: {e}")
+        raise InvalidReadingException(f"Malformed cothread object: {e}.")
 
     # If a save length is specified in the .req file, this is used to shorten the
     # cothread array length to the desired value.
-    if isinstance(ca_reading, cothread.dbr.ca_array):
-        if len(ca_reading) == 0:
-            raise InvalidReadingException(
-                f"caget failure: array of length zero returned"
-            )
+    if ca_reading.element_count > 1:
         saved_length, ca_reading_str = _flatten_ca_array_and_extract_save_len(
             ca_reading, save_length
         )
 
-    # A DBR enum, e.g. "DIAD".
-    elif isinstance(ca_reading, cothread.dbr.ca_str):
+    elif ca_reading.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
         ca_reading_str = str(ca_reading)
 
-        # Whitespace, e.g. "stop filling"
+        # Whitespace, e.g. "stop filling" in an enum.
         if " " in ca_reading_str:
             ca_reading_str = f'"{ca_reading_str}"'
 
-    # Any other augmented scalar value.
-    else:
+    elif ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+        ca_reading_str = int(ca_reading)
+
+    elif ca_reading.datatype in (DBR_FLOAT, DBR_DOUBLE):
         ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
+
+    else:
+        logging.warning(
+            f"Unexpected cothread type: {ca_reading.__str__()}. Converting to string."
+        )
+        ca_reading_str = str(ca_reading)
 
     return saved_length, ca_reading_str
 
