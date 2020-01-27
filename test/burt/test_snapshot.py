@@ -71,6 +71,8 @@ def test_simple_snapshot(mock_get_vals, mock_caget):
     singleton_return_value[0] = 1
     singleton_return_value[1] = 2
     singleton_return_value.ok = True
+    singleton_return_value.element_count = 2
+    singleton_return_value.datatype = DBR_FLOAT
     mock_caget.return_value = [singleton_return_value]
     mock_get_vals.return_value = ("user", "time", "dir", "group", 100)
 
@@ -152,6 +154,8 @@ def test_snapshot_arrays(mock_caget):
     # Flattened ndarray is a 12 element list of 40 elements.
     singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
     singleton_return_value.ok = True
+    singleton_return_value.element_count = 40
+    singleton_return_value.datatype = DBR_SHORT
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
@@ -228,14 +232,16 @@ def test_snapshot_enum(mock_caget):
     singleton_return_value = cothread.dbr.ca_str("DIAD")
     singleton_return_value.ok = True
     singleton_return_value.element_count = 1
-    singleton_return_value.datatype = DBR_FLOAT
+    singleton_return_value.datatype = DBR_STRING
     mock_caget.return_value = [singleton_return_value for i in range(12)]
     mock_caget.return_value[1] = cothread.dbr.ca_str(".5 fill")
     mock_caget.return_value[1].ok = True
     mock_caget.return_value[1].datatype = DBR_STRING
+    mock_caget.return_value[1].element_count = 1
     mock_caget.return_value[2] = cothread.dbr.ca_str("stop filling start beam")
     mock_caget.return_value[2].ok = True
     mock_caget.return_value[2].datatype = DBR_STRING
+    mock_caget.return_value[2].element_count = 1
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -271,33 +277,6 @@ def test_snapshot_enum(mock_caget):
     assert body[2].name == "SR01C-DI-COL-02:CENTRE"
     assert len(body[2].vals) == 1
     assert body[2].vals[0] == "stop filling start beam"
-
-    assert body[3].name == "SR01C-DI-COL-02:GAP"
-    assert len(body[3].vals) == 1
-    assert body[4].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[4].vals) == 1
-    assert body[5].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[5].vals) == 1
-    assert body[5].modifier == "RO"
-    assert body[6].name == "SR-DI-PICO-01:BUCKETS"
-    assert len(body[6].vals) == 1
-    assert body[6].modifier == "RON"
-
-    # Some readonly modifiers here.
-    assert body[7].name == "SR01C-DI-COL-01:POS1"
-    assert len(body[7].vals) == 1
-    assert body[7].modifier == "RON"
-    assert body[8].name == "SR01C-DI-COL-01:POS2"
-    assert len(body[8].vals) == 1
-    assert body[8].modifier == "RO"
-    assert body[9].name == "SR01C-DI-COL-02:POS1"
-    assert len(body[9].vals) == 1
-    assert body[9].modifier == "RO"
-    assert body[10].name == "SR01C-DI-COL-02:POS2"
-    assert len(body[10].vals) == 1
-    assert body[10].modifier == "RO"
-    assert body[11].name == "SR-CS-RING-01:MODE"
-    assert len(body[11].vals) == 1
 
     # cleanup
     os.remove(test.TMP_PYBURT_OUT)
