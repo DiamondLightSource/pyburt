@@ -17,7 +17,8 @@ from cothread.catools import (
 
 import burt
 import test
-from burt.parsers import ParserException
+from burt.parsers import ParserException, SnapParser
+from burt.write import snap_entry_to_ca_type
 
 INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
 STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM)
@@ -58,103 +59,6 @@ def test_restore_normal(mock_connect, mock_caput):
     # long PVs. This should now put a float.
     assert list(keys)[3] == "SR01C-DI-COL-02:POS2"
     assert list(values)[3] == 12.0
-
-
-@mock.patch("burt.write.caput")
-@mock.patch("burt.write.connect")
-@pytest.mark.parametrize(
-    "mock_channel_types,expected_converted_vals",
-    (
-        (
-            [
-                MockCainfo(DBR_FLOAT),
-                MockCainfo(DBR_SHORT),
-                MockCainfo(DBR_STRING),
-                MockCainfo(DBR_ENUM_STR),
-                MockCainfo(DBR_ENUM_STR),
-                MockCainfo(DBR_SHORT),
-                MockCainfo(DBR_DOUBLE),
-                MockCainfo(DBR_FLOAT),
-            ],
-            [
-                [3.259328000000000e00, -3.259328, 3.259328],
-                [3, 4, 2],
-                "enumstr",
-                "enumstr with spaces",
-                "DIAD",
-                2,
-                2.000,
-                1.200000000000000e01,
-            ],
-        ),
-        (
-            [
-                MockCainfo(DBR_FLOAT),
-                MockCainfo(DBR_FLOAT),
-                MockCainfo(DBR_STRING),
-                MockCainfo(DBR_ENUM_STR),
-                MockCainfo(DBR_ENUM_STR),
-                MockCainfo(DBR_FLOAT),
-                MockCainfo(DBR_FLOAT),
-                MockCainfo(DBR_FLOAT),
-            ],
-            [
-                [3.259328000000000e00, -3.259328, 3.259328],
-                [3.0000000000, 4, 2.00e00],
-                "enumstr",
-                "enumstr with spaces",
-                "DIAD",
-                2,
-                2.000,
-                1.200000000000000e01,
-            ],
-        ),
-        (
-            [
-                MockCainfo(DBR_STRING),
-                MockCainfo(DBR_STRING),
-                MockCainfo(DBR_CHAR),
-                MockCainfo(DBR_STRING),
-                MockCainfo(DBR_ENUM_STR),
-                MockCainfo(DBR_CHAR),
-                MockCainfo(DBR_STRING),
-                MockCainfo(DBR_STRING),
-            ],
-            [
-                [3.259328000000000e00, -3.259328, 3.259328],
-                [3, 4, 2],
-                "enumstr",
-                "enumstr with spaces",
-                "DIAD",
-                "2",
-                "2.000",
-                "1.200000000000000e+01",
-            ],
-        ),
-    ),
-)
-def test_restore_channel_converted_vals(
-    mock_connect, mock_caput, mock_channel_types, expected_converted_vals
-):
-    """Run BURT restore against several channel types and check the coerced val.
-
-    Case 1: Normal case.
-    Case 2: Int promotion.
-    Case 3: Primitives to strings.
-    """
-    mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 7
-    mock_connect.return_value = mock_channel_types
-
-    # Expected case
-    burt.restore(test.VARIETY_SNAP)
-    args, _ = mock_caput.call_args_list[0]
-    keys, values = args
-    converted_vals = list(values)
-
-    for converted_val, expected_converted_val in zip(
-        converted_vals, expected_converted_vals
-    ):
-        assert converted_val == expected_converted_val
 
 
 @mock.patch("burt.write.caput")
@@ -299,6 +203,23 @@ def test_restore_group_normal(mock_connect, mock_caput):
     # Just one caput of one PV expected.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")]
     burt.restore_group(test.NORMAL_ALT_RGR, False)
+
+
+@pytest.mark.parametrize(
+    "entry,datatype,expected",
+    [
+        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_LONG, 2),
+        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_FLOAT, 2.0),
+        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_STRING, "2"),
+        # Enums are parsed as strings.
+        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_ENUM, "2"),
+        # All arrays are parsed to floats.
+        (SnapParser.SNAP_PV("a", 2, ["2", "3"], ""), DBR_STRING, [2, 3]),
+    ],
+)
+def test_snap_entry_to_ca_type(entry, datatype, expected):
+    """Test conversion of snap entries to specific datatypes."""
+    assert snap_entry_to_ca_type(entry, datatype) == expected
 
 
 @mock.patch("argparse.ArgumentParser")

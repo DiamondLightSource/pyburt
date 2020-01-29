@@ -19,7 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import cothread
 from cothread.catools import caput, connect
@@ -38,6 +38,9 @@ import burt
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
 from . import logconfig
+
+
+CaValue = Union[str, int, float, List[float]]
 
 
 def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
@@ -76,9 +79,16 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     # correct type.
     ca_infos = connect([pv_entry.name for pv_entry in pvs], cainfo=True, throw=False)
 
+    pvs_to_restore = OrderedDict()
+
     for pv_entry, ca_info in zip(pvs, ca_infos):
         if _is_write_instr(pv_entry, _logger):
-            _convert_to_ca_type(pv_entry, ca_info, pvs_to_restore, _logger)
+            if not ca_info.ok:
+                _logger.warning(f"PV invalid, skipping: {ca_info.__str__()}")
+            else:
+                pvs_to_restore[pv_entry.name] = snap_entry_to_ca_type(
+                    pv_entry, ca_info.datatype
+                )
 
     failed_pvs = []
     return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
@@ -207,37 +217,28 @@ def _get_pvs_in_snap(snap_file, _logger):
     return body
 
 
-def _convert_to_ca_type(
-    pv_entry: SnapParser.SNAP_PV,
-    ca_info: cothread.catools.ca_info,
-    pvs_to_restore: dict,
-    _logger,
-):
+def snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValue:
     """Coerce the correct ca type from the channel type."""
-    if not ca_info.ok:
-        _logger.warning(f"Could not coerce channel type, skipping: {ca_info.__str__()}")
-        return
-
     # Non CA array case.
-    elif pv_entry.dtype_len == 1:
+    if pv_entry.dtype_len == 1:
         # Enums are stored in snap files as their string value.
-        if ca_info.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM):
-            pvs_to_restore[pv_entry.name] = str(pv_entry.vals[0])
+        if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM):
+            return str(pv_entry.vals[0])
 
-        elif ca_info.datatype in (DBR_SHORT, DBR_LONG):
-            pvs_to_restore[pv_entry.name] = int(pv_entry.vals[0])
+        elif datatype in (DBR_SHORT, DBR_LONG):
+            return int(pv_entry.vals[0])
 
-        elif ca_info.datatype in (DBR_FLOAT, DBR_DOUBLE):
-            pvs_to_restore[pv_entry.name] = float(pv_entry.vals[0])
+        elif datatype in (DBR_FLOAT, DBR_DOUBLE):
+            return float(pv_entry.vals[0])
 
         # Fall back on older technique wth trying to convert by force.
         else:
-            logging.warning(f"Unexpected channel type: {ca_info.__str__()}.")
+            logging.warning(f"Unexpected channel type: {datatype}.")
             try:
-                pvs_to_restore[pv_entry.name] = float(pv_entry.vals[0])
+                return float(pv_entry.vals[0])
             except ValueError:
-                pvs_to_restore[pv_entry.name] = pv_entry.vals[0]
+                return pv_entry.vals[0]
 
     # Arrays are always coerced as floats.
     else:
-        pvs_to_restore[pv_entry.name] = [float(val) for val in pv_entry.vals]
+        return [float(val) for val in pv_entry.vals]
