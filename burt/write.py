@@ -37,8 +37,7 @@ from cothread.catools import (
 import burt
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
-from . import logconfig
-
+from burt.config import logconfig
 
 CaValue = Union[str, int, float, List[float]]
 
@@ -101,7 +100,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
 
 def restore_group(
-    rgr_file: str, check: bool = True, _logger=logging.getLogger()
+        rgr_file: str, check: bool = True, _logger=logging.getLogger()
 ) -> List[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
