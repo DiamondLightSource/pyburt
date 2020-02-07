@@ -401,7 +401,15 @@ def _format_ca_reading(ca_reading):
     """Format the cothread value depending on its type."""
     ca_reading_str = ""
 
-    if ca_reading.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
+    if ca_reading.datatype == DBR_CHAR:
+        # Try to convert an ASCII code first, to handle char array case.
+        try:
+            ca_reading_str = chr(ca_reading)
+        except (ValueError, TypeError) as e:
+            logging.warning(f"Unable to convert ASCII code to str repr: {e}.")
+            ca_reading_str = str(ca_reading)
+
+    elif ca_reading.datatype in (DBR_STRING, DBR_ENUM_STR):
         ca_reading_str = str(ca_reading)
 
         # Empty string case, always output a null char instead to mimic old burt.
