@@ -381,7 +381,7 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, requested_length):
         ValueError: If the save length is invalid.
 
     """
-    desired_ca_arr_len = len(ca_reading)
+    desired_ca_arr_len = ca_reading.element_count
 
     if requested_length:
         if requested_length > desired_ca_arr_len:
@@ -404,7 +404,11 @@ def _format_ca_reading(ca_reading):
     if ca_reading.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
         ca_reading_str = str(ca_reading)
 
-        # Whitespace, e.g. "stop filling" in an enum.
+        # Empty string case, always output a null char instead to mimic old burt.
+        if not ca_reading_str:
+            ca_reading_str = "\0"
+
+        # Enum case, whitespace e.g. "stop filling" in an enum.
         if " " in ca_reading_str:
             ca_reading_str = f'"{ca_reading_str}"'
 
