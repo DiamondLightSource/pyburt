@@ -29,7 +29,9 @@ def is_snap_file(filename: str, check_existence: bool = False) -> bool:
         True if the file is a .snap file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.SNAP_FILE_EXT, check_existence)
+    return _is_correct_ext(
+        filename, burt.SNAP_FILE_EXT, check_existence
+    ) or _is_correct_ext(filename, burt.PYBURT_SNAP_FILE_EXT, check_existence)
 
 
 def is_rqg_file(filename: str, check_existence: bool = False) -> bool:
@@ -57,7 +59,9 @@ def is_rgr_file(filename: str, check_existence: bool = False) -> bool:
         True if the file is a .rgr file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.RGR_FILE_EXT, check_existence)
+    return _is_correct_ext(
+        filename, burt.RGR_FILE_EXT, check_existence
+    ) or _is_correct_ext(filename, burt.PYBURT_RGR_FILE_EXT, check_existence)
 
 
 def is_check_file(filename: str, check_existence: bool = False) -> bool:
