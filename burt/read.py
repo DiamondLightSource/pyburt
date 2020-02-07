@@ -35,9 +35,9 @@ from cothread.catools import (
 )
 
 import burt
+from burt.config import logconfig
 from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
-from burt.config import logconfig
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_PYFORMAT = "{:.15e}"
@@ -48,11 +48,11 @@ class InvalidReadingException(Exception):
 
 
 def take_snapshot(
-        req_files: List[str],
-        snap_file: str,
-        comments: str = None,
-        keywords: str = None,
-        _logger=logging.getLogger(),
+    req_files: List[str],
+    snap_file: str,
+    comments: str = None,
+    keywords: str = None,
+    _logger=logging.getLogger(),
 ) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
@@ -109,12 +109,12 @@ def take_snapshot(
 
 
 def take_snapshot_group(
-        rqg_file: str,
-        rgr_file: str,
-        comments: str = None,
-        keywords: str = None,
-        check: bool = True,
-        _logger=logging.getLogger(),
+    rqg_file: str,
+    rgr_file: str,
+    comments: str = None,
+    keywords: str = None,
+    check: bool = True,
+    _logger=logging.getLogger(),
 ) -> List[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
