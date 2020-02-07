@@ -79,10 +79,10 @@ def test_restore_channel_types(mock_connect, mock_caput):
         burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
     # Trying to convert float from an int channel type.
+    # Should now just log and convert to int anyway, instead of failing.
     for int_channel_type in INT_CHANNEL_TYPES:
         mock_channel_types[1] = MockCainfo(int_channel_type)
-        with pytest.raises(ValueError):
-            burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+        burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
     # Trying to convert float from a string channel type.
     for str_channel_type in STR_CHANNEL_TYPES:
