@@ -40,7 +40,7 @@ from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
-SNAP_PRECISION_PYFORMAT = "{:.15e}"
+SNAP_PRECISION_PYFORMAT = "{:.6e}"
 
 
 class InvalidReadingException(Exception):
@@ -321,24 +321,8 @@ def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
             ca_reading, save_length
         )
 
-    elif ca_reading.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
-        ca_reading_str = str(ca_reading)
-
-        # Whitespace, e.g. "stop filling" in an enum.
-        if " " in ca_reading_str:
-            ca_reading_str = f'"{ca_reading_str}"'
-
-    elif ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
-        ca_reading_str = int(ca_reading)
-
-    elif ca_reading.datatype in (DBR_FLOAT, DBR_DOUBLE):
-        ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
-
     else:
-        logging.warning(
-            f"Unexpected cothread type: {ca_reading.__str__()}. Converting to string."
-        )
-        ca_reading_str = str(ca_reading)
+        ca_reading_str = _format_ca_reading
 
     return saved_length, ca_reading_str
 
@@ -385,9 +369,6 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
 def _flatten_ca_array_and_extract_save_len(ca_reading, requested_length):
     """Flatten the ca array into a string and obtain the save length if specified.
 
-    The .snap file PV entries require a 15 width precision number(s) in
-    scientific notation.
-
     Args:
         ca_reading (any): Return value from cothread.
         requested_length (int): length specified in .req file.
@@ -411,12 +392,35 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, requested_length):
             desired_ca_arr_len = requested_length
 
     ca_reading_str = " ".join(
-        [
-            SNAP_PRECISION_PYFORMAT.format(reading)
-            for reading in ca_reading[:desired_ca_arr_len]
-        ]
+        [_format_ca_reading(reading) for reading in ca_reading[:desired_ca_arr_len]]
     )
     return desired_ca_arr_len, ca_reading_str
+
+
+def _format_ca_reading(ca_reading):
+    """Format the cothread value depending on its type."""
+    ca_reading_str = ""
+
+    if ca_reading.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
+        ca_reading_str = str(ca_reading)
+
+        # Whitespace, e.g. "stop filling" in an enum.
+        if " " in ca_reading_str:
+            ca_reading_str = f'"{ca_reading_str}"'
+
+    elif ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+        ca_reading_str = int(ca_reading)
+
+    elif ca_reading.datatype in (DBR_FLOAT, DBR_DOUBLE):
+        ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
+
+    else:
+        logging.warning(
+            f"Unexpected cothread type: {ca_reading.__str__()}. Converting to string."
+        )
+        ca_reading_str = str(ca_reading)
+
+    return ca_reading_str
 
 
 def _format_snap_footer_entry(ca_reading_len, ca_reading_str, pv_entry):
