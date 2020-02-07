@@ -1,0 +1,37 @@
+
+% An example of each of the different types used in DLS req files.
+
+% Scalar long
+SR-RF-LLRF-30:T-MOTOR.SREV
+
+% Array long
+LI-VA-FVALV-01:GETRAWILK
+
+% Scalar double
+SR-RF-RFPGU-34:SETPHASE
+
+% Array double
+SR-CS-FILL-01:FITGUNCHGE
+
+% Array float
+BR-RF-LLRF-01:AM:WAVE
+
+% Scalar enum
+SR-RF-IOC-31:BURT:OK
+
+% Scalar string
+SR-RF-IOT-34:SERIAL
+
+% Scalar char
+BR01C-PC-EVR-02:LINAC-PRE
+
+% Array char
+CS-CS-MSTAT-01:MESS01
+
+% Scalar short
+LI-TI-EVG-01:LINAC-PRE
+
+% Array short
+LI-VA-VLVCC-01:SOFTWARE
+
+
