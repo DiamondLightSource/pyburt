@@ -16,6 +16,8 @@ BCDORBIT_SNAP = "testables/snap/ioc_restore_bcdorbit.snap"
 # Note: it is a PV of containing a ca array datatype with 5 float32 elements.
 IOC_LOCAL_PV = "SR-CS-TEST-01:TESTPV"
 IOC_LOCAL_PV_LONG = "SR-CS-TEST-01:TESTPV_LONG"
+IOC_LOCAL_PV_DBL = "SR-CS-TEST-01:TESTPV_DBL"
+IOC_LOCAL_PV_STR = "SR-CS-TEST-01:TESTPV_STR"
 
 # Tmp files.
 TMP_BURT_OUT = "integration/tmp_burt.snap"

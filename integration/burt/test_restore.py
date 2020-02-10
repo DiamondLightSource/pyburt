@@ -59,7 +59,7 @@ def test_restore_enum():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_STR, "dummyEnumStr")
 
     # CA long PV.
     burt.restore(integration.ENUM_SNAP)

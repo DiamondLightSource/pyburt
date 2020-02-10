@@ -21,8 +21,10 @@ if __name__ == "__main__":
 
     IOC_NAME = "SR-CS-TEST-01"
 
+
     def notify(value):
         print("notify", value)
+
 
     builder.SetDeviceName(IOC_NAME)
     test = builder.aOut("TEST", initial_value=0, on_update=notify, always_update=True)
@@ -35,6 +37,8 @@ if __name__ == "__main__":
     mbbin = builder.mbbIn("MBBI", ("OFF", 0), ("ON", 1), ("NOT SURE", 2))
     wave = builder.WaveformOut("TESTPV", length=5)
     long = builder.longOut("TESTPV_LONG")
+    double = builder.aOut("TESTPV_DBL")
+    s = builder.stringOut("TESTPV_STR")
 
     bcdorbit_pvs = [
         "BCD_LIMIT",
