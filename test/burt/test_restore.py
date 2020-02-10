@@ -18,7 +18,7 @@ from cothread.catools import (
 import burt
 import test
 from burt.parsers import ParserException, SnapParser
-from burt.write import snap_entry_to_ca_type
+from burt.write import _snap_entry_to_ca_type
 
 INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
 STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM)
@@ -219,7 +219,7 @@ def test_restore_group_normal(mock_connect, mock_caput):
 )
 def test_snap_entry_to_ca_type(entry, datatype, expected):
     """Test conversion of snap entries to specific datatypes."""
-    assert snap_entry_to_ca_type(entry, datatype) == expected
+    assert _snap_entry_to_ca_type(entry, datatype) == expected
 
 
 @mock.patch("argparse.ArgumentParser")

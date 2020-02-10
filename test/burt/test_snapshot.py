@@ -5,7 +5,7 @@ import cothread
 import mock
 import numpy
 import pytest
-from cothread.catools import DBR_DOUBLE, DBR_FLOAT, DBR_SHORT, DBR_STRING
+from cothread.catools import DBR_DOUBLE, DBR_SHORT, DBR_STRING
 
 import burt
 import test

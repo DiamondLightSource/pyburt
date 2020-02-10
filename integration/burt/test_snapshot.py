@@ -1,6 +1,5 @@
 """ Various tests for the main burt module.
 """
-from integration import BCDORBIT_REQ
 import pytest
 import test
 import integration
@@ -245,14 +244,14 @@ def _vanilla_burtrb(input_req, output_snap, comments, keywords):
         keywords (keywords): keywords
     """
     burt_rb_cmd = (
-        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
-        + input_req
-        + " -o "
-        + output_snap
-        + " -c "
-        + comments
-        + " -k "
-        + keywords
+            "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
+            + input_req
+            + " -o "
+            + output_snap
+            + " -c "
+            + comments
+            + " -k "
+            + keywords
     )
 
     # Without shell=True raises an exception on Python 2.7

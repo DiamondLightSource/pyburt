@@ -113,8 +113,9 @@ def test_various_types_restore():
     caput(integration.IOC_LOCAL_PV_STR, "dummy")
     caput(integration.IOC_LOCAL_PV_ENUM, "dummy")
     caput(integration.IOC_LOCAL_PV_ARR_STR, "dummy")
-    caput(integration.IOC_LOCAL_PV_CHAR, "dummy")
-    caput(integration.IOC_LOCAL_PV_ARR_CHAR, "dummy")
+    # Ignored cases
+    # caput(integration.IOC_LOCAL_PV_CHAR, "dummy")
+    # caput(integration.IOC_LOCAL_PV_ARR_CHAR, "dummy")
     caput(integration.IOC_LOCAL_PV_SHORT, randint(1, 100))
     caput(integration.IOC_LOCAL_PV_ARR_SHORT, randint(1, 100))
 
@@ -125,10 +126,19 @@ def test_various_types_restore():
     pv_arr_double = caget(integration.IOC_LOCAL_PV_ARR_DBL)
     pv_arr_float = caget(integration.IOC_LOCAL_PV_ARR_FLOAT)
     pv_enum_str = caget(integration.IOC_LOCAL_PV_ENUM)
-    pv_arr_char = caget(integration.IOC_LOCAL_PV_ARR_CHAR)
+    # Ignored case.
+    # pv_arr_char = caget(integration.IOC_LOCAL_PV_ARR_CHAR)
     pv_short = caget(integration.IOC_LOCAL_PV_SHORT)
 
     assert pv_long == 200
+    assert pv_double == -2.900000000000000e+01
+    assert pv_arr_double[0] == 3.003617499404633e-02
+    assert pv_arr_double[1] == 3.457100664366716e-02
+    # Near equality
+    assert abs(pv_arr_float[0] - 3.800000e-01) <= 1e-05  # arbitrary
+    assert abs(pv_arr_float[1] - 3.800000e-01) <= 1e-05  # arbitrary
+    assert pv_enum_str == "Restored"
+    assert pv_short == 0
 
 
 def _vanilla_burtwb(input_snap):

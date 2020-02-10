@@ -85,7 +85,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
             if not ca_info.ok:
                 _logger.warning(f"PV invalid, skipping: {ca_info.__str__()}")
             else:
-                pvs_to_restore[pv_entry.name] = snap_entry_to_ca_type(
+                pvs_to_restore[pv_entry.name] = _snap_entry_to_ca_type(
                     pv_entry, ca_info.datatype
                 )
 
@@ -216,7 +216,7 @@ def _get_pvs_in_snap(snap_file, _logger):
     return body
 
 
-def snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValue:
+def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValue:
     """Coerce the correct ca type from the channel type."""
     # Non CA array case.
     if pv_entry.dtype_len == 1:
