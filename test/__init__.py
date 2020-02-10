@@ -25,6 +25,7 @@ MULTIPLE_REQ_PATHS_SNAP = "testables/snap/multiple_req_paths.snap"
 LONG_SNAP = "testables/snap/ioc_restore_long.snap"
 VARIETY_SNAP = "testables/snap/type_variety.snap"
 CONTROL_ROOM_TYPES_SNAP = "testables/snap/types.controlroom.snap"
+CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP = "testables/snap/ioc_restore_control_room_types.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = "testables/snap/duplicate_burt_headers.snap"
 MALFORMED_BODY_SNAP = "testables/snap/malformed_body.snap"

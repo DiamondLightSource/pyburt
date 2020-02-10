@@ -33,10 +33,25 @@ if __name__ == "__main__":
     mbbout = builder.mbbOut("MBBO", ("OFF", 0), ("ON", 1), ("NOT SURE", 2))
     mbbout_one = builder.mbbOut("MBBO1", ("OFF", 0))
     mbbin = builder.mbbIn("MBBI", ("OFF", 0), ("ON", 1), ("NOT SURE", 2))
-    wave = builder.WaveformOut("TESTPV", length=5)
+
+    float = builder.WaveformOut("TESTPV_FLOAT", length=1)
+    arr_float = builder.WaveformOut("TESTPV_ARR_FLOAT", length=160)
+
     long = builder.longOut("TESTPV_LONG")
+    arr_long = builder.WaveformOut("TESTPV_ARR_LONG", length=5, datatype="l")
+
     double = builder.aOut("TESTPV_DBL")
-    s = builder.stringOut("TESTPV_STR")
+    arr_double = builder.WaveformOut("TESTPV_ARR_DBL", length=40, datatype="d")
+
+    enum_str = builder.stringOut("TESTPV_ENUM")
+    str = builder.stringOut("TESTPV_STR")
+    arr_str = builder.WaveformOut("TESTPV_ARR_STR", length=5, datatype="S")
+
+    char = builder.WaveformOut("TESTPV_CHAR", length=1, datatype="b")
+    arr_char = builder.WaveformOut("TESTPV_ARR_CHAR", length=1000, datatype="b")
+
+    short = builder.WaveformOut("TESTPV_SHORT", length=1, datatype="h")
+    arr_short = builder.WaveformOut("TESTPV_ARR_SHORT", length=5, datatype="h")
 
     bcdorbit_pvs = [
         "BCD_LIMIT",
