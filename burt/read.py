@@ -49,11 +49,11 @@ class InvalidReadingException(Exception):
 
 
 def take_snapshot(
-    req_files: List[str],
-    snap_file: str,
-    comments: str = None,
-    keywords: str = None,
-    _logger=logging.getLogger(),
+        req_files: List[str],
+        snap_file: str,
+        comments: str = None,
+        keywords: str = None,
+        _logger=logging.getLogger(),
 ) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
@@ -110,12 +110,12 @@ def take_snapshot(
 
 
 def take_snapshot_group(
-    rqg_file: str,
-    rgr_file: str,
-    comments: str = None,
-    keywords: str = None,
-    check: bool = True,
-    _logger=logging.getLogger(),
+        rqg_file: str,
+        rgr_file: str,
+        comments: str = None,
+        keywords: str = None,
+        check: bool = True,
+        _logger=logging.getLogger(),
 ) -> List[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
@@ -361,7 +361,7 @@ def _format_ca_value(ca_reading: Any, requested_save_len: int) -> Tuple[int, str
         ca_reading_str = _flatten_ca_array(ca_reading, save_len)
 
     else:
-        ca_reading_str = _format_ca_reading(ca_reading)
+        ca_reading_str = _format_ca_reading(ca_reading, ca_reading.datatype)
 
     return save_len, ca_reading_str
 
@@ -427,17 +427,20 @@ def _flatten_ca_array(ca_reading, requested_length):
         ca_reading = ca_reading + ["\0"] * (ca_reading.element_count - len(ca_reading))
 
     ca_reading_str = " ".join(
-        [_format_ca_reading(reading) for reading in ca_reading[:requested_length]]
+        [
+            _format_ca_reading(reading, ca_reading.datatype)
+            for reading in ca_reading[:requested_length]
+        ]
     )
 
     return ca_reading_str
 
 
-def _format_ca_reading(ca_reading):
+def _format_ca_reading(ca_reading, datatype=DBR_STRING):
     """Format the cothread value depending on its type."""
     ca_reading_str = ""
 
-    if ca_reading.datatype == DBR_CHAR:
+    if datatype == DBR_CHAR:
         # Try to convert an ASCII code first, to handle char array case.
         try:
             ca_reading_str = chr(ca_reading)
@@ -445,7 +448,7 @@ def _format_ca_reading(ca_reading):
             logging.warning(f"Unable to convert ASCII code to str repr: {e}.")
             ca_reading_str = str(ca_reading)
 
-    elif ca_reading.datatype in (DBR_STRING, DBR_ENUM_STR):
+    elif datatype in (DBR_STRING, DBR_ENUM_STR):
         ca_reading_str = str(ca_reading)
 
         # Empty string case, always output a null char instead to mimic old burt.
@@ -456,19 +459,18 @@ def _format_ca_reading(ca_reading):
         elif " " in ca_reading_str:
             ca_reading_str = f'"{ca_reading_str}"'
 
-    elif ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
-        ca_reading_str = int(ca_reading)
+    elif datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+        ca_reading_str = str(int(ca_reading))
 
-    elif ca_reading.datatype == DBR_FLOAT:
+    elif datatype == DBR_FLOAT:
         ca_reading_str = SNAP_PRECISION_SHORT_PYFORMAT.format(ca_reading)
 
-    elif ca_reading.datatype == DBR_DOUBLE:
+    elif datatype == DBR_DOUBLE:
         ca_reading_str = SNAP_PRECISION_LONG_PYFORMAT.format(ca_reading)
 
     else:
         logging.warning(
-            f"Unexpected cothread type: {ca_reading.__str__()}. Converting to "
-            f"string."
+            f"Unexpected cothread type: {ca_reading.datatype}. Converting to string."
         )
         ca_reading_str = str(ca_reading)
 
