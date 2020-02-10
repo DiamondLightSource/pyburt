@@ -22,8 +22,8 @@ SR-RF-IOC-31:BURT:OK
 % Scalar string
 SR-RF-IOT-34:SERIAL
 
-% Scalar char
-BR01C-PC-EVR-02:LINAC-PRE
+% Scalar char, PROBLEM CASE
+% BR01C-PC-EVR-02:LINAC-PRE
 
 % Array char
 CS-CS-MSTAT-01:MESS01

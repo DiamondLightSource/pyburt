@@ -432,8 +432,10 @@ def _flatten_ca_array(ca_reading, requested_length):
 
     # Adding EPICS null chars if applicable.
     if len(ca_reading) < ca_reading.element_count:
-        ca_reading_str = ca_reading_str + (
-            "\0" * (ca_reading.element_count - len(ca_reading))
+        ca_reading_str = (
+            ca_reading_str
+            + " "
+            + " ".join(["\\0"] * (ca_reading.element_count - len(ca_reading)))
         )
 
     return ca_reading_str
@@ -456,7 +458,7 @@ def _format_ca_reading(ca_reading, datatype=DBR_STRING):
 
         # Empty string case, always output a null char instead to mimic old burt.
         if not ca_reading_str:
-            ca_reading_str = "\0"
+            ca_reading_str = "\\0"
 
         # Enum case, whitespace e.g. "stop filling" in an enum.
         elif " " in ca_reading_str:

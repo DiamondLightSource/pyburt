@@ -214,13 +214,16 @@ def test_various_types_against_burt():
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    _vanilla_burtrb(test.TYPES_REQ, integration.TMP_BURT_OUT, comment, keyword)
-
     burt.take_snapshot([test.TYPES_REQ], integration.TMP_PYBURT_OUT, comment, keyword)
 
-    assert filecmp.cmp(
-        integration.TMP_BURT_OUT, integration.TMP_PYBURT_OUT, shallow=False
-    )
+    # Read into strings to discard time dependent header.
+    with open(integration.TMP_PYBURT_OUT, 'r') as pyburt_out:
+        with open(test.CONTROL_ROOM_TYPES_SNAP, 'r') as burt_out:
+            pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
+            burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
+
+            assert pyburt_out_str == burt_out_str
+            print(pyburt_out_str)
 
     # cleanup
     os.remove(integration.TMP_BURT_OUT)
@@ -243,14 +246,14 @@ def _vanilla_burtrb(input_req, output_snap, comments, keywords):
         keywords (keywords): keywords
     """
     burt_rb_cmd = (
-        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
-        + input_req
-        + " -o "
-        + output_snap
-        + " -c "
-        + comments
-        + " -k "
-        + keywords
+            "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
+            + input_req
+            + " -o "
+            + output_snap
+            + " -c "
+            + comments
+            + " -k "
+            + keywords
     )
 
     # Without shell=True raises an exception on Python 2.7
