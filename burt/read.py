@@ -423,13 +423,18 @@ def _flatten_ca_array(ca_reading, requested_length):
         str: The flattened ca array as a string
 
     """
-    # Note: cothread converts to a numpy array when __pos__ is applied (+ op).
     ca_reading_str = " ".join(
         [
             _format_ca_reading(reading, ca_reading.datatype)
             for reading in ca_reading[:requested_length]
         ]
     )
+
+    # Adding EPICS null chars if applicable.
+    if len(ca_reading) < ca_reading.element_count:
+        ca_reading_str = ca_reading_str + (
+            "\0" * (ca_reading.element_count - len(ca_reading))
+        )
 
     return ca_reading_str
 
