@@ -318,7 +318,7 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
         try:
-            length, ca_reading_str = format_ca_value(ca_reading, pv_entry.save_len)
+            length, ca_reading_str = _format_ca_value(ca_reading, pv_entry.save_len)
             formatted_snapshot_entry = _format_snap_footer_entry(
                 length, ca_reading_str, pv_entry
             )
@@ -330,7 +330,7 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
     return os.linesep.join(snap_entries), failed_pvs
 
 
-def format_ca_value(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]:
+def _format_ca_value(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]:
     """Format a reading returned from caget into a string for a snap file.
 
     Cothread automatically converts a DBR channel access type into its python
@@ -341,11 +341,11 @@ def format_ca_value(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]
         requested_save_len: requested length of array to store
 
     Returns:
-        str: formatted string
         int: actual saved length
+        str: formatted string
 
     """
-    actual_save_len = 1
+    save_len = 1
     # Cothread attaches a .ok and .errorcode attribute to each reading. The error
     # if present will be stored in the reading itself.
     try:
@@ -357,13 +357,13 @@ def format_ca_value(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]
     # If a save length is specified in the .req file, this is used to shorten the
     # cothread array length to the desired value.
     if ca_reading.element_count > 1:
-        actual_save_len = _extract_save_len(ca_reading, requested_save_len)
-        ca_reading_str = _flatten_ca_array(ca_reading, actual_save_len)
+        save_len = _extract_save_len(ca_reading, requested_save_len)
+        ca_reading_str = _flatten_ca_array(ca_reading, save_len)
 
     else:
         ca_reading_str = _format_ca_reading(ca_reading)
 
-    return actual_save_len, ca_reading_str
+    return save_len, ca_reading_str
 
 
 def _extract_save_len(ca_reading, requested_length):
@@ -396,6 +396,25 @@ def _extract_save_len(ca_reading, requested_length):
 def _flatten_ca_array(ca_reading, requested_length):
     """Flatten the ca array into a string and obtain the save length if specified.
 
+    NOTE: cothread returns a truncated EPICS array, so len(ca_reading) and
+    ca_reading.element_count may be misaligned. Handle this by adding in the null chars
+    that EPICS adds to empty array elements, to be consistent with old BURT.
+
+    E.g.
+    >> l = caget('LI-VA-VLVCC-01:SOFTWARE')
+    >> l
+    ca_array([4368], dtype=int16)
+    >> l.element_count
+    3
+    >> len(l)
+    1
+    >> l[0]
+    4368
+    >> l[1]
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    IndexError: index 1 is out of bounds for axis 0 with size 1
+
     Args:
         ca_reading (any): Return value from cothread.
         requested_length (int): length specified in .req file.
@@ -404,6 +423,9 @@ def _flatten_ca_array(ca_reading, requested_length):
         str: The flattened ca array as a string
 
     """
+    if len(ca_reading) < ca_reading.element_count:
+        ca_reading = ca_reading + ["\0"] * (ca_reading.element_count - len(ca_reading))
+
     ca_reading_str = " ".join(
         [_format_ca_reading(reading) for reading in ca_reading[:requested_length]]
     )
@@ -431,7 +453,7 @@ def _format_ca_reading(ca_reading):
             ca_reading_str = "\0"
 
         # Enum case, whitespace e.g. "stop filling" in an enum.
-        if " " in ca_reading_str:
+        elif " " in ca_reading_str:
             ca_reading_str = f'"{ca_reading_str}"'
 
     elif ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
@@ -445,7 +467,8 @@ def _format_ca_reading(ca_reading):
 
     else:
         logging.warning(
-            f"Unexpected cothread type: {ca_reading.__str__()}. Converting to string."
+            f"Unexpected cothread type: {ca_reading.__str__()}. Converting to "
+            f"string."
         )
         ca_reading_str = str(ca_reading)
 
