@@ -5,6 +5,7 @@ from cothread.catools import DBR_FLOAT
 BLANK_REQ = "testables/req/blank.req"
 INLINE_COMMENTS_REQ = "testables/req/inline_comments.req"
 NORMAL_REQ = "testables/req/normal.req"
+TYPES_REQ = "testables/req/types.req"
 
 MALFORMED_REQ = "testables/req/malformed.req"
 MALFORMED_SAVE_LEN_NEG_INT_REQ = "testables/req/malformed_save_len_neg_int.req"

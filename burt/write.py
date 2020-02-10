@@ -100,7 +100,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
 
 def restore_group(
-        rgr_file: str, check: bool = True, _logger=logging.getLogger()
+    rgr_file: str, check: bool = True, _logger=logging.getLogger()
 ) -> List[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 

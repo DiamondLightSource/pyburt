@@ -182,6 +182,51 @@ def test_speed_snapshot():
     os.remove(integration.TMP_PYBURT_OUT)
 
 
+def test_various_types_against_burt():
+    """Test edge case types against old burt.
+
+    Requires the following DLS PVs to be active:
+
+    % Scalar long
+    SR-RF-LLRF-30:T-MOTOR.SREV
+    % Array long
+    LI-VA-FVALV-01:GETRAWILK
+    % Scalar double
+    SR-RF-RFPGU-34:SETPHASE
+    % Array double
+    SR-CS-FILL-01:FITGUNCHGE
+    % Array float
+    BR-RF-LLRF-01:AM:WAVE
+    % Scalar enum
+    SR-RF-IOC-31:BURT:OK
+    % Scalar string
+    SR-RF-IOT-34:SERIAL
+    % Scalar char
+    BR01C-PC-EVR-02:LINAC-PRE
+    % Array char
+    CS-CS-MSTAT-01:MESS01
+    % Scalar short
+    LI-TI-EVG-01:LINAC-PRE
+    % Array short
+    LI-VA-VLVCC-01:SOFTWARE
+
+    """
+    comment = "Hello World"
+    keyword = "little red sally jumped over the fence"
+
+    _vanilla_burtrb(test.TYPES_REQ, integration.TMP_BURT_OUT, comment, keyword)
+
+    burt.take_snapshot([test.TYPES_REQ], integration.TMP_PYBURT_OUT, comment, keyword)
+
+    assert filecmp.cmp(
+        integration.TMP_BURT_OUT, integration.TMP_PYBURT_OUT, shallow=False
+    )
+
+    # cleanup
+    os.remove(integration.TMP_BURT_OUT)
+    os.remove(integration.TMP_PYBURT_OUT)
+
+
 def test_speed_snapshot_group():
     """Speed comparison between different snapshot group schemes"""
     pass

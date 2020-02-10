@@ -49,11 +49,11 @@ class InvalidReadingException(Exception):
 
 
 def take_snapshot(
-        req_files: List[str],
-        snap_file: str,
-        comments: str = None,
-        keywords: str = None,
-        _logger=logging.getLogger(),
+    req_files: List[str],
+    snap_file: str,
+    comments: str = None,
+    keywords: str = None,
+    _logger=logging.getLogger(),
 ) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
@@ -110,12 +110,12 @@ def take_snapshot(
 
 
 def take_snapshot_group(
-        rqg_file: str,
-        rgr_file: str,
-        comments: str = None,
-        keywords: str = None,
-        check: bool = True,
-        _logger=logging.getLogger(),
+    rqg_file: str,
+    rgr_file: str,
+    comments: str = None,
+    keywords: str = None,
+    check: bool = True,
+    _logger=logging.getLogger(),
 ) -> List[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
@@ -423,9 +423,7 @@ def _flatten_ca_array(ca_reading, requested_length):
         str: The flattened ca array as a string
 
     """
-    if len(ca_reading) < ca_reading.element_count:
-        ca_reading = ca_reading + ["\0"] * (ca_reading.element_count - len(ca_reading))
-
+    # Note: cothread converts to a numpy array when __pos__ is applied (+ op).
     ca_reading_str = " ".join(
         [
             _format_ca_reading(reading, ca_reading.datatype)
