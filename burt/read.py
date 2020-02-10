@@ -40,7 +40,8 @@ from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
-SNAP_PRECISION_PYFORMAT = "{:.6e}"
+SNAP_PRECISION_LONG_PYFORMAT = "{:.15e}"
+SNAP_PRECISION_SHORT_PYFORMAT = "{:.6e}"
 
 
 class InvalidReadingException(Exception):
@@ -423,8 +424,11 @@ def _format_ca_reading(ca_reading):
     elif ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
         ca_reading_str = int(ca_reading)
 
-    elif ca_reading.datatype in (DBR_FLOAT, DBR_DOUBLE):
-        ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
+    elif ca_reading.datatype == DBR_FLOAT:
+        ca_reading_str = SNAP_PRECISION_SHORT_PYFORMAT.format(ca_reading)
+
+    elif ca_reading.datatype == DBR_DOUBLE:
+        ca_reading_str = SNAP_PRECISION_LONG_PYFORMAT.format(ca_reading)
 
     else:
         logging.warning(
