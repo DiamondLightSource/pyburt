@@ -5,7 +5,7 @@ import cothread
 import mock
 import numpy
 import pytest
-from cothread.catools import DBR_FLOAT, DBR_SHORT, DBR_STRING
+from cothread.catools import DBR_DOUBLE, DBR_SHORT, DBR_STRING
 
 import burt
 import test
@@ -63,7 +63,7 @@ def test_simple_snapshot(mock_get_vals, mock_caget):
     singleton_return_value[1] = 2
     singleton_return_value.ok = True
     singleton_return_value.element_count = 2
-    singleton_return_value.datatype = DBR_FLOAT
+    singleton_return_value.datatype = DBR_DOUBLE
     mock_caget.return_value = [singleton_return_value]
     mock_get_vals.return_value = ("user", "time", "dir", "group", 100)
 

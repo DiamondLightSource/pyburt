@@ -18,7 +18,7 @@ from cothread.catools import (
 import burt
 import test
 from burt.parsers import ParserException, SnapParser
-from burt.write import snap_entry_to_ca_type
+from burt.write import _snap_entry_to_ca_type
 
 INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
 STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM)
@@ -79,10 +79,10 @@ def test_restore_channel_types(mock_connect, mock_caput):
         burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
     # Trying to convert float from an int channel type.
+    # Should now just log and convert to int anyway, instead of failing.
     for int_channel_type in INT_CHANNEL_TYPES:
         mock_channel_types[1] = MockCainfo(int_channel_type)
-        with pytest.raises(ValueError):
-            burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+        burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
 
     # Trying to convert float from a string channel type.
     for str_channel_type in STR_CHANNEL_TYPES:
@@ -219,7 +219,7 @@ def test_restore_group_normal(mock_connect, mock_caput):
 )
 def test_snap_entry_to_ca_type(entry, datatype, expected):
     """Test conversion of snap entries to specific datatypes."""
-    assert snap_entry_to_ca_type(entry, datatype) == expected
+    assert _snap_entry_to_ca_type(entry, datatype) == expected
 
 
 @mock.patch("argparse.ArgumentParser")

@@ -5,6 +5,7 @@ from cothread.catools import DBR_FLOAT
 BLANK_REQ = "testables/req/blank.req"
 INLINE_COMMENTS_REQ = "testables/req/inline_comments.req"
 NORMAL_REQ = "testables/req/normal.req"
+TYPES_REQ = "testables/req/types.req"
 
 MALFORMED_REQ = "testables/req/malformed.req"
 MALFORMED_SAVE_LEN_NEG_INT_REQ = "testables/req/malformed_save_len_neg_int.req"
@@ -23,6 +24,8 @@ MODIFIERS_SNAP = "testables/snap/modifiers.snap"
 MULTIPLE_REQ_PATHS_SNAP = "testables/snap/multiple_req_paths.snap"
 LONG_SNAP = "testables/snap/ioc_restore_long.snap"
 VARIETY_SNAP = "testables/snap/type_variety.snap"
+CONTROL_ROOM_TYPES_SNAP = "testables/snap/types.controlroom.snap"
+CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP = "testables/snap/ioc_restore_control_room_types.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = "testables/snap/duplicate_burt_headers.snap"
 MALFORMED_BODY_SNAP = "testables/snap/malformed_body.snap"
