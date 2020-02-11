@@ -1,6 +1,5 @@
 """ Various tests for the main burt module.
 """
-from integration import BCDORBIT_REQ
 import pytest
 import test
 import integration
@@ -182,6 +181,53 @@ def test_speed_snapshot():
     os.remove(integration.TMP_PYBURT_OUT)
 
 
+def test_various_types_against_burt():
+    """Test edge case types against old burt.
+
+    Requires the following DLS PVs to be active:
+
+    % Scalar long
+    SR-RF-LLRF-30:T-MOTOR.SREV
+    % Array long
+    LI-VA-FVALV-01:GETRAWILK
+    % Scalar double
+    SR-RF-RFPGU-34:SETPHASE
+    % Array double
+    SR-CS-FILL-01:FITGUNCHGE
+    % Array float
+    BR-RF-LLRF-01:AM:WAVE
+    % Scalar enum
+    SR-RF-IOC-31:BURT:OK
+    % Scalar string
+    SR-RF-IOT-34:SERIAL
+    % Scalar char
+    BR01C-PC-EVR-02:LINAC-PRE
+    % Array char
+    CS-CS-MSTAT-01:MESS01
+    % Scalar short
+    LI-TI-EVG-01:LINAC-PRE
+    % Array short
+    LI-VA-VLVCC-01:SOFTWARE
+
+    """
+    comment = "Hello World"
+    keyword = "little red sally jumped over the fence"
+
+    burt.take_snapshot([test.TYPES_REQ], integration.TMP_PYBURT_OUT, comment, keyword)
+
+    # Read into strings to discard time dependent header.
+    with open(integration.TMP_PYBURT_OUT, "r") as pyburt_out:
+        with open(test.CONTROL_ROOM_TYPES_SNAP, "r") as burt_out:
+            pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
+            burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
+
+            assert pyburt_out_str.strip() == burt_out_str.strip()
+
+    # cleanup
+    os.remove(integration.TMP_BURT_OUT)
+    os.remove(integration.TMP_PYBURT_OUT)
+
+
 def test_speed_snapshot_group():
     """Speed comparison between different snapshot group schemes"""
     pass
@@ -198,14 +244,14 @@ def _vanilla_burtrb(input_req, output_snap, comments, keywords):
         keywords (keywords): keywords
     """
     burt_rb_cmd = (
-        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
-        + input_req
-        + " -o "
-        + output_snap
-        + " -c "
-        + comments
-        + " -k "
-        + keywords
+            "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
+            + input_req
+            + " -o "
+            + output_snap
+            + " -c "
+            + comments
+            + " -k "
+            + keywords
     )
 
     # Without shell=True raises an exception on Python 2.7

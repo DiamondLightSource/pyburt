@@ -35,12 +35,13 @@ from cothread.catools import (
 )
 
 import burt
+from burt.config import logconfig
 from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
-from . import logconfig
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
-SNAP_PRECISION_PYFORMAT = "{:.15e}"
+SNAP_PRECISION_LONG_PYFORMAT = "{:.15e}"
+SNAP_PRECISION_SHORT_PYFORMAT = "{:.6e}"
 
 
 class InvalidReadingException(Exception):
@@ -290,59 +291,6 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
-def format_ca_value(ca_reading: Any, save_length: int) -> Tuple[int, str]:
-    """Format a reading returned from caget into a string for a snap file.
-
-    Cothread automatically converts a DBR channel access type into its python
-    equivalent, and stores it as a type of one of ca_array, ca_str, ca_int, or ca_float.
-
-    Args:
-        ca_reading: reading from caget
-        save_length: requested length of array to store
-
-    Returns:
-        str: formatted string
-        int: actual saved length
-
-    """
-    saved_length = 1
-    # Cothread attaches a .ok and .errorcode attribute to each reading. The error
-    # if present will be stored in the reading itself.
-    try:
-        if not ca_reading.ok:
-            raise InvalidReadingException(f"Caget failure: {ca_reading.errorcode}.")
-    except AttributeError as e:
-        raise InvalidReadingException(f"Malformed cothread object: {e}.")
-
-    # If a save length is specified in the .req file, this is used to shorten the
-    # cothread array length to the desired value.
-    if ca_reading.element_count > 1:
-        saved_length, ca_reading_str = _flatten_ca_array_and_extract_save_len(
-            ca_reading, save_length
-        )
-
-    elif ca_reading.datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
-        ca_reading_str = str(ca_reading)
-
-        # Whitespace, e.g. "stop filling" in an enum.
-        if " " in ca_reading_str:
-            ca_reading_str = f'"{ca_reading_str}"'
-
-    elif ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
-        ca_reading_str = int(ca_reading)
-
-    elif ca_reading.datatype in (DBR_FLOAT, DBR_DOUBLE):
-        ca_reading_str = SNAP_PRECISION_PYFORMAT.format(ca_reading)
-
-    else:
-        logging.warning(
-            f"Unexpected cothread type: {ca_reading.__str__()}. Converting to string."
-        )
-        ca_reading_str = str(ca_reading)
-
-    return saved_length, ca_reading_str
-
-
 def _gen_snap_footer(ca_readings, pv_entries, _logger):
     """Generate the .snap file BURT footer as a string.
 
@@ -370,7 +318,7 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
         try:
-            length, ca_reading_str = format_ca_value(ca_reading, pv_entry.save_len)
+            length, ca_reading_str = _format_ca_value(ca_reading, pv_entry.save_len)
             formatted_snapshot_entry = _format_snap_footer_entry(
                 length, ca_reading_str, pv_entry
             )
@@ -382,11 +330,44 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
     return os.linesep.join(snap_entries), failed_pvs
 
 
-def _flatten_ca_array_and_extract_save_len(ca_reading, requested_length):
-    """Flatten the ca array into a string and obtain the save length if specified.
+def _format_ca_value(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]:
+    """Format a reading returned from caget into a string for a snap file.
 
-    The .snap file PV entries require a 15 width precision number(s) in
-    scientific notation.
+    Cothread automatically converts a DBR channel access type into its python
+    equivalent, and stores it as a type of one of ca_array, ca_str, ca_int, or ca_float.
+
+    Args:
+        ca_reading: reading from caget
+        requested_save_len: requested length of array to store
+
+    Returns:
+        int: actual saved length
+        str: formatted string
+
+    """
+    save_len = 1
+    # Cothread attaches a .ok and .errorcode attribute to each reading. The error
+    # if present will be stored in the reading itself.
+    try:
+        if not ca_reading.ok:
+            raise InvalidReadingException(f"Caget failure: {ca_reading.errorcode}.")
+    except AttributeError as e:
+        raise InvalidReadingException(f"Malformed cothread object: {e}.")
+
+    # If a save length is specified in the .req file, this is used to shorten the
+    # cothread array length to the desired value.
+    if ca_reading.element_count > 1:
+        save_len = _extract_save_len(ca_reading, requested_save_len)
+        ca_reading_str = _flatten_ca_array(ca_reading, save_len)
+
+    else:
+        ca_reading_str = _format_ca_reading(ca_reading, ca_reading.datatype)
+
+    return save_len, ca_reading_str
+
+
+def _extract_save_len(ca_reading, requested_length):
+    """Check the save length if specified, truncating to the actual value if not.
 
     Args:
         ca_reading (any): Return value from cothread.
@@ -394,29 +375,103 @@ def _flatten_ca_array_and_extract_save_len(ca_reading, requested_length):
 
     Returns:
         int: The shortest reading length.
-        str: The flattened ca array as a string
 
     Raises:
         ValueError: If the save length is invalid.
 
     """
-    desired_ca_arr_len = len(ca_reading)
+    actual_save_len = ca_reading.element_count
 
     if requested_length:
-        if requested_length > desired_ca_arr_len:
+        if requested_length > ca_reading.element_count:
             raise ValueError(
                 "Save length value specified in .req file exceeds length of PV data."
             )
         else:
-            desired_ca_arr_len = requested_length
+            actual_save_len = requested_length
 
+    return actual_save_len
+
+
+def _flatten_ca_array(ca_reading, requested_length):
+    """Flatten the ca array into a string and obtain the save length if specified.
+
+    NOTE: cothread returns a truncated EPICS array, so len(ca_reading) and
+    ca_reading.element_count may be misaligned. Handle this by adding in the null chars
+    that EPICS adds to empty array elements, to be consistent with old BURT.
+
+    E.g.
+    >> l = caget('LI-VA-VLVCC-01:SOFTWARE')
+    >> l
+    ca_array([4368], dtype=int16)
+    >> l.element_count
+    3
+    >> len(l)
+    1
+    >> l[0]
+    4368
+    >> l[1]
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    IndexError: index 1 is out of bounds for axis 0 with size 1
+
+    Args:
+        ca_reading (any): Return value from cothread.
+        requested_length (int): length specified in .req file.
+
+    Returns:
+        str: The flattened ca array as a string
+
+    """
     ca_reading_str = " ".join(
         [
-            SNAP_PRECISION_PYFORMAT.format(reading)
-            for reading in ca_reading[:desired_ca_arr_len]
+            _format_ca_reading(reading, ca_reading.datatype)
+            for reading in ca_reading[:requested_length]
         ]
     )
-    return desired_ca_arr_len, ca_reading_str
+
+    return ca_reading_str
+
+
+def _format_ca_reading(ca_reading, datatype=DBR_STRING):
+    """Format the cothread value depending on its type."""
+    ca_reading_str = ""
+
+    if datatype == DBR_CHAR:
+        # Try to convert an ASCII code first, to handle char array case.
+        try:
+            ca_reading_str = chr(ca_reading)
+        except (ValueError, TypeError) as e:
+            logging.warning(f"Unable to convert ASCII code to str repr: {e}.")
+            ca_reading_str = str(ca_reading)
+
+    elif datatype in (DBR_STRING, DBR_ENUM_STR):
+        ca_reading_str = str(ca_reading)
+
+        # Empty string case, always output a null char instead to mimic old burt.
+        if not ca_reading_str:
+            ca_reading_str = "\\0"
+
+        # Enum case, whitespace e.g. "stop filling" in an enum.
+        elif " " in ca_reading_str:
+            ca_reading_str = f'"{ca_reading_str}"'
+
+    elif datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+        ca_reading_str = str(int(ca_reading))
+
+    elif datatype == DBR_FLOAT:
+        ca_reading_str = SNAP_PRECISION_SHORT_PYFORMAT.format(ca_reading)
+
+    elif datatype == DBR_DOUBLE:
+        ca_reading_str = SNAP_PRECISION_LONG_PYFORMAT.format(ca_reading)
+
+    else:
+        logging.warning(
+            f"Unexpected cothread type: {ca_reading.datatype}. Converting to string."
+        )
+        ca_reading_str = str(ca_reading)
+
+    return ca_reading_str
 
 
 def _format_snap_footer_entry(ca_reading_len, ca_reading_str, pv_entry):

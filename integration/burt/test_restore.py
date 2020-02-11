@@ -20,19 +20,19 @@ def test_restore():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
     # CA array PV.
     burt.restore(integration.ARR_SNAP)
-    ca_arr = caget(integration.IOC_LOCAL_PV)
+    ca_arr = caget(integration.IOC_LOCAL_PV_ARR_FLOAT)
     assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
 
     # Scalar PV.
     burt.restore(integration.SCALAR_SNAP)
-    ca_arr = caget(integration.IOC_LOCAL_PV)
-    assert ca_arr[0] == 2
+    ca_long = caget(integration.IOC_LOCAL_PV_LONG)
+    assert ca_long == 2
 
 
 def test_restore_long():
@@ -59,7 +59,7 @@ def test_restore_enum():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_STR, "dummyEnumStr")
 
     # CA long PV.
     burt.restore(integration.ENUM_SNAP)
@@ -72,12 +72,12 @@ def test_restore_group():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
     burt.restore_group(test.NORMAL_ALT_RGR, False)
 
     # CA array PV.
-    ca_arr = caget(integration.IOC_LOCAL_PV)
+    ca_arr = caget(integration.IOC_LOCAL_PV_ARR_FLOAT)
     assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
@@ -99,6 +99,46 @@ def test_speed_restore():
     t1 = time.time()
     tend = t1 - t0
     print(f"test_speed_restore_burt_vanilla:{tend}")
+
+
+def test_various_types_restore():
+    """Check that restoring for various types works properly."""
+    # Randomize IOC start values.
+    caput(integration.IOC_LOCAL_PV_FLOAT, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_LONG, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_ARR_LONG, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_DBL, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_ARR_DBL, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_STR, "dummy")
+    caput(integration.IOC_LOCAL_PV_ENUM, "dummy")
+    caput(integration.IOC_LOCAL_PV_ARR_STR, "dummy")
+    # Ignored cases
+    # caput(integration.IOC_LOCAL_PV_CHAR, "dummy")
+    # caput(integration.IOC_LOCAL_PV_ARR_CHAR, "dummy")
+    caput(integration.IOC_LOCAL_PV_SHORT, randint(1, 100))
+    caput(integration.IOC_LOCAL_PV_ARR_SHORT, randint(1, 100))
+
+    burt.restore(test.CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP)
+
+    pv_long = caget(integration.IOC_LOCAL_PV_LONG)
+    pv_double = caget(integration.IOC_LOCAL_PV_DBL)
+    pv_arr_double = caget(integration.IOC_LOCAL_PV_ARR_DBL)
+    pv_arr_float = caget(integration.IOC_LOCAL_PV_ARR_FLOAT)
+    pv_enum_str = caget(integration.IOC_LOCAL_PV_ENUM)
+    # Ignored case.
+    # pv_arr_char = caget(integration.IOC_LOCAL_PV_ARR_CHAR)
+    pv_short = caget(integration.IOC_LOCAL_PV_SHORT)
+
+    assert pv_long == 200
+    assert pv_double == -2.900000000000000e+01
+    assert pv_arr_double[0] == 3.003617499404633e-02
+    assert pv_arr_double[1] == 3.457100664366716e-02
+    # Near equality
+    assert abs(pv_arr_float[0] - 3.800000e-01) <= 1e-05  # arbitrary
+    assert abs(pv_arr_float[1] - 3.800000e-01) <= 1e-05  # arbitrary
+    assert pv_enum_str == "Restored"
+    assert pv_short == 0
 
 
 def _vanilla_burtwb(input_snap):

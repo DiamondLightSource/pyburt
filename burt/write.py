@@ -35,10 +35,9 @@ from cothread.catools import (
 )
 
 import burt
+from burt.config import logconfig
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_rgr_file, is_snap_file
-from . import logconfig
-
 
 CaValue = Union[str, int, float, List[float]]
 
@@ -86,7 +85,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
             if not ca_info.ok:
                 _logger.warning(f"PV invalid, skipping: {ca_info.__str__()}")
             else:
-                pvs_to_restore[pv_entry.name] = snap_entry_to_ca_type(
+                pvs_to_restore[pv_entry.name] = _snap_entry_to_ca_type(
                     pv_entry, ca_info.datatype
                 )
 
@@ -217,7 +216,7 @@ def _get_pvs_in_snap(snap_file, _logger):
     return body
 
 
-def snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValue:
+def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValue:
     """Coerce the correct ca type from the channel type."""
     # Non CA array case.
     if pv_entry.dtype_len == 1:
@@ -226,7 +225,19 @@ def snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValu
             return str(pv_entry.vals[0])
 
         elif datatype in (DBR_SHORT, DBR_LONG):
-            return int(pv_entry.vals[0])
+            # Problematic case where the channel type is an int type, but stored value
+            # is float. Python cannot convert a str float representation to an int,
+            # without converting to an int first.
+            try:
+                return int(pv_entry.vals[0])
+            except ValueError as e:
+                logging.warning(
+                    f"Unable to convert: {pv_entry.vals[0]}, to int type,"
+                    f"given channel type: {datatype}. Converting to float value "
+                    f"first: {e}."
+                )
+                fl_val = float(pv_entry.vals[0])
+                return int(fl_val)
 
         elif datatype in (DBR_FLOAT, DBR_DOUBLE):
             return float(pv_entry.vals[0])
@@ -236,7 +247,8 @@ def snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValu
             logging.warning(f"Unexpected channel type: {datatype}.")
             try:
                 return float(pv_entry.vals[0])
-            except ValueError:
+            except ValueError as e:
+                logging.warning(f"Unable to convert to float type: {e}.")
                 return pv_entry.vals[0]
 
     # Arrays are always coerced as floats.
