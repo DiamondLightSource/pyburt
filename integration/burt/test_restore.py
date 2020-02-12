@@ -53,16 +53,19 @@ def test_restore_long():
 
 
 def test_restore_enum():
-    """Runs burt restore against a .snap file with an enum datatype.
+    """Runs burt restore against a .snap file with an enum str datatype.
 
     A caget on the test IOC is performed to check that the restore changed the
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
     caput(integration.IOC_LOCAL_PV_STR, "dummyEnumStr")
+    caput(integration.IOC_LOCAL_PV_ENUM_STR, "bla bla")
 
-    # CA long PV.
     burt.restore(integration.ENUM_SNAP)
+
+    assert caget(integration.IOC_LOCAL_PV_STR) == "DIAD"
+    assert caget(integration.IOC_LOCAL_PV_ENUM_STR) == "DIAD1 DIAD2"
 
 
 def test_restore_group():
@@ -111,7 +114,7 @@ def test_various_types_restore():
     caput(integration.IOC_LOCAL_PV_DBL, randint(1, 100))
     caput(integration.IOC_LOCAL_PV_ARR_DBL, randint(1, 100))
     caput(integration.IOC_LOCAL_PV_STR, "dummy")
-    caput(integration.IOC_LOCAL_PV_ENUM, "dummy")
+    caput(integration.IOC_LOCAL_PV_ENUM_STR, "dummy")
     caput(integration.IOC_LOCAL_PV_ARR_STR, "dummy")
     # Ignored cases
     # caput(integration.IOC_LOCAL_PV_CHAR, "dummy")
@@ -125,13 +128,14 @@ def test_various_types_restore():
     pv_double = caget(integration.IOC_LOCAL_PV_DBL)
     pv_arr_double = caget(integration.IOC_LOCAL_PV_ARR_DBL)
     pv_arr_float = caget(integration.IOC_LOCAL_PV_ARR_FLOAT)
-    pv_enum_str = caget(integration.IOC_LOCAL_PV_ENUM)
+    pv_enum_str = caget(integration.IOC_LOCAL_PV_ENUM_STR)
     # Ignored case.
     # pv_arr_char = caget(integration.IOC_LOCAL_PV_ARR_CHAR)
     pv_short = caget(integration.IOC_LOCAL_PV_SHORT)
+    pv_str = caget(integration.IOC_LOCAL_PV_STR)
 
     assert pv_long == 200
-    assert pv_double == -2.900000000000000e+01
+    assert pv_double == -2.900000000000000e01
     assert pv_arr_double[0] == 3.003617499404633e-02
     assert pv_arr_double[1] == 3.457100664366716e-02
     # Near equality
@@ -139,6 +143,7 @@ def test_various_types_restore():
     assert abs(pv_arr_float[1] - 3.800000e-01) <= 1e-05  # arbitrary
     assert pv_enum_str == "Restored"
     assert pv_short == 0
+    assert pv_str == ""
 
 
 def _vanilla_burtwb(input_snap):

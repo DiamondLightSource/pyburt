@@ -21,7 +21,7 @@ from burt.parsers import ParserException, SnapParser
 from burt.write import _snap_entry_to_ca_type
 
 INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
-STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM)
+STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR)
 
 
 class MockCainfo:
@@ -205,21 +205,20 @@ def test_restore_group_normal(mock_connect, mock_caput):
     burt.restore_group(test.NORMAL_ALT_RGR, False)
 
 
-@pytest.mark.parametrize(
-    "entry,datatype,expected",
-    [
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_LONG, 2),
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_FLOAT, 2.0),
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_STRING, "2"),
-        # Enums are parsed as strings.
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_ENUM, "2"),
-        # All arrays are parsed to floats.
-        (SnapParser.SNAP_PV("a", 2, ["2", "3"], ""), DBR_STRING, [2, 3]),
-    ],
-)
-def test_snap_entry_to_ca_type(entry, datatype, expected):
+def test_snap_entry_to_ca_type():
     """Test conversion of snap entries to specific datatypes."""
-    assert _snap_entry_to_ca_type(entry, datatype) == expected
+    # Note: pytest.parametrise doesn't seem to work properly with class objs as params.
+    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_LONG, 2),
+    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_FLOAT, 2.0),
+    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_STRING, "2"),
+    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_ENUM, 2),
+    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_ENUM_STR, "2"),
+    (SnapParser.SNAP_PV("a", 1, "enum space", ""), DBR_ENUM_STR, "enum space"),
+    # All arrays are parsed to floats.
+    (SnapParser.SNAP_PV("a", 2, ["2", "3"], ""), DBR_STRING, [2, 3]),
+
+    assert _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, "2", ""), DBR_LONG) == 2
+    assert _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, "2", ""), DBR_FLOAT) == 2.0
 
 
 @mock.patch("argparse.ArgumentParser")

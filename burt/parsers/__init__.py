@@ -142,10 +142,11 @@ class BurtParser:
 
         """
         body_objs = []
-        for line in body_lines:
 
+        for line in body_lines:
             if BurtParser._skippable_line(line):
                 pass
+
             else:
                 line = BurtParser._clean_line(line)
 
@@ -170,7 +171,7 @@ class BurtParser:
 
         """
         if not (self.get_header().start_label in file_contents) and (
-            self.get_header().end_label in file_contents
+                self.get_header().end_label in file_contents
         ):
             raise ParserException("Malformed BURT header.")
 

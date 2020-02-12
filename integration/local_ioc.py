@@ -43,7 +43,7 @@ if __name__ == "__main__":
     double = builder.aOut("TESTPV_DBL")
     arr_double = builder.WaveformOut("TESTPV_ARR_DBL", length=40, datatype="d")
 
-    enum_str = builder.stringOut("TESTPV_ENUM")
+    enum_str = builder.stringOut("TESTPV_ENUM_STR")
     str = builder.stringOut("TESTPV_STR")
     arr_str = builder.WaveformOut("TESTPV_ARR_STR", length=5, datatype="S")
 

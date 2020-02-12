@@ -81,6 +81,7 @@ def test_bad_file_arguments(mock_caget):
         (-6.67e7, DBR_FLOAT, "-6.670000e+07"),
         (1, DBR_DOUBLE, "1.000000000000000e+00"),
         (-6.67e13, DBR_DOUBLE, "-6.670000000000000e+13"),
+        ("", DBR_STRING, "\\0"),
     ),
 )
 def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
