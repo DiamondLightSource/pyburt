@@ -318,7 +318,9 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
         try:
-            length, ca_reading_str = _format_ca_value(ca_reading, pv_entry.save_len)
+            length, ca_reading_str = _ca_val_to_snap_entry(
+                ca_reading, pv_entry.save_len
+            )
             formatted_snapshot_entry = _format_snap_footer_entry(
                 length, ca_reading_str, pv_entry
             )
@@ -330,7 +332,7 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
     return os.linesep.join(snap_entries), failed_pvs
 
 
-def _format_ca_value(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]:
+def _ca_val_to_snap_entry(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]:
     """Format a reading returned from caget into a string for a snap file.
 
     Cothread automatically converts a DBR channel access type into its python
