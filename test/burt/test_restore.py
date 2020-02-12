@@ -208,17 +208,27 @@ def test_restore_group_normal(mock_connect, mock_caput):
 def test_snap_entry_to_ca_type():
     """Test conversion of snap entries to specific datatypes."""
     # Note: pytest.parametrise doesn't seem to work properly with class objs as params.
-    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_LONG, 2),
-    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_FLOAT, 2.0),
-    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_STRING, "2"),
-    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_ENUM, 2),
-    (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_ENUM_STR, "2"),
-    (SnapParser.SNAP_PV("a", 1, "enum space", ""), DBR_ENUM_STR, "enum space"),
-    # All arrays are parsed to floats.
-    (SnapParser.SNAP_PV("a", 2, ["2", "3"], ""), DBR_STRING, [2, 3]),
-
-    assert _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, "2", ""), DBR_LONG) == 2
-    assert _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, "2", ""), DBR_FLOAT) == 2.0
+    assert _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_LONG) == 2
+    assert (
+        _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_FLOAT) == 2.0
+    )
+    assert (
+        _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_STRING) == "2"
+    )
+    assert _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_ENUM) == 2
+    assert (
+        _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_ENUM_STR)
+        == "2"
+    )
+    assert (
+        _snap_entry_to_ca_type(
+            SnapParser.SNAP_PV("a", 1, ["enum space"], ""), DBR_ENUM_STR
+        )
+        == "enum space"
+    )
+    assert _snap_entry_to_ca_type(
+        SnapParser.SNAP_PV("a", 2, ["2", "3"], ""), DBR_STRING
+    ) == [2, 3]
 
 
 @mock.patch("argparse.ArgumentParser")
