@@ -5,7 +5,8 @@ for the **snapshot** and
 **restore** functionality of **pyburt**.
 
 It involves running an IOC server which hosts a local IOC `SR-CS-TEST-01` and 
-performing restore operations on some `.snap` files which write to the below PV's:
+performing snapshots on DLS PV's, as well as restore operations on some `.snap` files 
+which write to the below PV's:
 
 ```
 SR-CS-TEST-01:TESTPV_FLOAT
@@ -24,9 +25,7 @@ SR-CS-TEST-01:TESTPV_ARR_SHORT
 ```
 
 It also involves doing some comparison tests against the vanilla BURT outputs, which 
-requires running BURT on a set of
-`.req` and `.snap` files. Finally, it also runs snapshot tests against DLS 
-PV's.
+requires running BURT on a set of `.req` and `.snap` files.
 
 ## Test Steps
 
