@@ -222,13 +222,14 @@ def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaVal
     # Non CA array case.
     if pv_entry.dtype_len == 1:
 
-        if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR):
+        # Enum values are stored in snap files as strings.
+        if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM):
             if pv_entry.vals[0] == "\\0":
                 return ""
             else:
                 return str(pv_entry.vals[0])
 
-        elif datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+        elif datatype in (DBR_SHORT, DBR_LONG):
             # Problematic case where the channel type is an int type, but stored value
             # is float. Python cannot convert a str float representation to an int,
             # without converting to an int first.

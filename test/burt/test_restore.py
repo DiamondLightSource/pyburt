@@ -215,10 +215,16 @@ def test_snap_entry_to_ca_type():
     assert (
         _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_STRING) == "2"
     )
-    assert _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_ENUM) == 2
+    # Enums are stored in snap files as strings, so this entry would be interpreted as
+    # the string part of the enum being "2", not the index being 2.
     assert (
-        _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_ENUM_STR)
-        == "2"
+        _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_ENUM) == "2"
+    )
+    # We no longer handle DBR_ENUM_STR because we do not believe a PV will be of that
+    # type. It is for sending, not receiving data. This case falls through to the
+    # default parsing as double.
+    assert (
+        _snap_entry_to_ca_type(SnapParser.SNAP_PV("a", 1, ["2"], ""), DBR_ENUM_STR) == 2
     )
     assert (
         _snap_entry_to_ca_type(
