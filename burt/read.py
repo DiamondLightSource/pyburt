@@ -432,6 +432,14 @@ def _flatten_ca_array(ca_reading, requested_length):
         ]
     )
 
+    # Adding EPICS null chars if applicable.
+    if len(ca_reading) < ca_reading.element_count:
+        ca_reading_str = (
+            ca_reading_str
+            + " "
+            + " ".join(["\\0"] * (ca_reading.element_count - len(ca_reading)))
+        )
+
     return ca_reading_str
 
 

@@ -220,43 +220,45 @@ def _get_pvs_in_snap(snap_file, _logger):
 def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValue:
     """Coerce the correct ca type from the channel type."""
     # Non CA array case.
-    if pv_entry.dtype_len == 1:
+    if pv_entry.dtype_len > 1:
+        return [_convert_to_ca_type(val, datatype) for val in pv_entry.vals]
 
-        # Enum values are stored in snap files as strings.
-        if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM):
-            if pv_entry.vals[0] == "\\0":
-                return ""
-            else:
-                return str(pv_entry.vals[0])
-
-        elif datatype in (DBR_SHORT, DBR_LONG):
-            # Problematic case where the channel type is an int type, but stored value
-            # is float. Python cannot convert a str float representation to an int,
-            # without converting to an int first.
-            try:
-                return int(pv_entry.vals[0])
-            except ValueError as e:
-                logging.warning(
-                    f"Unable to convert: {pv_entry.vals[0]}, to int type,"
-                    f"given channel type: {datatype}. Converting to float value "
-                    f"first: {e}."
-                )
-                fl_val = float(pv_entry.vals[0])
-                return int(fl_val)
-
-        elif datatype in (DBR_FLOAT, DBR_DOUBLE):
-            return float(pv_entry.vals[0])
-
-        # Fall back on older technique wth trying to convert by force.
-        else:
-            logging.warning(f"Unexpected channel type: {datatype}.")
-            try:
-                return float(pv_entry.vals[0])
-            except ValueError as e:
-                logging.warning(f"Unable to convert to float type: {e}.")
-                return pv_entry.vals[0]
-
-    # Arrays are always coerced as floats.
-    # TODO: handle arrays of chars and other types.
     else:
-        return [float(val) for val in pv_entry.vals]
+        return _convert_to_ca_type(pv_entry.vals[0], datatype)
+
+
+def _convert_to_ca_type(snap_val, datatype: int) -> CaValue:
+    """Convert a single snap value given a channel type."""
+    # Enum values are stored in snap files as strings.
+    if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM, DBR_ENUM_STR):
+        if snap_val == "\\0":
+            return ""
+        else:
+            return str(snap_val)
+
+    elif datatype in (DBR_SHORT, DBR_LONG):
+        # Problematic case where the channel type is an int type, but stored value
+        # is float. Python cannot convert a str float representation to an int,
+        # without converting to an int first.
+        try:
+            return int(snap_val)
+        except ValueError as e:
+            logging.warning(
+                f"Unable to convert: {snap_val}, to int type,"
+                f"given channel type: {datatype}. Converting to float value "
+                f"first: {e}."
+            )
+            fl_val = float(snap_val)
+            return int(fl_val)
+
+    elif datatype in (DBR_FLOAT, DBR_DOUBLE):
+        return float(snap_val)
+
+    # Fall back on older technique wth trying to convert by force.
+    else:
+        logging.warning(f"Unexpected channel type: {datatype}.")
+        try:
+            return float(snap_val)
+        except ValueError as e:
+            logging.warning(f"Unable to convert to float type: {e}.")
+            return snap_val
