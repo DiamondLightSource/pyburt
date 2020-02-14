@@ -57,7 +57,7 @@ Observe the output and check that all tests pass. This may take several seconds 
 
 ```bash
 $ pwd
-.../pyburt
+.../pyburtgit
 
 $ pytest -vv integration
 =============================================================================================== test session starts ===============================================================================================

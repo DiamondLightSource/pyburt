@@ -95,8 +95,9 @@ class SnapParser(BurtParser):
         if '"' in line or "'" in line:
             posix_opt = True
 
-        pv_snapshot = [segment.strip() for segment in
-                       shlex.split(line, posix=posix_opt)]
+        pv_snapshot = [
+            segment.strip() for segment in shlex.split(line, posix=posix_opt)
+        ]
 
         if len(pv_snapshot) < 3:
             raise ParserException(

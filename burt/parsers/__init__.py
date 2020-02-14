@@ -171,7 +171,7 @@ class BurtParser:
 
         """
         if not (self.get_header().start_label in file_contents) and (
-                self.get_header().end_label in file_contents
+            self.get_header().end_label in file_contents
         ):
             raise ParserException("Malformed BURT header.")
 
