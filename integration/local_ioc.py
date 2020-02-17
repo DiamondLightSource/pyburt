@@ -21,8 +21,10 @@ if __name__ == "__main__":
 
     IOC_NAME = "SR-CS-TEST-01"
 
+
     def notify(value):
         print("notify", value)
+
 
     builder.SetDeviceName(IOC_NAME)
     test = builder.aOut("TEST", initial_value=0, on_update=notify, always_update=True)
@@ -38,7 +40,7 @@ if __name__ == "__main__":
     arr_float = builder.WaveformOut("TESTPV_ARR_FLOAT", length=160)
 
     long = builder.longOut("TESTPV_LONG")
-    arr_long = builder.WaveformOut("TESTPV_ARR_LONG", length=5, datatype="l")
+    arr_long = builder.WaveformOut("TESTPV_ARR_LONG", length=200, datatype="l")
 
     double = builder.aOut("TESTPV_DBL")
     arr_double = builder.WaveformOut("TESTPV_ARR_DBL", length=40, datatype="d")
