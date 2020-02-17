@@ -19,7 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
-from typing import Any, Dict, List, Union
+from typing import cast, Any, Dict, List, Optional, Union
 
 import cothread
 from cothread.catools import caput, connect
@@ -38,7 +38,7 @@ from burt.config import logconfig
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
 
-CaValue = Union[str, int, float, List[float]]
+CaValue = Union[str, int, float]
 
 
 def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
@@ -216,29 +216,33 @@ def _get_pvs_in_snap(snap_file, _logger):
     return body
 
 
-def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaValue:
+def _snap_entry_to_ca_type(
+    pv_entry: SnapParser.SNAP_PV, datatype: int
+) -> Union[CaValue, List[CaValue]]:
     """Coerce the correct ca type from the channel type."""
     # Non CA array case.
     if pv_entry.dtype_len > 1:
         converted_vals = [_convert_to_ca_type(val, datatype) for val in pv_entry.vals]
-
-        # idx(None) to len(n) entries should be stripped.
         if None in converted_vals:
-            return converted_vals[: len(converted_vals) - converted_vals.index(None)]
+            stripped_converted_vals = converted_vals[: converted_vals.index(None)]
         else:
-            return converted_vals
+            stripped_converted_vals = converted_vals
+
+        # Tell Mypy that we have removed the Nones.
+        return cast(List[CaValue], stripped_converted_vals)
 
     else:
         converted_val = _convert_to_ca_type(pv_entry.vals[0], datatype)
 
         # Singleton string case, where a null should be written as an empty string.
-        if converted_val is None and datatype in (DBR_STRING, DBR_ENUM):
+        if converted_val is None:
+            assert datatype in (DBR_STRING, DBR_ENUM)
             return ""
         else:
             return converted_val
 
 
-def _convert_to_ca_type(snap_val, datatype):
+def _convert_to_ca_type(snap_val, datatype) -> Optional[CaValue]:
     """Convert a single snap value given a channel type."""
     if is_null_char(snap_val):
         return None
@@ -270,7 +274,7 @@ def _convert_to_ca_type(snap_val, datatype):
             fl_val = float(snap_val)
             return int(fl_val)
 
-    # Note: for double and float arrays, /0 null should never appear in the snap file.
+    # Note: for double and float arrays, \0 null should never appear in the snap file.
     elif datatype in (DBR_FLOAT, DBR_DOUBLE):
         return float(snap_val)
 
