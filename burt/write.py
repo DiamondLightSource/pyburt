@@ -19,7 +19,7 @@ import argparse
 import logging
 import sys
 from collections import OrderedDict
-from typing import cast, Any, Dict, List, Optional, Union
+from typing import Any, cast, Dict, List, Optional, Union
 
 import cothread
 from cothread.catools import caput, connect
@@ -248,11 +248,11 @@ def _convert_to_ca_type(snap_val, datatype) -> Optional[CaValue]:
         return None
 
     if datatype == DBR_CHAR:
+        ascii_code: Optional[int] = None
         try:
             ascii_code = ord(snap_val)
         except (ValueError, TypeError) as e:
             logging.warning(f"Unable to convert .snap value to ascii code: {e}.")
-            ascii_code = None
 
         return ascii_code
 
