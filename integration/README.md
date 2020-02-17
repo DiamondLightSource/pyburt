@@ -4,7 +4,32 @@ Listed below are a set of instructions for running the DLS integration tests
 for the **snapshot** and
 **restore** functionality of **pyburt**.
 
-It involves running an IOC server which hosts a local IOC `SR-CS-TEST-01` and 
+## Soft IOCs
+There are two soft IOCs included in this directory:
+
+### softioc.db
+
+This contains all the types of PVs that Pyburt can handle. There is also
+`softioc.req` and `softioc.burt.snap`, which shows how the original Burt
+saves these values. To run this IOC
+
+```
+softIoc -d softioc.db
+```
+
+### local.db
+
+This is a Python Soft IOC containing PVs used for the integration tests.
+
+To run this IOC:
+
+```
+./local_ioc.py
+```
+
+## Integration tests.
+
+These involves running an IOC server which hosts a local IOC `SR-CS-TEST-01` and 
 performing snapshots on DLS PV's, as well as restore operations on some `.snap` files 
 which write to the below PV's:
 
