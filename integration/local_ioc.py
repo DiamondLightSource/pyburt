@@ -27,32 +27,39 @@ if __name__ == "__main__":
 
 
     builder.SetDeviceName(IOC_NAME)
-    test = builder.aOut("TEST", initial_value=0, on_update=notify, always_update=True)
-    ain = builder.aIn("AI", initial_value=0)
-    longname = builder.aIn("THIS-IS-A-VERY-LONG-PV-NAME-AI", initial_value=0)
+    # ai, ao
+    ain = builder.aIn("AI")
     aout = builder.aOut("AO")
-    # builder.bIn('BI')
+    longname = builder.aIn("THIS-IS-A-VERY-LONG-PV-NAME-AI")
+    # bo
+    bout = builder.boolOut("BO", "ZERO VAL", "ONE VAL")
+    # mbbi, mbbo
     mbbout = builder.mbbOut("MBBO", ("OFF", 0), ("ON", 1), ("NOT SURE", 2))
     mbbout_one = builder.mbbOut("MBBO1", ("OFF", 0))
     mbbin = builder.mbbIn("MBBI", ("OFF", 0), ("ON", 1), ("NOT SURE", 2))
 
-    float = builder.WaveformOut("TESTPV_FLOAT", length=1)
+    # float only available via typed waveform
+    scalar_float = builder.WaveformOut("TESTPV_FLOAT", length=1)
     arr_float = builder.WaveformOut("TESTPV_ARR_FLOAT", length=160)
 
-    long = builder.longOut("TESTPV_LONG")
+    # long
+    longout = builder.longOut("TESTPV_LONG")
     arr_long = builder.WaveformOut("TESTPV_ARR_LONG", length=200, datatype="l")
 
-    double = builder.aOut("TESTPV_DBL")
+    # double
+    scalar_double = builder.aOut("TESTPV_DBL")
     arr_double = builder.WaveformOut("TESTPV_ARR_DBL", length=40, datatype="d")
 
-    enum_str = builder.stringOut("TESTPV_ENUM_STR")
-    str = builder.stringOut("TESTPV_STR")
+    # string
+    scalar_str = builder.stringOut("TESTPV_STR")
     arr_str = builder.WaveformOut("TESTPV_ARR_STR", length=5, datatype="S")
 
-    char = builder.WaveformOut("TESTPV_CHAR", length=1, datatype="b")
+    # char only available via typed waveform
+    scalar_char = builder.WaveformOut("TESTPV_CHAR", length=1, datatype="b")
     arr_char = builder.WaveformOut("TESTPV_ARR_CHAR", length=1000, datatype="b")
 
-    short = builder.WaveformOut("TESTPV_SHORT", length=1, datatype="h")
+    # short only available via typed waveform
+    scalar_short = builder.WaveformOut("TESTPV_SHORT", length=1, datatype="h")
     arr_short = builder.WaveformOut("TESTPV_ARR_SHORT", length=5, datatype="h")
 
     bcdorbit_pvs = [

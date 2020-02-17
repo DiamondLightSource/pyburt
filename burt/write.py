@@ -101,7 +101,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
 
 def restore_group(
-    rgr_file: str, check: bool = True, _logger=logging.getLogger()
+        rgr_file: str, check: bool = True, _logger=logging.getLogger()
 ) -> List[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
@@ -230,7 +230,7 @@ def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaVal
 def _convert_to_ca_type(snap_val, datatype: int) -> CaValue:
     """Convert a single snap value given a channel type."""
     # Enum values are stored in snap files as strings.
-    if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM, DBR_ENUM_STR):
+    if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM):
         if snap_val == "\\0":
             return ""
         else:
