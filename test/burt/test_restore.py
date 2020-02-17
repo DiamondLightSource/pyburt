@@ -21,7 +21,7 @@ from burt.parsers import ParserException, SnapParser
 from burt.write import _snap_entry_to_ca_type
 
 INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
-STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR)
+STR_CHANNEL_TYPES = (DBR_STRING, DBR_ENUM_STR)
 
 
 class MockCainfo:
@@ -209,8 +209,11 @@ def test_restore_group_normal(mock_connect, mock_caput):
     "length,values,datatype,result",
     [
         (1, ["2"], DBR_LONG, 2),
+        (2, ["2", "234"], DBR_LONG, [2, 234]),
         (1, ["2"], DBR_FLOAT, 2.0),
+        (2, ["2.00e+3", "1.4e-1"], DBR_FLOAT, [2000.0, 0.14]),
         (1, ["2"], DBR_STRING, "2"),
+        (2, ["2", "hello world"], DBR_STRING, ["2", "hello world"]),
         (1, ["string space"], DBR_STRING, "string space"),
         # Enums stored in snap files as their string value
         (1, ["2"], DBR_ENUM, "2"),
@@ -218,11 +221,13 @@ def test_restore_group_normal(mock_connect, mock_caput):
         # We don't expect channels of type DBR_ENUM_STR
         # so this defaults to double parsing.
         (1, ["2"], DBR_ENUM_STR, 2),
-        # Not currently handled.
-        # (2, ["2", "3"], DBR_STRING, ["2", "3"]),
-        # Not currently handled.
-        # (2, ["str space", "str space2"], DBR_STRING, ["str space", "str space2"]),
+        (2, ["2", "3"], DBR_STRING, ["2", "3"]),
+        (2, ["str space", "str space2"], DBR_STRING, ["str space", "str space2"]),
         (2, ["2", "3"], DBR_DOUBLE, [2.0, 3.0]),
+        (5, ["2", "3", "1", "\0", "\0"], DBR_DOUBLE, [2.0, 3.0, 1.0]),
+        (1, ["A"], DBR_CHAR, 65),
+        (3, ["A", "B", "\0"], DBR_CHAR, [65, 66]),
+        (3, ["\0", "\0", "\0"], DBR_CHAR, []),
     ],
 )
 def test_snap_entry_to_ca_type(length, values, datatype, result):

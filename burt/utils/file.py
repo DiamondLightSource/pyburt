@@ -4,6 +4,14 @@ from os.path import isfile, splitext
 import burt
 
 
+def is_null_char(snap_char: str) -> bool:
+    """Check if a given snap file char in a snap file represents a null char."""
+    if snap_char in ("\0", "\00", "\000", "\x00", "\\0", "\\00", "\\000"):
+        return True
+    else:
+        return False
+
+
 def is_req_file(filename: str, check_existence: bool = False) -> bool:
     """Check if a given filename refers to a .req file.
 
