@@ -433,11 +433,27 @@ def _flatten_ca_array(ca_reading, requested_length):
     )
 
     # Adding EPICS null chars if applicable.
+    # Note: Burt represents empty array elements as null zeroes for integer types, and
+    # 0 to some 7 sig figs for floats and 16 sig figs for doubles.
     if len(ca_reading) < ca_reading.element_count:
+        if ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+            empty_elem_identifier = "\\0"
+        elif ca_reading.datatype == DBR_FLOAT:
+            empty_elem_identifier = SNAP_PRECISION_SHORT_PYFORMAT.format(0)
+        elif ca_reading.datatype == DBR_DOUBLE:
+            empty_elem_identifier = SNAP_PRECISION_LONG_PYFORMAT.format(0)
+        else:
+            logging.warning(
+                f"Unexpected type: {ca_reading.datatype}, with array len " f"overflow."
+            )
+            empty_elem_identifier = "\\0"
+
         ca_reading_str = (
             ca_reading_str
             + " "
-            + " ".join(["\\0"] * (ca_reading.element_count - len(ca_reading)))
+            + " ".join(
+                [empty_elem_identifier] * (ca_reading.element_count - len(ca_reading))
+            )
         )
 
     return ca_reading_str
