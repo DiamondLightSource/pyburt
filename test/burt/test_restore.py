@@ -218,10 +218,8 @@ def test_restore_group_normal(mock_connect, mock_caput):
         # We don't expect channels of type DBR_ENUM_STR
         # so this defaults to double parsing.
         (1, ["2"], DBR_ENUM_STR, 2),
-        # Not currently handled.
-        # (2, ["2", "3"], DBR_STRING, ["2", "3"]),
-        # Not currently handled.
-        # (2, ["str space", "str space2"], DBR_STRING, ["str space", "str space2"]),
+        (2, ["2", "3"], DBR_STRING, ["2", "3"]),
+        (2, ["str space", "str space2"], DBR_STRING, ["str space", "str space2"]),
         (2, ["2", "3"], DBR_DOUBLE, [2.0, 3.0]),
     ],
 )

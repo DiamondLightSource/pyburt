@@ -234,6 +234,8 @@ def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaVal
         # Singleton string case, where a null should be written as an empty string.
         if converted_val is None and datatype in (DBR_STRING, DBR_ENUM):
             return ""
+        else:
+            return converted_val
 
 
 def _convert_to_ca_type(snap_val, datatype):
