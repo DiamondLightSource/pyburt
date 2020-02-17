@@ -221,7 +221,10 @@ def test_various_types_against_burt():
             pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
             burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
 
-            assert pyburt_out_str.strip() == burt_out_str.strip()
+            # Some of the str type PV's can change their case, so this test is
+            # a bit brittle. E.g. CS-CS-MSTAT-01:MESS01 can have a lower case b or
+            # capital case B for "User beam time".
+            assert pyburt_out_str.strip().lower() == burt_out_str.strip().lower()
 
     # cleanup
     os.remove(integration.TMP_BURT_OUT)
@@ -244,14 +247,14 @@ def _vanilla_burtrb(input_req, output_snap, comments, keywords):
         keywords (keywords): keywords
     """
     burt_rb_cmd = (
-            "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
-            + input_req
-            + " -o "
-            + output_snap
-            + " -c "
-            + comments
-            + " -k "
-            + keywords
+        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
+        + input_req
+        + " -o "
+        + output_snap
+        + " -c "
+        + comments
+        + " -k "
+        + keywords
     )
 
     # Without shell=True raises an exception on Python 2.7

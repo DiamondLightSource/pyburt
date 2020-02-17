@@ -21,7 +21,7 @@ from burt.parsers import ParserException, SnapParser
 from burt.write import _snap_entry_to_ca_type
 
 INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
-STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM)
+STR_CHANNEL_TYPES = (DBR_CHAR, DBR_STRING, DBR_ENUM_STR)
 
 
 class MockCainfo:
@@ -206,20 +206,29 @@ def test_restore_group_normal(mock_connect, mock_caput):
 
 
 @pytest.mark.parametrize(
-    "entry,datatype,expected",
+    "length,values,datatype,result",
     [
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_LONG, 2),
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_FLOAT, 2.0),
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_STRING, "2"),
-        # Enums are parsed as strings.
-        (SnapParser.SNAP_PV("a", 1, "2", ""), DBR_ENUM, "2"),
-        # All arrays are parsed to floats.
-        (SnapParser.SNAP_PV("a", 2, ["2", "3"], ""), DBR_STRING, [2, 3]),
+        (1, ["2"], DBR_LONG, 2),
+        (1, ["2"], DBR_FLOAT, 2.0),
+        (1, ["2"], DBR_STRING, "2"),
+        (1, ["string space"], DBR_STRING, "string space"),
+        # Enums stored in snap files as their string value
+        (1, ["2"], DBR_ENUM, "2"),
+        (1, ["enum space"], DBR_ENUM, "enum space"),
+        # We don't expect channels of type DBR_ENUM_STR
+        # so this defaults to double parsing.
+        (1, ["2"], DBR_ENUM_STR, 2),
+        # Not currently handled.
+        # (2, ["2", "3"], DBR_STRING, ["2", "3"]),
+        # Not currently handled.
+        # (2, ["str space", "str space2"], DBR_STRING, ["str space", "str space2"]),
+        (2, ["2", "3"], DBR_DOUBLE, [2.0, 3.0]),
     ],
 )
-def test_snap_entry_to_ca_type(entry, datatype, expected):
+def test_snap_entry_to_ca_type(length, values, datatype, result):
     """Test conversion of snap entries to specific datatypes."""
-    assert _snap_entry_to_ca_type(entry, datatype) == expected
+    snap_entry = SnapParser.SNAP_PV("pv", length, values, "")
+    assert _snap_entry_to_ca_type(snap_entry, datatype) == result
 
 
 @mock.patch("argparse.ArgumentParser")

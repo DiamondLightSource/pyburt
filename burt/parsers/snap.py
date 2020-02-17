@@ -86,8 +86,18 @@ class SnapParser(BurtParser):
                 .snap body line.
 
         """
-        # Shlex preserves quoted substrings. E.g: 1 3.4 "fill 1" -> [1, 3.4, "fill 1"]
-        pv_snapshot = [segment.strip() for segment in shlex.split(line)]
+        # True posix preserves quoted substrings. Usually for string enums:
+        # E.g: 1, "fill 1" -> [1, "fill 1"]
+        # False posix to prevent shlex from interpreting special chars, e.g. backslash.
+        # Usually for chars, e.g. 1, \0 -> [1, \0], if posix=true, the backslash gets
+        # discarded.
+        posix_opt = False
+        if '"' in line or "'" in line:
+            posix_opt = True
+
+        pv_snapshot = [
+            segment.strip() for segment in shlex.split(line, posix=posix_opt)
+        ]
 
         if len(pv_snapshot) < 3:
             raise ParserException(

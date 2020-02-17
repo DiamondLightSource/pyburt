@@ -4,11 +4,28 @@ Listed below are a set of instructions for running the DLS integration tests
 for the **snapshot** and
 **restore** functionality of **pyburt**.
 
-It involves running an IOC server which hosts a dummy PV `SR-CS-TEST-01:TESTPV` and performing restore
-operations on some `.snap` files which write to this PV. It also involves
-doing some comparison tests against the vanilla BURT outputs, which requires running BURT on a set of
-`.req` and `.snap` files. Finally, it also runs snapshot tests against DLS 
-PV's.
+It involves running an IOC server which hosts a local IOC `SR-CS-TEST-01` and 
+performing snapshots on DLS PV's, as well as restore operations on some `.snap` files 
+which write to the below PV's:
+
+```
+SR-CS-TEST-01:TESTPV_FLOAT
+SR-CS-TEST-01:TESTPV_ARR_FLOAT
+SR-CS-TEST-01:TESTPV_LONG
+SR-CS-TEST-01:TESTPV_ARR_LONG
+SR-CS-TEST-01:TESTPV_DBL
+SR-CS-TEST-01:TESTPV_ARR_DBL
+SR-CS-TEST-01:TESTPV_STR
+SR-CS-TEST-01:TESTPV_ENUM_STR
+SR-CS-TEST-01:TESTPV_ARR_STR
+SR-CS-TEST-01:TESTPV_CHAR
+SR-CS-TEST-01:TESTPV_ARR_CHAR
+SR-CS-TEST-01:TESTPV_SHORT
+SR-CS-TEST-01:TESTPV_ARR_SHORT
+```
+
+It also involves doing some comparison tests against the vanilla BURT outputs, which 
+requires running BURT on a set of `.req` and `.snap` files.
 
 ## Test Steps
 
@@ -40,7 +57,7 @@ Observe the output and check that all tests pass. This may take several seconds 
 
 ```bash
 $ pwd
-.../pyburt
+.../pyburtgit
 
 $ pytest -vv integration
 =============================================================================================== test session starts ===============================================================================================
