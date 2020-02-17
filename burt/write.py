@@ -83,11 +83,12 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     for pv_entry, ca_info in zip(pvs, ca_infos):
         if _is_write_instr(pv_entry, _logger):
             if not ca_info.ok:
-                _logger.warning(f"PV invalid, skipping: {ca_info.__str__()}")
+                _logger.warning(f"PV invalid, skipping: {ca_info}")
             else:
                 pvs_to_restore[pv_entry.name] = _snap_entry_to_ca_type(
                     pv_entry, ca_info.datatype
                 )
+                _logger.debug(f"Restoring PVs: {pvs_to_restore}.")
 
     failed_pvs = []
     return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
@@ -220,9 +221,13 @@ def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaVal
     """Coerce the correct ca type from the channel type."""
     # Non CA array case.
     if pv_entry.dtype_len == 1:
-        # Enums are stored in snap files as their string value.
-        if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM_STR, DBR_ENUM):
-            return str(pv_entry.vals[0])
+
+        # Enum values are stored in snap files as strings.
+        if datatype in (DBR_CHAR, DBR_STRING, DBR_ENUM):
+            if pv_entry.vals[0] == "\\0":
+                return ""
+            else:
+                return str(pv_entry.vals[0])
 
         elif datatype in (DBR_SHORT, DBR_LONG):
             # Problematic case where the channel type is an int type, but stored value
@@ -252,5 +257,6 @@ def _snap_entry_to_ca_type(pv_entry: SnapParser.SNAP_PV, datatype: int) -> CaVal
                 return pv_entry.vals[0]
 
     # Arrays are always coerced as floats.
+    # TODO: handle arrays of chars and other types.
     else:
         return [float(val) for val in pv_entry.vals]

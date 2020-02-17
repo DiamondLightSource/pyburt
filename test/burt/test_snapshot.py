@@ -5,11 +5,21 @@ import cothread
 import mock
 import numpy
 import pytest
-from cothread.catools import DBR_DOUBLE, DBR_SHORT, DBR_STRING
+from cothread.catools import (
+    DBR_CHAR,
+    DBR_DOUBLE,
+    DBR_ENUM,
+    DBR_ENUM_STR,
+    DBR_FLOAT,
+    DBR_LONG,
+    DBR_SHORT,
+    DBR_STRING,
+)
 
 import burt
 import test
 from burt import SnapParser as sp
+from burt.read import _format_ca_reading
 
 
 @mock.patch("burt.read.caget")
@@ -52,6 +62,31 @@ def test_bad_file_arguments(mock_caget):
         burt.take_snapshot_group("dummy.rqg", "helloworld.snap")
     with pytest.raises(NotImplementedError):
         burt.take_snapshot_group(test.NORMAL_RQG, "helloworld.sn")
+
+
+@pytest.mark.parametrize(
+    "ca_reading,ca_type,expected_str",
+    (
+        (0, DBR_CHAR, "\x00"),
+        (80, DBR_CHAR, "P"),
+        (6666666, DBR_CHAR, "6666666"),  # non existent char code, falls back to str
+        ("Dummy", DBR_STRING, "Dummy"),
+        ("DummyEnum", DBR_ENUM_STR, "DummyEnum"),
+        ("", DBR_ENUM_STR, "\\0"),
+        ("Dummy Space Word", DBR_STRING, '"Dummy Space Word"'),
+        (123, DBR_SHORT, "123"),
+        (123456789, DBR_LONG, "123456789"),
+        (1, DBR_ENUM, "1"),
+        (1, DBR_FLOAT, "1.000000e+00"),
+        (-6.67e7, DBR_FLOAT, "-6.670000e+07"),
+        (1, DBR_DOUBLE, "1.000000000000000e+00"),
+        (-6.67e13, DBR_DOUBLE, "-6.670000000000000e+13"),
+        ("", DBR_STRING, "\\0"),
+    ),
+)
+def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
+    """Check the ca readings are formatted as expected."""
+    assert _format_ca_reading(ca_reading, ca_type) == expected_str
 
 
 @mock.patch("burt.read.caget")

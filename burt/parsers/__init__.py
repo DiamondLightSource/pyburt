@@ -142,10 +142,11 @@ class BurtParser:
 
         """
         body_objs = []
-        for line in body_lines:
 
+        for line in body_lines:
             if BurtParser._skippable_line(line):
                 pass
+
             else:
                 line = BurtParser._clean_line(line)
 
