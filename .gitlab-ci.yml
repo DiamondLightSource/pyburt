@@ -1,6 +1,6 @@
 include:
   - project: 'controls/reports/ci_templates'
-    ref: 0-11
+    ref: 0-13
     file: 'all_templates.yml'
 
 stages:
@@ -32,10 +32,11 @@ Static code checks:
   variables:
     FLAKE8_MODULES: burt test
     BLACK_MODULES: burt test
-  extends:
-    - .flake8_and_black
+    MYPY_MODULES: burt
   script:
-    - pipenv run mypy burt
+    - pipenv run flake8 --show-source ${FLAKE8_MODULES}
+    - pipenv run black ${BLACK_MODULES} --check
+    - pipenv run mypy --pretty --python-version=3.7 ${MYPY_MODULES}
 
 # Publish coverage html report to common location
 Publish coverage:
