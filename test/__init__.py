@@ -20,7 +20,6 @@ ARRAYS_AND_SCALARS_WITH_MODS_SNAP = "testables/snap/arrays_and_scalars_with_mods
 BLANK_SNAP = "testables/snap/blank.snap"
 SCALARS_SNAP = "testables/snap/scalars.snap"
 INLINE_COMMENTS_SNAP = "testables/snap/inline_comments.snap"
-MODIFIERS_SNAP = "testables/snap/modifiers.snap"
 MULTIPLE_REQ_PATHS_SNAP = "testables/snap/multiple_req_paths.snap"
 LONG_SNAP = "testables/snap/ioc_restore_long.snap"
 VARIETY_SNAP = "testables/snap/type_variety.snap"
