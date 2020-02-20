@@ -72,17 +72,14 @@ def test_bad_file_arguments(mock_caget):
         (80, DBR_CHAR, "P"),
         (6666666, DBR_CHAR, "6666666"),  # non existent char code, falls back to str
         ("Dummy", DBR_STRING, "Dummy"),
-        ("DummyEnum", DBR_ENUM_STR, "DummyEnum"),
-        ("", DBR_ENUM_STR, "\\0"),
         ("Dummy Space Word", DBR_STRING, '"Dummy Space Word"'),
+        ("", DBR_STRING, "\\0"),
         (123, DBR_SHORT, "123"),
         (123456789, DBR_LONG, "123456789"),
-        (1, DBR_ENUM, "1"),
         (1, DBR_FLOAT, "1.000000e+00"),
         (-6.67e7, DBR_FLOAT, "-6.670000e+07"),
         (1, DBR_DOUBLE, "1.000000000000000e+00"),
         (-6.67e13, DBR_DOUBLE, "-6.670000000000000e+13"),
-        ("", DBR_STRING, "\\0"),
     ),
 )
 def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
@@ -96,7 +93,7 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
         ([1, 2], DBR_FLOAT, 2, 2, "1.000000e+00 2.000000e+00"),
         ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
         ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
-        ([1, 2, 3], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
+        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 0.000000000000000e+00"),
         ([1, 2], DBR_LONG, 2, 2, "1 2"),
         ([1, 2], DBR_LONG, 3, 2, "1 2 \\0"),
         ([], DBR_LONG, 2, 2, "\\0 \\0"),
