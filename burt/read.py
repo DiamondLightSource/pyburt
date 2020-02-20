@@ -434,7 +434,7 @@ def _flatten_ca_array(ca_reading, requested_length):
 
     # Adding EPICS null chars if applicable.
     # Note: Burt represents empty array elements as null zeroes for integer types, and
-    # 0 to some 7 sig figs for floats and 16 sig figs for doubles.
+    # 7 sig figs for floats and 16 sig figs for doubles.
     if len(ca_reading) < ca_reading.element_count:
         if ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
             empty_elem_identifier = "\\0"
@@ -448,12 +448,9 @@ def _flatten_ca_array(ca_reading, requested_length):
             )
             empty_elem_identifier = "\\0"
 
-        ca_reading_str = (
-            ca_reading_str
-            + " "
-            + " ".join(
-                [empty_elem_identifier] * (ca_reading.element_count - len(ca_reading))
-            )
+        null_chars_padding = ca_reading_str + " " if ca_reading_str else ""
+        ca_reading_str = null_chars_padding + " ".join(
+            [empty_elem_identifier] * (ca_reading.element_count - len(ca_reading))
         )
 
     return ca_reading_str
