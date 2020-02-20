@@ -91,33 +91,25 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
 
 
 @pytest.mark.parametrize(
-    "ca_reading,req_length,output",
+    "vals,datatype,array_length,requested_length,output",
     [
-        (aug_val([1, 2], count=2), 2, "1.000000e+00 2.000000e+00"),
-        (aug_val([1, 2], count=3), 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
-        (
-            aug_val([1, 2], count=2, dtype=DBR_DOUBLE),
-            2,
-            "1.000000000000000e+00 2.000000000000000e+00",
-        ),
-        (
-            aug_val([1, 2, 3], count=2, dtype=DBR_DOUBLE),
-            2,
-            "1.000000000000000e+00 2.000000000000000e+00",
-        ),
-        (aug_val([1, 2], count=2, dtype=DBR_LONG), 2, "1 2"),
-        (aug_val([1, 2], count=3, dtype=DBR_LONG), 2, "1 2 \\0"),
-        (aug_val([1, 2], count=3, dtype=DBR_LONG), 2, "1 2 \\0"),
-        (aug_val([], count=2, dtype=DBR_LONG), 2, "\\0 \\0"),
-        (aug_val(["a", "b"], count=2, dtype=DBR_STRING), 2, "a b"),
-        (aug_val(["a", "b"], count=3, dtype=DBR_STRING), 2, "a b \\0"),
-        (aug_val(["a b", "c d"], count=2, dtype=DBR_STRING), 2, '"a b" "c d"'),
-        (aug_val(["a b", "c d"], count=3, dtype=DBR_STRING), 2, '"a b" "c d" \\0'),
+        ([1, 2], DBR_FLOAT, 2, 2, "1.000000e+00 2.000000e+00"),
+        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
+        ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
+        ([1, 2, 3], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
+        ([1, 2], DBR_LONG, 2, 2, "1 2"),
+        ([1, 2], DBR_LONG, 3, 2, "1 2 \\0"),
+        ([], DBR_LONG, 2, 2, "\\0 \\0"),
+        (["a", "b"], DBR_STRING, 2, 2, "a b"),
+        (["a", "b"], DBR_STRING, 3, 2, "a b \\0"),
+        (["a b", "c d"], DBR_STRING, 2, 2, '"a b" "c d"'),
+        (["a b", "c d"], DBR_STRING, 3, 2, '"a b" "c d" \\0'),
     ],
 )
-def test_flatten_ca_array(ca_reading, req_length, output):
+def test_flatten_ca_array(vals, datatype, array_length, requested_length, output):
     """Check formatting arrays for snap files."""
-    assert _flatten_ca_array(ca_reading, req_length) == output
+    ca_reading = aug_val(vals, count=array_length, dtype=datatype)
+    assert _flatten_ca_array(ca_reading, requested_length) == output
 
 
 @mock.patch("burt.read.caget")
