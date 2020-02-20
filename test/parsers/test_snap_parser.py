@@ -176,3 +176,21 @@ def test_snap_parser_enums(line, parsed_value):
     assert snap_pv.name == "PV:NAME"
     assert snap_pv.dtype_len == 1
     assert snap_pv.vals == [parsed_value]
+
+
+@pytest.mark.parametrize(
+    "line,parsed_value",
+    [
+        ("PV:NAME 1 a b", ["a", "b"]),
+        ('PV:NAME 1 a "b c"', ["a", "b c"]),
+        ("PV:NAME 1 a \\0", ["a", "\\0"]),
+        ('PV:NAME 1 a "b c" \\0', ["a", "b c", "\\0"]),
+    ],
+)
+def test_snap_parser_string_arrays(line, parsed_value):
+    """Run the .snap parser against a case with enums."""
+    parser = sp("file")
+    snap_pv = parser.read_body_line(line)
+    assert snap_pv.name == "PV:NAME"
+    assert snap_pv.dtype_len == 1
+    assert snap_pv.vals == parsed_value
