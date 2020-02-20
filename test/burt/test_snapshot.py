@@ -19,7 +19,8 @@ from cothread.catools import (
 import burt
 import test
 from burt import SnapParser as sp
-from burt.read import _format_ca_reading
+from burt.read import _format_ca_reading, _flatten_ca_array
+from test import aug_val
 
 
 @mock.patch("burt.read.caget")
@@ -87,6 +88,36 @@ def test_bad_file_arguments(mock_caget):
 def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
     """Check the ca readings are formatted as expected."""
     assert _format_ca_reading(ca_reading, ca_type) == expected_str
+
+
+@pytest.mark.parametrize(
+    "ca_reading,req_length,output",
+    [
+        (aug_val([1, 2], count=2), 2, "1.000000e+00 2.000000e+00"),
+        (aug_val([1, 2], count=3), 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
+        (
+            aug_val([1, 2], count=2, dtype=DBR_DOUBLE),
+            2,
+            "1.000000000000000e+00 2.000000000000000e+00",
+        ),
+        (
+            aug_val([1, 2, 3], count=2, dtype=DBR_DOUBLE),
+            2,
+            "1.000000000000000e+00 2.000000000000000e+00",
+        ),
+        (aug_val([1, 2], count=2, dtype=DBR_LONG), 2, "1 2"),
+        (aug_val([1, 2], count=3, dtype=DBR_LONG), 2, "1 2 \\0"),
+        (aug_val([1, 2], count=3, dtype=DBR_LONG), 2, "1 2 \\0"),
+        (aug_val([], count=2, dtype=DBR_LONG), 2, "\\0 \\0"),
+        (aug_val(["a", "b"], count=2, dtype=DBR_STRING), 2, "a b"),
+        (aug_val(["a", "b"], count=3, dtype=DBR_STRING), 2, "a b \\0"),
+        (aug_val(["a b", "c d"], count=2, dtype=DBR_STRING), 2, '"a b" "c d"'),
+        (aug_val(["a b", "c d"], count=3, dtype=DBR_STRING), 2, '"a b" "c d" \\0'),
+    ],
+)
+def test_flatten_ca_array(ca_reading, req_length, output):
+    """Check formatting arrays for snap files."""
+    assert _flatten_ca_array(ca_reading, req_length) == output
 
 
 @mock.patch("burt.read.caget")
@@ -314,7 +345,7 @@ def test_snapshot_scalar(mock_caget):
 
     Note that cothread will always return an augmented non scalar value.
     """
-    singleton_return_value = test.aug_float(-1e-16)
+    singleton_return_value = test.aug_val(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
@@ -424,7 +455,7 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget):
 @mock.patch("burt.read.caget")
 def test_snapshot_multiple_reqs(mock_caget):
     """Run a take snapshot test of a .req file with multiple req paths."""
-    singleton_return_value = test.aug_float(-1e-16)
+    singleton_return_value = test.aug_val(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"

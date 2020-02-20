@@ -1,5 +1,7 @@
 """The test package."""
-from cothread.catools import DBR_FLOAT
+from cothread.catools import DBR_FLOAT, DBR_LONG, DBR_STRING
+
+import numpy
 
 # Shared test .req files.
 BLANK_REQ = "testables/req/blank.req"
@@ -85,15 +87,41 @@ NORMAL_CHECK_3 = "testables/check/normal_3.check"
 TMP_PYBURT_OUT = "test/tmp.snap"
 
 
-def aug_float(int_val, ok=True, element_count=1):
-    """Create an augmented value as returned by cothread."""
+def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
+    """Create a dummy augmented value as returned by cothread."""
     # noqa D202  https://github.com/PyCQA/pydocstyle/pull/395
     class AugFloat(float):
-        pass
+        ok = True
+        element_count = 1
+        datatype = DBR_FLOAT
 
-    f = AugFloat(int_val)
+    class AugInt(int):
+        ok = True
+        element_count = 1
+        datatype = DBR_FLOAT
+
+    class AugArray(numpy.ndarray):
+        ok = True
+        element_count = 1
+        datatype = DBR_FLOAT
+
+    if count > 1:
+        if dtype == DBR_STRING:
+            npdtype = numpy.object
+        else:
+            npdtype = numpy.float64
+        f = AugArray([len(val)], dtype=npdtype)
+        for i, v in enumerate(val):
+            f[i] = v
+    elif dtype == DBR_FLOAT:
+        f = AugFloat(val)
+    elif dtype == DBR_LONG:
+        f = AugInt(val)
+    else:
+        f = AugFloat(val)
+
     f.ok = ok
-    f.element_count = element_count
-    f.datatype = DBR_FLOAT
+    f.element_count = count
+    f.datatype = dtype
 
     return f
