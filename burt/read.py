@@ -21,7 +21,7 @@ import pwd
 import time
 from typing import Any, List, Tuple
 
-from cothread.catools import caget, DBR_ENUM_STR
+from cothread.catools import caget
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -468,7 +468,8 @@ def _format_ca_reading(ca_reading, datatype=DBR_STRING):
      * DBR_LONG
      * DBR_STRING (including for an enum channel)
 
-    See http://controls.diamond.ac.uk/downloads/python/cothread/2-14/docs/html/catools.html#augmented
+    See http://controls.diamond.ac.uk/downloads/python/cothread/2-14/docs/html
+    /catools.html#augmented
 
     """
     ca_reading_str = ""

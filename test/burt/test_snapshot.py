@@ -8,8 +8,6 @@ import pytest
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
-    DBR_ENUM,
-    DBR_ENUM_STR,
     DBR_FLOAT,
     DBR_LONG,
     DBR_SHORT,
@@ -19,7 +17,7 @@ from cothread.catools import (
 import burt
 import test
 from burt import SnapParser as sp
-from burt.read import _format_ca_reading, _flatten_ca_array
+from burt.read import _flatten_ca_array, _format_ca_reading
 from test import aug_val
 
 

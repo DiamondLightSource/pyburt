@@ -1,7 +1,6 @@
 """The test package."""
-from cothread.catools import DBR_FLOAT, DBR_LONG, DBR_STRING
-
 import numpy
+from cothread.catools import DBR_FLOAT, DBR_LONG, DBR_STRING
 
 # Shared test .req files.
 BLANK_REQ = "testables/req/blank.req"
