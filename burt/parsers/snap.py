@@ -1,5 +1,5 @@
 """Snap parser class which reads the information from a .snap BURT file."""
-import shlex
+import re
 from collections import namedtuple
 
 import burt
@@ -86,17 +86,11 @@ class SnapParser(BurtParser):
                 .snap body line.
 
         """
-        # True posix preserves quoted substrings. Usually for string enums:
-        # E.g: 1, "fill 1" -> [1, "fill 1"]
-        # False posix to prevent shlex from interpreting special chars, e.g. backslash.
-        # Usually for chars, e.g. 1, \0 -> [1, \0], if posix=true, the backslash gets
-        # discarded.
-        posix_opt = False
-        if '"' in line or "'" in line:
-            posix_opt = True
-
+        # Need to preserve inner quotes and special null symboles \\0.
+        # Thanks: https://stackoverflow.com/questions/79968
         pv_snapshot = [
-            segment.strip() for segment in shlex.split(line, posix=posix_opt)
+            "".join(segment)
+            for segment in re.findall(r"""([^\s"']+)|"([^"]*)"|'([^']*)'""", line)
         ]
 
         if len(pv_snapshot) < 3:

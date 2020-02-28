@@ -46,48 +46,30 @@ def test_inline_comments():
     assert correct_pv_snapshots == body
 
 
-def test_malformed_files():
+@pytest.mark.parametrize(
+    "invalid_snap_file",
+    [
+        test.MISSING_BOTTOM_HEADER_SNAP,
+        test.MISSING_TOP_HEADER_SNAP,
+        test.MISORDERED_BURT_HEADER_SNAP,
+        test.DUPLICATE_BURT_HEADERS_SNAP,
+        test.MALFORMED_HEADER_BURT_TYPO_SNAP,
+        test.MALFORMED_HEADER_TYPO_SNAP,
+        test.MALFORMED_BODY_SNAP,
+        test.MALFORMED_HEADER_COLONS_SNAP,
+        test.MALFORMED_FOOTER_PREFIX_SNAP,
+        test.MALFORMED_FOOTER_NON_INT_LENGTH_SNAP,
+    ],
+)
+def test_malformed_snap_files(invalid_snap_file):
     """Run the .snap parser against the malformed .snap files."""
     with pytest.raises(ParserException):
-        snap_parser = sp(test.MISSING_BOTTOM_HEADER_SNAP)
+        snap_parser = sp(invalid_snap_file)
         snap_parser.parse()
 
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MISSING_TOP_HEADER_SNAP)
-        snap_parser.parse()
 
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MISORDERED_BURT_HEADER_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.DUPLICATE_BURT_HEADERS_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MALFORMED_HEADER_BURT_TYPO_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MALFORMED_HEADER_TYPO_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MALFORMED_BODY_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MALFORMED_HEADER_COLONS_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MALFORMED_FOOTER_PREFIX_SNAP)
-        snap_parser.parse()
-
-    with pytest.raises(ParserException):
-        snap_parser = sp(test.MALFORMED_FOOTER_NON_INT_LENGTH_SNAP)
-        snap_parser.parse()
-
+def test_acceptably_malformed_snap_file():
+    """Run the .snap parser against a malformed .snap file that is still valid."""
     # Entries should still be parsed fine as header is valid, but values could
     # be problematic.
     snap_parser = sp(test.MALFORMED_HEADER_ENTRIES_SNAP)
@@ -140,100 +122,76 @@ def test_snap_parser_multiple_req_paths():
     ] == header[sp.REQ_FILE_PREFIX]
 
 
-def test_snap_parser_ca_arr():
+@pytest.mark.parametrize(
+    "line,length,parsed_value",
+    [
+        (
+            "PV:NAME 3 3.259328000000000e+00 3.259328000000000e+00 "
+            "3.259328000000000e+00",
+            3,
+            ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"],
+        ),
+        ("PV:NAME 1 -3.276854000000000e+00", 1, ["-3.276854000000000e+00"]),
+    ],
+)
+def test_snap_parser_ca_arr(line, length, parsed_value):
     """Run the .snap parser against a case with ca arrays."""
-    correct_pv_snapshots = [
-        sp.SNAP_PV(
-            "SR01C-DI-COL-01:POS1",
-            3,
-            ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"],
-            None,
-        ),
-        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"], None),
-        sp.SNAP_PV(
-            "SR01C-DI-COL-02:POS1",
-            2,
-            ["-1.200000000000000e+01", "-1.200000000000000e+01"],
-            None,
-        ),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], None),
-    ]
-
-    snap_parser = sp(test.ARRAYS_AND_SCALARS_SNAP)
-    header, body = snap_parser.parse()
-
-    assert test.ARRAYS_AND_SCALARS_SNAP == snap_parser.path
-    assert 4 == len(body)
-    assert "Tue Sep 21 15:07:59 2010" == header[sp.TIME_PREFIX]
-    assert "ops-cc83 (Chris Christou)" == header[sp.LOGINID_PREFIX]
-    assert "37245" == header[sp.UID_PREFIX]
-    assert "37245" == header[sp.GROUPID_PREFIX]
-    assert "hello world" == header[sp.KEYWORDS_PREFIX]
-    assert (
-        r"Nominal optics\nInjection efficiency with IDs closed to 5mm"
-        r" is 80%\nResidual kick less than 1mm peak to"
-        r" peak\nOnly changed injection magnets\nRF phasing 94/180"
-        r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
-    )
-    assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
-    assert "/home/ops/burt/backupFiles" == header[sp.DIRECTORY_PREFIX]
-    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[sp.REQ_FILE_PREFIX]
-    assert correct_pv_snapshots == body
+    snap_parser = sp("file")
+    snap_pv = snap_parser.read_body_line(line)
+    assert snap_pv.name == "PV:NAME"
+    assert snap_pv.dtype_len == length
+    assert snap_pv.vals == parsed_value
 
 
-def test_snap_parser_with_modifiers():
+@pytest.mark.parametrize(
+    "line,parsed_value,modifier",
+    [
+        ("RO PV:NAME 1 NIL", ["NIL"], "RO"),
+        ('WO PV:NAME 1 "lower voltage"', ["lower voltage"], "WO"),
+        ('PV:NAME 1 "no voltage"', ["no voltage"], None),
+        ("RON PV:NAME 1 1.200000000000000e+0", ["1.200000000000000e+0"], "RON"),
+    ],
+)
+def test_snap_parser_with_modifiers(line, parsed_value, modifier):
     """Run the .snap parser against a case with optional modifiers."""
-    correct_pv_snapshots = [
-        sp.SNAP_PV(
-            "SR01C-DI-COL-01:POS1",
-            3,
-            ["3.259328000000000e+00", "3.259328000000000e+00", "3.259328000000000e+00"],
-            "RO",
-        ),
-        sp.SNAP_PV("SR01C-DI-COL-01:POS2", 1, ["-3.276854000000000e+00"], "WO"),
-        sp.SNAP_PV(
-            "SR01C-DI-COL-02:POS1",
-            2,
-            ["-1.200000000000000e+01", "-1.200000000000000e+01"],
-            None,
-        ),
-        sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], "RON"),
-    ]
-
-    snap_parser = sp(test.MODIFIERS_SNAP)
-    header, body = snap_parser.parse()
-
-    assert test.MODIFIERS_SNAP == snap_parser.path
-    assert 4 == len(body)
-    assert "Tue Sep 21 15:07:59 2010" == header[sp.TIME_PREFIX]
-    assert "ops-cc83 (Chris Christou)" == header[sp.LOGINID_PREFIX]
-    assert "37245" == header[sp.UID_PREFIX]
-    assert "37245" == header[sp.GROUPID_PREFIX]
-    assert "hello world" == header[sp.KEYWORDS_PREFIX]
-    assert (
-        r"Nominal optics\nInjection efficiency with IDs closed to 5mm"
-        r" is 80%\nResidual kick less than 1mm peak to"
-        r" peak\nOnly changed injection magnets\nRF phasing 94/180"
-        r" voltage 0.8/1.4" == header[sp.COMMENTS_PREFIX]
-    )
-    assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
-    assert "/home/ops/burt/backupFiles" == header[sp.DIRECTORY_PREFIX]
-    assert "/home/ops/burt/requestFiles/SR-DI.req" == header[sp.REQ_FILE_PREFIX]
-    assert correct_pv_snapshots == body
+    snap_parser = sp("file")
+    snap_pv = snap_parser.read_body_line(line)
+    assert snap_pv.name == "PV:NAME"
+    assert snap_pv.modifier == modifier
+    assert snap_pv.vals == parsed_value
 
 
-def test_snap_parser_enums():
+@pytest.mark.parametrize(
+    "line,parsed_value",
+    [
+        ("PV:NAME 1 NIL", "NIL"),
+        ('PV:NAME 1 "lower voltage"', "lower voltage"),
+        ('PV:NAME 1 "no voltage"', "no voltage"),
+        ('PV:NAME 1 "lower voltage no voltage"', "lower voltage no voltage"),
+    ],
+)
+def test_snap_parser_enums(line, parsed_value):
     """Run the .snap parser against a case with enums."""
-    correct_pv_snapshots = [
-        sp.SNAP_PV("SR01C-DI-COL-01:ENUM", 1, ["NIL"], None),
-        sp.SNAP_PV("SR01C-DI-COL-01:ENUM2", 1, ["lower voltage"], None),
-        sp.SNAP_PV("SR01C-DI-COL-01:ENUM3", 1, ["no voltage"], None),
-        sp.SNAP_PV("SR01C-DI-COL-01:ENUM4", 1, ["lower voltage no voltage"], None),
-    ]
+    parser = sp("file")
+    snap_pv = parser.read_body_line(line)
+    assert snap_pv.name == "PV:NAME"
+    assert snap_pv.dtype_len == 1
+    assert snap_pv.vals == [parsed_value]
 
-    snap_parser = sp(test.ENUM_SNAP)
-    header, body = snap_parser.parse()
 
-    assert test.ENUM_SNAP == snap_parser.path
-    assert 4 == len(body)
-    assert correct_pv_snapshots == body
+@pytest.mark.parametrize(
+    "line,parsed_value",
+    [
+        ("PV:NAME 1 a b", ["a", "b"]),
+        ('PV:NAME 1 a "b c"', ["a", "b c"]),
+        ("PV:NAME 1 a \\0", ["a", "\\0"]),
+        ('PV:NAME 1 a "b c" \\0', ["a", "b c", "\\0"]),
+    ],
+)
+def test_snap_parser_string_arrays(line, parsed_value):
+    """Run the .snap parser against a case with enums."""
+    parser = sp("file")
+    snap_pv = parser.read_body_line(line)
+    assert snap_pv.name == "PV:NAME"
+    assert snap_pv.dtype_len == 1
+    assert snap_pv.vals == parsed_value

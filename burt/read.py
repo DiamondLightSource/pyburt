@@ -21,7 +21,6 @@ import pwd
 import time
 from typing import Any, List, Tuple
 
-import cothread
 from cothread.catools import caget
 from cothread.catools import (
     DBR_CHAR,
@@ -89,9 +88,9 @@ def take_snapshot(
         _, pvs = req_parser.parse()
         _logger.debug(f"Parsed PVs: {pvs}")
 
-        ca_readings = caget(
-            [pv.name for pv in pvs], datatype=cothread.catools.DBR_ENUM_STR, throw=False
-        )
+        # Use the special DBR_ENUM_STR datatype request, which gets the natural type
+        # unless the channel is enum, in which case it gets the string value.
+        ca_readings = caget([pv.name for pv in pvs], datatype=DBR_ENUM_STR, throw=False)
         singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(
             ca_readings, pvs, _logger
         )
@@ -434,7 +433,7 @@ def _flatten_ca_array(ca_reading, requested_length):
 
     # Adding EPICS null chars if applicable.
     # Note: Burt represents empty array elements as null zeroes for integer types, and
-    # 0 to some 7 sig figs for floats and 16 sig figs for doubles.
+    # 7 sig figs for floats and 16 sig figs for doubles.
     if len(ca_reading) < ca_reading.element_count:
         if ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
             empty_elem_identifier = "\\0"
@@ -448,19 +447,31 @@ def _flatten_ca_array(ca_reading, requested_length):
             )
             empty_elem_identifier = "\\0"
 
-        ca_reading_str = (
-            ca_reading_str
-            + " "
-            + " ".join(
-                [empty_elem_identifier] * (ca_reading.element_count - len(ca_reading))
-            )
+        null_chars_padding = ca_reading_str + " " if ca_reading_str else ""
+        ca_reading_str = null_chars_padding + " ".join(
+            [empty_elem_identifier] * (ca_reading.element_count - len(ca_reading))
         )
 
     return ca_reading_str
 
 
 def _format_ca_reading(ca_reading, datatype=DBR_STRING):
-    """Format the cothread value depending on its type."""
+    """Format the cothread value depending on its type.
+
+    Since we have used passed datatype=DBR_ENUM_STR to caget, we expect
+    only 6 types to be returned:
+
+     * DBR_DOUBLE
+     * DBR_FLOAT
+     * DBR_CHAR
+     * DBR_SHORT
+     * DBR_LONG
+     * DBR_STRING (including for an enum channel)
+
+    See http://controls.diamond.ac.uk/downloads/python/cothread/2-14/docs/html
+    /catools.html#augmented
+
+    """
     ca_reading_str = ""
 
     if datatype == DBR_CHAR:
@@ -471,7 +482,7 @@ def _format_ca_reading(ca_reading, datatype=DBR_STRING):
             logging.warning(f"Unable to convert ASCII code to str repr: {e}.")
             ca_reading_str = str(ca_reading)
 
-    elif datatype in (DBR_STRING, DBR_ENUM_STR):
+    elif datatype == DBR_STRING:
         ca_reading_str = str(ca_reading)
 
         # Empty string case, always output a null char instead to mimic old burt.
@@ -482,7 +493,7 @@ def _format_ca_reading(ca_reading, datatype=DBR_STRING):
         elif " " in ca_reading_str:
             ca_reading_str = f'"{ca_reading_str}"'
 
-    elif datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+    elif datatype in (DBR_SHORT, DBR_LONG):
         ca_reading_str = str(int(ca_reading))
 
     elif datatype == DBR_FLOAT:
@@ -492,9 +503,7 @@ def _format_ca_reading(ca_reading, datatype=DBR_STRING):
         ca_reading_str = SNAP_PRECISION_LONG_PYFORMAT.format(ca_reading)
 
     else:
-        logging.warning(
-            f"Unexpected cothread type: {ca_reading.datatype}. Converting to string."
-        )
+        logging.warning(f"Unexpected cothread type: {datatype}. Converting to string.")
         ca_reading_str = str(ca_reading)
 
     return ca_reading_str

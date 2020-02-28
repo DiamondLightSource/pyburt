@@ -8,8 +8,6 @@ import pytest
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
-    DBR_ENUM,
-    DBR_ENUM_STR,
     DBR_FLOAT,
     DBR_LONG,
     DBR_SHORT,
@@ -19,7 +17,8 @@ from cothread.catools import (
 import burt
 import test
 from burt import SnapParser as sp
-from burt.read import _format_ca_reading
+from burt.read import _flatten_ca_array, _format_ca_reading
+from test import aug_val
 
 
 @mock.patch("burt.read.caget")
@@ -71,22 +70,41 @@ def test_bad_file_arguments(mock_caget):
         (80, DBR_CHAR, "P"),
         (6666666, DBR_CHAR, "6666666"),  # non existent char code, falls back to str
         ("Dummy", DBR_STRING, "Dummy"),
-        ("DummyEnum", DBR_ENUM_STR, "DummyEnum"),
-        ("", DBR_ENUM_STR, "\\0"),
         ("Dummy Space Word", DBR_STRING, '"Dummy Space Word"'),
+        ("", DBR_STRING, "\\0"),
         (123, DBR_SHORT, "123"),
         (123456789, DBR_LONG, "123456789"),
-        (1, DBR_ENUM, "1"),
         (1, DBR_FLOAT, "1.000000e+00"),
         (-6.67e7, DBR_FLOAT, "-6.670000e+07"),
         (1, DBR_DOUBLE, "1.000000000000000e+00"),
         (-6.67e13, DBR_DOUBLE, "-6.670000000000000e+13"),
-        ("", DBR_STRING, "\\0"),
     ),
 )
 def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
     """Check the ca readings are formatted as expected."""
     assert _format_ca_reading(ca_reading, ca_type) == expected_str
+
+
+@pytest.mark.parametrize(
+    "vals,datatype,array_length,requested_length,output",
+    [
+        ([1, 2], DBR_FLOAT, 2, 2, "1.000000e+00 2.000000e+00"),
+        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
+        ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
+        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 0.000000000000000e+00"),
+        ([1, 2], DBR_LONG, 2, 2, "1 2"),
+        ([1, 2], DBR_LONG, 3, 2, "1 2 \\0"),
+        ([], DBR_LONG, 2, 2, "\\0 \\0"),
+        (["a", "b"], DBR_STRING, 2, 2, "a b"),
+        (["a", "b"], DBR_STRING, 3, 2, "a b \\0"),
+        (["a b", "c d"], DBR_STRING, 2, 2, '"a b" "c d"'),
+        (["a b", "c d"], DBR_STRING, 3, 2, '"a b" "c d" \\0'),
+    ],
+)
+def test_flatten_ca_array(vals, datatype, array_length, requested_length, output):
+    """Check formatting arrays for snap files."""
+    ca_reading = aug_val(vals, count=array_length, dtype=datatype)
+    assert _flatten_ca_array(ca_reading, requested_length) == output
 
 
 @mock.patch("burt.read.caget")
@@ -314,7 +332,7 @@ def test_snapshot_scalar(mock_caget):
 
     Note that cothread will always return an augmented non scalar value.
     """
-    singleton_return_value = test.aug_float(-1e-16)
+    singleton_return_value = test.aug_val(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
@@ -424,7 +442,7 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget):
 @mock.patch("burt.read.caget")
 def test_snapshot_multiple_reqs(mock_caget):
     """Run a take snapshot test of a .req file with multiple req paths."""
-    singleton_return_value = test.aug_float(-1e-16)
+    singleton_return_value = test.aug_val(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
