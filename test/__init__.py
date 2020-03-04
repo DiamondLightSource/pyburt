@@ -1,6 +1,13 @@
 """The test package."""
 import numpy
-from cothread.catools import DBR_FLOAT, DBR_LONG, DBR_STRING
+from cothread.catools import (
+    DBR_CHAR,
+    DBR_DOUBLE,
+    DBR_FLOAT,
+    DBR_LONG,
+    DBR_SHORT,
+    DBR_STRING,
+)
 
 # Shared test .req files.
 BLANK_REQ = "testables/req/blank.req"
@@ -97,7 +104,12 @@ def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
     class AugInt(int):
         ok = True
         element_count = 1
-        datatype = DBR_FLOAT
+        datatype = DBR_LONG
+
+    class AugStr(str):
+        ok = True
+        element_count = 1
+        datatype = DBR_STRING
 
     class AugArray(numpy.ndarray):
         ok = True
@@ -105,17 +117,19 @@ def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
         datatype = DBR_FLOAT
 
     if count > 1:
-        if dtype == DBR_STRING:
+        if dtype in (DBR_STRING, DBR_CHAR):
             npdtype = numpy.object
         else:
             npdtype = numpy.float64
         f = AugArray([len(val)], dtype=npdtype)
         for i, v in enumerate(val):
             f[i] = v
-    elif dtype == DBR_FLOAT:
+    elif dtype in (DBR_DOUBLE, DBR_FLOAT):
         f = AugFloat(val)
-    elif dtype == DBR_LONG:
+    elif dtype in (DBR_SHORT, DBR_LONG):
         f = AugInt(val)
+    elif dtype in (DBR_STRING):
+        f = AugStr(val)
     else:
         f = AugFloat(val)
 
