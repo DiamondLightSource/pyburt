@@ -25,7 +25,6 @@ from cothread.catools import caget
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
-    DBR_ENUM,
     DBR_ENUM_STR,
     DBR_FLOAT,
     DBR_LONG,
@@ -432,21 +431,27 @@ def _flatten_ca_array(ca_reading, requested_length):
     )
 
     # Adding EPICS null chars if applicable.
-    # Note: Burt represents empty array elements as null zeroes for integer types, and
-    # 7 sig figs for floats and 16 sig figs for doubles.
+    # Note: Burt represents empty array elements as null zeroes for integer types.
     if len(ca_reading) < ca_reading.element_count:
-        if ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_ENUM):
+
+        # DBR_ENUM and DBR_ENUM_STR are never expected because we caget with
+        # DBR_ENUM_STR as a return type request.
+        if ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_CHAR, DBR_STRING):
             empty_elem_identifier = "\\0"
+
+        # Zero is shown in a snap file to a certain precision for floats and doubles.
         elif ca_reading.datatype == DBR_FLOAT:
             empty_elem_identifier = SNAP_PRECISION_SHORT_PYFORMAT.format(0)
         elif ca_reading.datatype == DBR_DOUBLE:
             empty_elem_identifier = SNAP_PRECISION_LONG_PYFORMAT.format(0)
+
         else:
-            logging.warning(
-                f"Unexpected type: {ca_reading.datatype}, with array len " f"overflow."
-            )
+            logging.warning(f"Unexpected type: {ca_reading.datatype}.")
             empty_elem_identifier = "\\0"
 
+        # The old BURT appends null characters to the end of arrays in the snap file,
+        # if there is a difference between the length of ca_reading (EPICS) vs the
+        # actual returned values from cothread. We mimic this behaviour here.
         null_chars_padding = ca_reading_str + " " if ca_reading_str else ""
         ca_reading_str = null_chars_padding + " ".join(
             [empty_elem_identifier] * (ca_reading.element_count - len(ca_reading))

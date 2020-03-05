@@ -86,7 +86,7 @@ class SnapParser(BurtParser):
                 .snap body line.
 
         """
-        # Need to preserve inner quotes and special null symboles \\0.
+        # Need to preserve inner quotes and special null symbols \\0.
         # Thanks: https://stackoverflow.com/questions/79968
         pv_snapshot = [
             "".join(segment)

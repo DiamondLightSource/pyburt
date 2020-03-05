@@ -92,6 +92,9 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
         ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
         ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
         ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 0.000000000000000e+00"),
+        ([1, 2], DBR_SHORT, 2, 2, "1 2"),
+        ([1, 2], DBR_SHORT, 3, 2, "1 2 \\0"),
+        ([], DBR_SHORT, 2, 2, "\\0 \\0"),
         ([1, 2], DBR_LONG, 2, 2, "1 2"),
         ([1, 2], DBR_LONG, 3, 2, "1 2 \\0"),
         ([], DBR_LONG, 2, 2, "\\0 \\0"),
@@ -99,6 +102,8 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
         (["a", "b"], DBR_STRING, 3, 2, "a b \\0"),
         (["a b", "c d"], DBR_STRING, 2, 2, '"a b" "c d"'),
         (["a b", "c d"], DBR_STRING, 3, 2, '"a b" "c d" \\0'),
+        ([97, 98], DBR_CHAR, 2, 2, "a b"),
+        ([97, 98], DBR_CHAR, 3, 2, "a b \\0"),
     ],
 )
 def test_flatten_ca_array(vals, datatype, array_length, requested_length, output):
