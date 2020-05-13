@@ -125,3 +125,16 @@ Note that running pytest against `integration` without running the test IOC
  first,
 as described in `integration/README.md`, will cause the tests to
 fail.
+
+## Developing outside Diamond
+
+At present `Pipfile.lock` contains Diamond dependencies. To use a development
+environment outside Diamond, you need Python 3.6 or greater and Pipenv installed. Then
+
+```bash
+$ pipenv install --skip-lock --dev
+$ export EPICS_BASE=<path-to-epics-base>
+$ pipenv run python -m pytest test
+```
+
+If the tests pass then your development environment is set up correctly.

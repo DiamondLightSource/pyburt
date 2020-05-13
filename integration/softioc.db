@@ -58,7 +58,7 @@ record (waveform, "SR-CS-SOFT-01:STRING_ARR")
 # Char waveform (no simple char record)
 record (waveform, "SR-CS-SOFT-01:CHAR_ARR")
 {
-    field (NELM, "8")
+    field (NELM, "20")
     field (FTVL, "CHAR")
     field (PINI, "YES")
     field (DISS, "3")

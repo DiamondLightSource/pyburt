@@ -9,4 +9,4 @@ Type:     Absolute
 Directory /home/ops/burt/backupFiles
 Req File: /home/ops/burt/requestFiles/SR-DI.req
 --- End BURT header
-SR-CS-SOFT-01:LONGIN 1 2
+SR-CS-SOFT-01:STRINGIN 1 DIAD

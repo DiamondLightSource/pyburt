@@ -9,4 +9,4 @@ Type:     Absolute
 Directory /home/ops/burt/backupFiles
 Req File: /home/ops/burt/requestFiles/SR-DI.req
 --- End BURT header
-SR-CS-TEST-01:TESTPV_ARR_FLOAT 3 3.259328000000000e+00 4 -1
+SR-CS-SOFT-01:DOUBLE_ARR 3 3.259328000000000e+00 4 -1

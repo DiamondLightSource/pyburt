@@ -11,7 +11,9 @@ import time
 
 from burt import SnapParser as sp
 
+NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 
+@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_snapshot_normal():
     """Runs a take snapshot test of a normal .req file that specifies DLS PVs
     with scalars and ca array pvs.
@@ -109,7 +111,7 @@ def test_snapshot_invalid_save_len():
     Try to save a PV with a length specified that is greater than the PV
     data size. This is a case which would not be  caught by the parser.
     """
-    with pytest.raises(ValueError):
+    with pytest.raises(burt.parsers.ParserException):
         burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], test.TMP_PYBURT_OUT)
 
 
@@ -136,6 +138,7 @@ def test_burt_vanilla_rb():
     os.remove(integration.TMP_PYBURT_OUT)
 
 
+@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_speed_snapshot():
     """Speed comparison between different snapshot schemes."""
     test_comment = "Hello World"
@@ -181,6 +184,7 @@ def test_speed_snapshot():
     os.remove(integration.TMP_PYBURT_OUT)
 
 
+@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_various_types_against_burt():
     """Test edge case types against old burt.
 
