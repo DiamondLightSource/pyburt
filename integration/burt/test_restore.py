@@ -1,17 +1,16 @@
-""" Various tests for the burt modules which require a running IOC (restore).
-"""
-import integration
-import burt
+"""Various integration tests for Pyburt restore which require a running IOC."""
 import itertools
 import os
 import subprocess
-import test
 import time
 from random import randint
-import numpy
 
 import pytest
 from cothread.catools import caget, caput
+
+import burt
+import integration
+import test
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
@@ -103,9 +102,6 @@ def test_restore_group():
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_speed_restore():
     """Speed comparison between different restore schemes."""
-    test_comment = "Hello World"
-    test_keywords = "cool,snap,file"
-
     t0 = time.time()
     burt.restore(integration.BCDORBIT_SNAP)
     t1 = time.time()
@@ -133,6 +129,7 @@ def test_various_types_restore():
     caput(integration.IOC_LOCAL_PV_DBL, randint(1, 100))
     caput(integration.IOC_LOCAL_PV_ARR_DBL, randint(1, 100))
     caput(integration.IOC_LOCAL_PV_STR, "dummy")
+    caput(integration.IOC_LOCAL_PV_ARR_STR, ["dummy", "rummy"])
     # Scalar short only available in a waveform in a soft IOC.
     caput(integration.IOC_LOCAL_PV_ARR_SHORT, randint(1, 100))
     # Ignored cases
@@ -146,7 +143,7 @@ def test_various_types_restore():
     pv_arr_double = caget(integration.IOC_LOCAL_PV_ARR_DBL)
     pv_arr_float = caget(integration.IOC_LOCAL_PV_ARR_FLOAT)
     pv_str = caget(integration.IOC_LOCAL_PV_STR)
-    pv_arr_str = caget(integration.IOC_LOCAL_PV_STR)
+    pv_arr_str = caget(integration.IOC_LOCAL_PV_ARR_STR)
     pv_arr_char = caget(integration.IOC_LOCAL_PV_ARR_CHAR)
     pv_arr_short = caget(integration.IOC_LOCAL_PV_ARR_SHORT)
 
@@ -164,11 +161,12 @@ def test_various_types_restore():
     assert abs(pv_arr_float[1] - 3.800000e-01) <= 1e-05  # arbitrary
     assert pv_arr_short[0] == 4368
     assert pv_str == ""
+    assert pv_arr_str[0] == "dummy"
+    assert pv_arr_str[1] == "rummy"
 
 
 def _vanilla_burtwb(input_snap):
-    """
-    Wrapper for the original burtwb implementation.
+    """Run the original burtwb implementation.
 
     Args:
         input_snap (str): input snap file

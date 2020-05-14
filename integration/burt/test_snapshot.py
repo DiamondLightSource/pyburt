@@ -1,21 +1,23 @@
-""" Various tests for the main burt module.
-"""
-import pytest
-import test
-import integration
-import burt
-import subprocess
-import os
+"""Various integration tests for Pyburt snapshots."""
 import filecmp
+import os
+import subprocess
 import time
 
+import pytest
+
+import burt
+import integration
+import test
 from burt import SnapParser as sp
+
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 
 
 @pytest.fixture
 def burt_tmpfile():
+    """Temporary file used by Burt."""
     yield integration.TMP_BURT_OUT
     try:
         os.remove(integration.TMP_BURT_OUT)
@@ -25,6 +27,7 @@ def burt_tmpfile():
 
 @pytest.fixture
 def pyburt_tmpfile():
+    """Temporary file used by Pyburt."""
     yield integration.TMP_PYBURT_OUT
     try:
         os.remove(integration.TMP_PYBURT_OUT)
@@ -34,9 +37,7 @@ def pyburt_tmpfile():
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_snapshot_normal(pyburt_tmpfile):
-    """Runs a take snapshot test of a normal .req file that specifies DLS PVs
-    with scalars and ca array pvs.
-    """
+    """Take a snapshot of a normal .req file that specifies DLS PVs."""
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
@@ -89,8 +90,9 @@ def test_snapshot_normal(pyburt_tmpfile):
 
 @pytest.mark.xfail  # take_snapshot_group is not yet implemented
 def test_snapshot_group_normal(pyburt_tmpfile):
-    """Runs a take snapshot test of a normal .rqg file that specifies .req
-    files which point to DLS PVS with scalars and ca array pvs.
+    """Take a snapshot of a normal .rqg file.
+
+    The .req files point to DLS PVS with scalars and ca array pvs.
     """
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -118,9 +120,10 @@ def test_snapshot_group_normal(pyburt_tmpfile):
 
 
 def test_snapshot_req_file_length_bigger_than_pv(pyburt_tmpfile):
-    """
-    Try to save a PV with a length specified in the .req file that is greater
-    than the actual PV's data size. This is a case which would not be caught by the parser.
+    """Save a PV with a length specified in the .req file that is too big.
+
+    That is, the length in the .req file is bigger than the actual PV's data
+    size. This is a case which would not be caught by the parser.
     """
     with pytest.raises(ValueError):
         burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
@@ -128,9 +131,7 @@ def test_snapshot_req_file_length_bigger_than_pv(pyburt_tmpfile):
 
 @pytest.mark.xfail  # The output is no long exactly the Ysame.
 def test_burt_vanilla_rb(burt_tmpfile, pyburt_tmpfile):
-    """Runs vanilla BURT against pyburt for the rb functionality and checks for
-    differences.
-    """
+    """Compare vanilla BURT against pyburt snapshots."""
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
@@ -223,13 +224,12 @@ def test_various_types_against_burt(pyburt_tmpfile):
 
 
 def test_speed_snapshot_group():
-    """Speed comparison between different snapshot group schemes"""
+    """Speed comparison between different snapshot group schemes."""
     pass
 
 
 def _vanilla_burtrb(input_req, output_snap, comments, keywords):
-    """
-    Wrapper for the original burtrb implementation.
+    """Run the original burtrb implementation.
 
     Args:
         input_req (str): input req file(s)

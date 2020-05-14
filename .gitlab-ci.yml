@@ -30,8 +30,8 @@ Static code checks:
     - rhel7
   stage: static code checks
   variables:
-    FLAKE8_MODULES: burt test
-    BLACK_MODULES: burt test
+    FLAKE8_MODULES: burt test integration
+    BLACK_MODULES: burt test integration
     MYPY_MODULES: burt
   script:
     - pipenv run flake8 --show-source ${FLAKE8_MODULES}

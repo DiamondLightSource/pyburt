@@ -1,5 +1,4 @@
-"""The integration package."""
-import subprocess
+"""The integration test package."""
 
 # Shared test .req files.
 NORMAL_REQ = "testables/req/normal.req"
