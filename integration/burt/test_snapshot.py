@@ -14,24 +14,40 @@ from burt import SnapParser as sp
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 
 
+@pytest.fixture
+def burt_tmpfile():
+    yield integration.TMP_BURT_OUT
+    try:
+        os.remove(integration.TMP_BURT_OUT)
+    except FileNotFoundError:
+        pass
+
+
+@pytest.fixture
+def pyburt_tmpfile():
+    yield integration.TMP_PYBURT_OUT
+    try:
+        os.remove(integration.TMP_PYBURT_OUT)
+    except FileNotFoundError:
+        pass
+
+
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_snapshot_normal():
+def test_snapshot_normal(pyburt_tmpfile):
     """Runs a take snapshot test of a normal .req file that specifies DLS PVs
     with scalars and ca array pvs.
     """
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(
-        [test.NORMAL_REQ], integration.TMP_PYBURT_OUT, test_comment, test_keywords
-    )
+    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
-    assert os.path.isfile(integration.TMP_PYBURT_OUT)
-    assert os.stat(integration.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
-    snap_parser = burt.SnapParser(integration.TMP_PYBURT_OUT)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
     header, body = snap_parser.parse()
     assert 12 == len(body)
     assert header[sp.TIME_PREFIX]
@@ -70,12 +86,9 @@ def test_snapshot_normal():
     assert len(snapshot_save_length_spec_3.vals) == 25
     assert snapshot_save_length_spec_3.modifier == "RON"
 
-    # cleanup
-    os.remove(integration.TMP_PYBURT_OUT)
-
 
 @pytest.mark.xfail  # take_snapshot_group is not yet implemented
-def test_snapshot_group_normal():
+def test_snapshot_group_normal(pyburt_tmpfile):
     """Runs a take snapshot test of a normal .rqg file that specifies .req
     files which point to DLS PVS with scalars and ca array pvs.
     """
@@ -83,15 +96,15 @@ def test_snapshot_group_normal():
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot_group(
-        test.NORMAL_RQG, integration.TMP_PYBURT_OUT, test_comment, test_keywords, False
+        test.NORMAL_RQG, pyburt_tmpfile, test_comment, test_keywords, False
     )
 
-    assert os.path.isfile(integration.TMP_PYBURT_OUT)
-    assert os.stat(integration.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
-    snap_parser = burt.SnapParser(integration.TMP_PYBURT_OUT)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
     header, body = snap_parser.parse()
     assert 6 == len(body)
     assert header[sp.TIME_PREFIX]
@@ -103,90 +116,67 @@ def test_snapshot_group_normal():
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
 
-    # cleanup
-    os.remove(integration.TMP_PYBURT_OUT)
 
-
-def test_snapshot_req_file_length_bigger_than_pv():
+def test_snapshot_req_file_length_bigger_than_pv(pyburt_tmpfile):
     """
     Try to save a PV with a length specified in the .req file that is greater
     than the actual PV's data size. This is a case which would not be caught by the parser.
     """
     with pytest.raises(ValueError):
-        burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], test.TMP_PYBURT_OUT)
+        burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
 
 
-@pytest.mark.xfail  # The output is no long exactly the same.
-def test_burt_vanilla_rb():
+@pytest.mark.xfail  # The output is no long exactly the Ysame.
+def test_burt_vanilla_rb(burt_tmpfile, pyburt_tmpfile):
     """Runs vanilla BURT against pyburt for the rb functionality and checks for
     differences.
     """
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    _vanilla_burtrb(integration.NORMAL_REQ, integration.TMP_BURT_OUT, comment, keyword)
+    _vanilla_burtrb(integration.NORMAL_REQ, burt_tmpfile, comment, keyword)
 
-    burt.take_snapshot(
-        [integration.NORMAL_REQ], integration.TMP_PYBURT_OUT, comment, keyword
-    )
+    burt.take_snapshot([integration.NORMAL_REQ], pyburt_tmpfile, comment, keyword)
 
-    assert filecmp.cmp(
-        integration.TMP_BURT_OUT, integration.TMP_PYBURT_OUT, shallow=False
-    )
-
-    # cleanup
-    os.remove(integration.TMP_BURT_OUT)
-    os.remove(integration.TMP_PYBURT_OUT)
+    assert filecmp.cmp(burt_tmpfile, pyburt_tmpfile, shallow=False)
 
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_speed_snapshot():
+def test_speed_snapshot(pyburt_tmpfile):
     """Speed comparison between different snapshot schemes."""
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
     t0 = time.time()
     burt.take_snapshot(
-        [integration.BCDORBIT_REQ],
-        integration.TMP_PYBURT_OUT,
-        test_comment,
-        test_keywords,
+        [integration.BCDORBIT_REQ], pyburt_tmpfile, test_comment, test_keywords
     )
     t1 = time.time()
     tend = t1 - t0
     print(f"test_speed_snapshot_pyburt_1:{tend}")
-    # cleanup
-    # os.remove(integration.TMP_PYBURT_OUT)
 
     t0 = time.time()
     burt.take_snapshot(
-        [integration.BCDORBIT_REQ],
-        integration.TMP_PYBURT_OUT,
-        test_comment,
-        test_keywords,
+        [integration.BCDORBIT_REQ], pyburt_tmpfile, test_comment, test_keywords
     )
     t1 = time.time()
     tend = t1 - t0
     print(f"test_speed_snapshot_pyburt_2:{tend}")
-    # cleanup
-    os.remove(integration.TMP_PYBURT_OUT)
 
     t0 = time.time()
     _vanilla_burtrb(
         "/home/ops/burt/requestFiles/bcdorbit.req",
-        integration.TMP_PYBURT_OUT,
+        pyburt_tmpfile,
         test_comment,
         test_keywords,
     )
     t1 = time.time()
     tend = t1 - t0
     print(f"test_speed_snapshot_burt_vanilla:{tend}")
-    # cleanup
-    os.remove(integration.TMP_PYBURT_OUT)
 
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_various_types_against_burt():
+def test_various_types_against_burt(pyburt_tmpfile):
     """Test edge case types against old burt.
 
     Requires the following DLS PVs to be active:
@@ -218,10 +208,10 @@ def test_various_types_against_burt():
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    burt.take_snapshot([test.TYPES_REQ], integration.TMP_PYBURT_OUT, comment, keyword)
+    burt.take_snapshot([test.TYPES_REQ], pyburt_tmpfile, comment, keyword)
 
     # Read into strings to discard time dependent header.
-    with open(integration.TMP_PYBURT_OUT, "r") as pyburt_out:
+    with open(pyburt_tmpfile, "r") as pyburt_out:
         with open(test.CONTROL_ROOM_TYPES_SNAP, "r") as burt_out:
             pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
             burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
@@ -230,10 +220,6 @@ def test_various_types_against_burt():
             # a bit brittle. E.g. CS-CS-MSTAT-01:MESS01 can have a lower case b or
             # capital case B for "User beam time".
             assert pyburt_out_str.strip().lower() == burt_out_str.strip().lower()
-
-    # cleanup
-    os.remove(integration.TMP_BURT_OUT)
-    os.remove(integration.TMP_PYBURT_OUT)
 
 
 def test_speed_snapshot_group():
