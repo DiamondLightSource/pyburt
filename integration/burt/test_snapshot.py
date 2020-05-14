@@ -13,6 +13,7 @@ from burt import SnapParser as sp
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 
+
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_snapshot_normal():
     """Runs a take snapshot test of a normal .req file that specifies DLS PVs
@@ -106,12 +107,12 @@ def test_snapshot_group_normal():
     os.remove(integration.TMP_PYBURT_OUT)
 
 
-def test_snapshot_invalid_save_len():
+def test_snapshot_req_file_length_bigger_than_pv():
     """
-    Try to save a PV with a length specified that is greater than the PV
-    data size. This is a case which would not be  caught by the parser.
+    Try to save a PV with a length specified in the .req file that is greater
+    than the actual PV's data size. This is a case which would not be caught by the parser.
     """
-    with pytest.raises(burt.parsers.ParserException):
+    with pytest.raises(ValueError):
         burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], test.TMP_PYBURT_OUT)
 
 

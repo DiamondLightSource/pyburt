@@ -565,16 +565,16 @@ def test_snapshot_newlines_in_args(mock_caget):
 
 
 @mock.patch("burt.read.caget")
-def test_snapshot_invalid_save_len(mock_caget):
+def test_snapshot_req_file_length_bigger_than_pv(mock_caget):
     """Try to save a PV with a length that is greater than the PV data size.
 
     This is a case which would not be caught by the parser.
     """
-    # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
-    # The requested save length in the .req file is 937.
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
+    # Flattened ndarray is a 8 element list.
+    # The requested save length in the .req file is 9.
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 8])).flatten()
     singleton_return_value.ok = True
-    singleton_return_value.element_count = 936
+    singleton_return_value.element_count = 8
     mock_caget.return_value = [singleton_return_value]
 
     with pytest.raises(ValueError):
