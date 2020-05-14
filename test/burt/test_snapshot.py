@@ -203,8 +203,8 @@ def test_burtinter_req_file_prefix_compatability():
 @mock.patch("burt.read.caget")
 def test_snapshot_arrays(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test of a normal .req file."""
-    # Flattened ndarray is a 12 element list of 40 elements.
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    # Caget return value is a 12 element list of arrays of 40 elements.
+    singleton_return_value = cothread.dbr.ca_array((40,), dtype=numpy.uint16)
     singleton_return_value.ok = True
     singleton_return_value.element_count = 40
     singleton_return_value.datatype = DBR_SHORT
