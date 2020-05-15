@@ -174,7 +174,6 @@ def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
     for pv in pvs_from_snap:
         return_value = cothread.catools.ca_nothing(pv)
         return_value.ok = False
-        return_value.errorcode = "dummy"
         return_values.append(return_value)
     mock_caput.return_value = return_values
 
