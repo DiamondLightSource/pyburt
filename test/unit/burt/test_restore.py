@@ -146,22 +146,18 @@ def test_restore_ok_snap(mock_connect, mock_caput):
     burt.restore(test.MALFORMED_HEADER_ENTRIES_SNAP)
 
 
-@mock.patch("burt.write.caput")
-@mock.patch("burt.write.connect")
-def test_bad_file_arguments(mock_connect, mock_caput):
+@pytest.mark.parametrize("filename", ["", "goodbyeworld", "helloworld.snap"])
+def test_restore_bad_file_arguments(filename):
     """Run the burt script against a case where the file arguments are malformed."""
     with pytest.raises(ValueError):
-        burt.restore("")
+        burt.restore(filename)
+
+
+@pytest.mark.parametrize("filename", ["", "helloworld", "helloworld.snap"])
+def test_restore_group_bad_file_arguments(filename):
+    """Run the burt script against a case where the file arguments are malformed."""
     with pytest.raises(ValueError):
-        burt.restore("goodbyeworld")
-    with pytest.raises(ValueError):
-        burt.restore("helloworld.snap")
-    with pytest.raises(ValueError):
-        burt.restore_group("")
-    with pytest.raises(ValueError):
-        burt.restore_group("helloworld")
-    with pytest.raises(ValueError):
-        burt.restore_group("helloworld.snap")
+        burt.restore_group(filename)
 
 
 @mock.patch("burt.write.caput")
@@ -189,9 +185,7 @@ def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
     assert failed_pvs == pvs_from_snap
 
 
-@mock.patch("burt.write.caput")
-@mock.patch("burt.write.connect")
-def test_blank_restore(mock_connect, mock_caput):
+def test_blank_restore():
     """Run burt restore against a blank .snap file."""
     with pytest.raises(ParserException):
         burt.restore(test.BLANK_SNAP)

@@ -31,18 +31,18 @@ def test_inline_comments():
     assert correct_pv_list == body
 
 
-def test_malformed_files():
+@pytest.mark.parametrize(
+    "filename",
+    [
+        test.MALFORMED_REQ,
+        test.MALFORMED_SAVE_LEN_NEG_INT_REQ,
+        test.MALFORMED_SAVE_LEN_NON_INT_REQ,
+    ],
+)
+def test_malformed_files(filename):
     """Run the parser against the malformed .req files."""
     with pytest.raises(ParserException):
-        req_parser = rp(test.MALFORMED_REQ)
-        req_parser.parse()
-
-    with pytest.raises(ParserException):
-        req_parser = rp(test.MALFORMED_SAVE_LEN_NEG_INT_REQ)
-        req_parser.parse()
-
-    with pytest.raises(ParserException):
-        req_parser = rp(test.MALFORMED_SAVE_LEN_NON_INT_REQ)
+        req_parser = rp(filename)
         req_parser.parse()
 
 
