@@ -9,6 +9,7 @@ from cothread.catools import (
     DBR_STRING,
 )
 
+
 # Shared test .req files.
 BLANK_REQ = "testables/req/blank.req"
 INLINE_COMMENTS_REQ = "testables/req/inline_comments.req"
@@ -32,7 +33,6 @@ MULTIPLE_REQ_PATHS_SNAP = "testables/snap/multiple_req_paths.snap"
 LONG_SNAP = "testables/snap/ioc_restore_long.snap"
 VARIETY_SNAP = "testables/snap/type_variety.snap"
 CONTROL_ROOM_TYPES_SNAP = "testables/snap/types.controlroom.snap"
-CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP = "testables/snap/ioc_restore_control_room_types.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = "testables/snap/duplicate_burt_headers.snap"
 MALFORMED_BODY_SNAP = "testables/snap/malformed_body.snap"
@@ -88,6 +88,7 @@ NEG_TOLERANCE_CHECK = "testables/check/neg_tolerance.check"
 NORMAL_CHECK_1 = "testables/check/normal_1.check"
 NORMAL_CHECK_2 = "testables/check/normal_2.check"
 NORMAL_CHECK_3 = "testables/check/normal_3.check"
+
 
 # Tmp snap file to be deleted after a test run.
 TMP_PYBURT_OUT = "test/tmp.snap"

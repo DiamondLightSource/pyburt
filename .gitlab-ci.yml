@@ -16,7 +16,7 @@ Unit tests and coverage:
     - .template_py3_pytest_and_coverage
   variables:
     COVERAGE_ARGS: --cov=burt --cov-report term-missing --cov-fail-under 90
-    TEST_DIR: test
+    TEST_DIR: test/unit
   artifacts:
     paths:
       # Pass on virtualenv, coverage and built docs to following stages

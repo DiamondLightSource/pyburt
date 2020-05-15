@@ -22,18 +22,15 @@ from test import aug_val
 
 
 @mock.patch("burt.read.caget")
-def test_blank_snapshot(mock_caget):
+def test_blank_snapshot(mock_caget, pyburt_tmpfile):
     """Run the burt snapshot against a blank .req file."""
     mock_caget.return_value = cothread.dbr.ca_array(numpy.array([0, 0, 0])).flatten()
     mock_caget.return_value.ok = True
 
-    burt.take_snapshot([test.BLANK_REQ], test.TMP_PYBURT_OUT)
+    burt.take_snapshot([test.BLANK_REQ], pyburt_tmpfile)
 
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
-
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
 
 @mock.patch("burt.read.caget")
@@ -114,7 +111,7 @@ def test_flatten_ca_array(vals, datatype, array_length, requested_length, output
 
 @mock.patch("burt.read.caget")
 @mock.patch("burt.read._get_snap_header_system_vals")
-def test_simple_snapshot(mock_get_vals, mock_caget):
+def test_simple_snapshot(mock_get_vals, mock_caget, pyburt_tmpfile):
     """Run a simple snapshot."""
     singleton_return_value = cothread.dbr.ca_array(numpy.array([2]))
     singleton_return_value[0] = 1
@@ -128,14 +125,10 @@ def test_simple_snapshot(mock_get_vals, mock_caget):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(
-        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
-    )
-    with open(test.TMP_PYBURT_OUT) as f1:
+    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    with open(pyburt_tmpfile) as f1:
         with open(test.SIMPLE_SNAP) as f2:
             assert f1.read() == f2.read()
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
 
 
 def test_burtinter_req_file_prefix_compatability():
@@ -198,10 +191,10 @@ def test_burtinter_req_file_prefix_compatability():
 
 
 @mock.patch("burt.read.caget")
-def test_snapshot_arrays(mock_caget):
+def test_snapshot_arrays(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test of a normal .req file."""
-    # Flattened ndarray is a 12 element list of 40 elements.
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
+    # Caget return value is a 12 element list of arrays of 40 elements.
+    singleton_return_value = cothread.dbr.ca_array((40,), dtype=numpy.uint16)
     singleton_return_value.ok = True
     singleton_return_value.element_count = 40
     singleton_return_value.datatype = DBR_SHORT
@@ -210,16 +203,14 @@ def test_snapshot_arrays(mock_caget):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(
-        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
-    )
+    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
-    snap_parser = sp(test.TMP_PYBURT_OUT)
+    snap_parser = sp(pyburt_tmpfile)
     header, body = snap_parser.parse()
     assert 12 == len(body)
     assert header[sp.TIME_PREFIX]
@@ -268,12 +259,9 @@ def test_snapshot_arrays(mock_caget):
     assert body[11].name == "SR-CS-RING-01:MODE"
     assert len(body[11].vals) == 40
 
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
-
 
 @mock.patch("burt.read.caget")
-def test_snapshot_enum(mock_caget):
+def test_snapshot_enum(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test of a normal .req file.
 
     Including a mocked enum, with spaces.
@@ -295,16 +283,14 @@ def test_snapshot_enum(mock_caget):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(
-        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
-    )
+    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
-    snap_parser = sp(test.TMP_PYBURT_OUT)
+    snap_parser = sp(pyburt_tmpfile)
     header, body = snap_parser.parse()
     assert 12 == len(body)
     assert header[sp.TIME_PREFIX]
@@ -327,12 +313,9 @@ def test_snapshot_enum(mock_caget):
     assert len(body[2].vals) == 1
     assert body[2].vals[0] == "stop filling start beam"
 
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
-
 
 @mock.patch("burt.read.caget")
-def test_snapshot_scalar(mock_caget):
+def test_snapshot_scalar(mock_caget, pyburt_tmpfile):
     """Runs a take snapshot test of a normal .req file with a mocked scalar.
 
     Note that cothread will always return an augmented non scalar value.
@@ -343,16 +326,14 @@ def test_snapshot_scalar(mock_caget):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(
-        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
-    )
+    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
-    snap_parser = sp(test.TMP_PYBURT_OUT)
+    snap_parser = sp(pyburt_tmpfile)
     header, body = snap_parser.parse()
     assert 12 == len(body)
     assert header[sp.TIME_PREFIX]
@@ -396,12 +377,9 @@ def test_snapshot_scalar(mock_caget):
     assert body[11].name == "SR-CS-RING-01:MODE"
     assert len(body[11].vals) == 1
 
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
-
 
 @mock.patch("burt.read.caget")
-def test_snapshot_scalar_failed_pvs_ret(mock_caget):
+def test_snapshot_scalar_failed_pvs_ret(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test of a normal .req file with a mocked scalar.
 
     Test the failed values for validity.
@@ -433,19 +411,19 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget):
     ]
 
     failed_pvs = burt.take_snapshot(
-        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
+        [test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords
     )
 
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
     assert failed_pvs == expected_failed_pvs
 
     # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
+    os.remove(pyburt_tmpfile)
 
 
 @mock.patch("burt.read.caget")
-def test_snapshot_multiple_reqs(mock_caget):
+def test_snapshot_multiple_reqs(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test of a .req file with multiple req paths."""
     singleton_return_value = test.aug_val(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
@@ -455,17 +433,17 @@ def test_snapshot_multiple_reqs(mock_caget):
 
     burt.take_snapshot(
         [test.NORMAL_REQ, test.INLINE_COMMENTS_REQ, test.BLANK_REQ],
-        test.TMP_PYBURT_OUT,
+        pyburt_tmpfile,
         test_comment,
         test_keywords,
     )
 
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
-    snap_parser = sp(test.TMP_PYBURT_OUT)
+    snap_parser = sp(pyburt_tmpfile)
     header, body = snap_parser.parse()
     assert 15 == len(body)
     assert header[sp.TIME_PREFIX]
@@ -522,12 +500,9 @@ def test_snapshot_multiple_reqs(mock_caget):
 
     # Third req file is empty.
 
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
-
 
 @mock.patch("burt.read.caget")
-def test_snapshot_newlines_in_args(mock_caget):
+def test_snapshot_newlines_in_args(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test with newlines in user supplied meta data.
 
     The newlines should appear as is in the .snap file,
@@ -545,40 +520,35 @@ def test_snapshot_newlines_in_args(mock_caget):
     expected_snap_comment = "\\nHello\\r\\n \\nWorld\\r\\n\\r"
     expected_snap_keywords = "\\r\\ncool\\n,\\r\\nsnap,file\\n\\r\\r"
 
-    burt.take_snapshot(
-        [test.NORMAL_REQ], test.TMP_PYBURT_OUT, test_comment, test_keywords
-    )
+    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
-    assert os.path.isfile(test.TMP_PYBURT_OUT)
-    assert os.stat(test.TMP_PYBURT_OUT).st_size != 0
+    assert os.path.isfile(pyburt_tmpfile)
+    assert os.stat(pyburt_tmpfile).st_size != 0
 
     # Reverse parsing should have the correct contents for the independent
     # properties, e.g. keywords, directory, etc.
-    snap_parser = sp(test.TMP_PYBURT_OUT)
+    snap_parser = sp(pyburt_tmpfile)
     header, _ = snap_parser.parse()
 
     assert expected_snap_comment == header[sp.COMMENTS_PREFIX]
     assert expected_snap_keywords == header[sp.KEYWORDS_PREFIX]
 
-    # cleanup
-    os.remove(test.TMP_PYBURT_OUT)
-
 
 @mock.patch("burt.read.caget")
-def test_snapshot_invalid_save_len(mock_caget):
+def test_snapshot_req_file_length_bigger_than_pv(mock_caget, pyburt_tmpfile):
     """Try to save a PV with a length that is greater than the PV data size.
 
     This is a case which would not be caught by the parser.
     """
-    # Flattened ndarray is a 936 element list (mimics SR-DI-PICO-01:BUCKETS).
-    # The requested save length in the .req file is 937.
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 936])).flatten()
+    # Flattened ndarray is a 8 element list.
+    # The requested save length in the .req file is 9.
+    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 8])).flatten()
     singleton_return_value.ok = True
-    singleton_return_value.element_count = 936
+    singleton_return_value.element_count = 8
     mock_caget.return_value = [singleton_return_value]
 
     with pytest.raises(ValueError):
-        burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], test.TMP_PYBURT_OUT)
+        burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
 
 
 @pytest.mark.xfail

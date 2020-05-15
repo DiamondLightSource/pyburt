@@ -46,40 +46,28 @@ def test_inline_comments():
     assert correct_snaps == body[3:]
 
 
-def test_malformed_files():
+@pytest.mark.parametrize(
+    "filename",
+    [
+        test.MISSING_BOTTOM_HEADER_RGR,
+        test.MISSING_TOP_HEADER_RGR,
+        test.MISORDERED_HEADER_RGR,
+        test.DUPLICATE_HEADERS_RGR,
+        test.MALFORMED_HEADER_TYPO_RGR,
+        test.MALFORMED_HEADER_PREFIX_TYPO_RGR,
+        test.MALFORMED_BODY_RGR,
+        test.MALFORMED_BODY_MISORDERED_CHECKS_RGR,
+    ],
+)
+def test_malformed_files(filename):
     """Run the .rgr parser against the malformed .snap files."""
     with pytest.raises(ParserException):
-        rgr_parser = rp(test.MISSING_BOTTOM_HEADER_RGR)
+        rgr_parser = rp(filename)
         rgr_parser.parse()
 
-    with pytest.raises(ParserException):
-        rgr_parser = rp(test.MISSING_TOP_HEADER_RGR)
-        rgr_parser.parse()
 
-    with pytest.raises(ParserException):
-        rgr_parser = rp(test.MISORDERED_HEADER_RGR)
-        rgr_parser.parse()
-
-    with pytest.raises(ParserException):
-        rgr_parser = rp(test.DUPLICATE_HEADERS_RGR)
-        rgr_parser.parse()
-
-    with pytest.raises(ParserException):
-        rgr_parser = rp(test.MALFORMED_HEADER_TYPO_RGR)
-        rgr_parser.parse()
-
-    with pytest.raises(ParserException):
-        rgr_parser = rp(test.MALFORMED_HEADER_PREFIX_TYPO_RGR)
-        rgr_parser.parse()
-
-    with pytest.raises(ParserException):
-        rgr_parser = rp(test.MALFORMED_BODY_RGR)
-        rgr_parser.parse()
-
-    with pytest.raises(ParserException):
-        rgr_parser = rp(test.MALFORMED_BODY_MISORDERED_CHECKS_RGR)
-        rgr_parser.parse()
-
+def test_malformed_but_valid_file():
+    """Run the .rgr parser against a malformed but valid file."""
     # Entries should still be parsed fine as header is valid, but values could
     # be problematic.
     rgr_parser = rp(test.MALFORMED_HEADER_ENTRIES_RGR)

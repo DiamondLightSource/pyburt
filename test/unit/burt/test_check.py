@@ -1,5 +1,4 @@
 """Various tests for the check file functionality."""
-import cothread
 import mock
 import pytest
 
@@ -7,19 +6,14 @@ import burt
 import test
 
 
-@mock.patch("burt.checks.caget")
-def test_bad_file_arguments(mock_caget):
+@pytest.mark.parametrize(
+    "filename",
+    ["", "helloworld.req", "helloworld.chk", "/tmp/no_such_folder/helloworld.check"],
+)
+def test_bad_file_arguments(filename):
     """Run the check against a case where the file arguments are malformed."""
-    mock_caget.return_value = cothread.catools.ca_nothing
-
     with pytest.raises(ValueError):
-        burt.check("")
-    with pytest.raises(ValueError):
-        burt.check("helloworld.req")
-    with pytest.raises(ValueError):
-        burt.check("helloworld.chk")
-    with pytest.raises(ValueError):
-        burt.check("/tmp/no_such_folder/helloworld.check")
+        burt.check(filename)
 
 
 @mock.patch("burt.checks.caget")
