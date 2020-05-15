@@ -3,7 +3,6 @@ import os
 
 import cothread
 import mock
-import numpy
 import pytest
 from cothread.catools import (
     DBR_CHAR,
