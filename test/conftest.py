@@ -1,8 +1,9 @@
-import test
+"""Test fixtures."""
+import os
 
 import pytest
 
-import os
+import test
 
 
 @pytest.fixture

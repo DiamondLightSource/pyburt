@@ -8,8 +8,8 @@ import pytest
 
 import burt
 import test
-from test import integration
 from burt import SnapParser as sp
+from test import integration
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ

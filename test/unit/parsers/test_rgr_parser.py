@@ -67,6 +67,7 @@ def test_malformed_files(filename):
 
 
 def test_malformed_but_valid_file():
+    """Run the .rgr parser against a malformed but valid file."""
     # Entries should still be parsed fine as header is valid, but values could
     # be problematic.
     rgr_parser = rp(test.MALFORMED_HEADER_ENTRIES_RGR)

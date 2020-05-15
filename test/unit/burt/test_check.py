@@ -1,5 +1,4 @@
 """Various tests for the check file functionality."""
-import cothread
 import mock
 import pytest
 
