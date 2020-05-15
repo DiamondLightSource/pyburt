@@ -24,6 +24,14 @@ record (waveform, "SR-CS-SOFT-01:DOUBLE_ARR")
     field (PINI, "YES")
     field (DISS, "3")
 }
+# Double waveform - remains uninitialised during testing.
+record (waveform, "SR-CS-SOFT-01:DOUBLE_ARR_UNINIT")
+{
+    field (NELM, "8")
+    field (FTVL, "DOUBLE")
+    field (PINI, "YES")
+    field (DISS, "3")
+}
 # Float waveform (no simple float record)
 record (waveform, "SR-CS-SOFT-01:FLOAT_ARR")
 {
@@ -89,6 +97,14 @@ record(longout, "SR-CS-SOFT-01:LONGOUT") {
 }
 # Long waveform
 record (waveform, "SR-CS-SOFT-01:LONG_ARR")
+{
+    field (NELM, "8")
+    field (FTVL, "LONG")
+    field (PINI, "YES")
+    field (DISS, "3")
+}
+# Long waveform - remains uninitialised during testing
+record (waveform, "SR-CS-SOFT-01:LONG_ARR_UNINIT")
 {
     field (NELM, "8")
     field (FTVL, "LONG")

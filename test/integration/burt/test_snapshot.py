@@ -15,6 +15,21 @@ from test import integration
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 
 
+DOUBLE_ZERO_STR = "0.000000000000000e+00"
+NULL_STR = "\\0"
+
+
+def test_snapshot_uninitialised_array(pyburt_tmpfile):
+    """Run a snapshot against uninitialised arrays."""
+    burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    header, body = snap_parser.parse()
+    double_array_entry = body[0]
+    assert all(val == DOUBLE_ZERO_STR for val in double_array_entry.vals)
+    long_array_entry = body[1]
+    assert all(val == NULL_STR for val in long_array_entry.vals)
+
+
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_snapshot_normal(pyburt_tmpfile):
     """Take a snapshot of a normal .req file that specifies DLS PVs."""
