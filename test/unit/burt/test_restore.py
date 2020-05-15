@@ -20,6 +20,7 @@ import test
 from burt.parsers import ParserException, SnapParser
 from burt.write import _snap_entry_to_ca_type
 
+
 INT_CHANNEL_TYPES = (DBR_SHORT, DBR_LONG)
 STR_CHANNEL_TYPES = (DBR_STRING, DBR_ENUM_STR)
 

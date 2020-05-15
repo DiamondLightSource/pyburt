@@ -21,16 +21,6 @@ from burt.read import _flatten_ca_array, _format_ca_reading
 from test import aug_val
 
 
-@pytest.fixture
-def pyburt_tmpfile():
-    """Temporary file used by Pyburt."""
-    yield test.TMP_PYBURT_OUT
-    try:
-        os.remove(test.TMP_PYBURT_OUT)
-    except FileNotFoundError:
-        pass
-
-
 @mock.patch("burt.read.caget")
 def test_blank_snapshot(mock_caget, pyburt_tmpfile):
     """Run the burt snapshot against a blank .req file."""

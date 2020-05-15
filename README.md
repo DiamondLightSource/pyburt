@@ -110,7 +110,7 @@ To run the core pytest unit tests:
 
 ```bash
 $ pipenv shell
-$ pytest -vv test
+$ pytest -vv test/unit
 ```
 
 Note: the unit tests should be run from the root project directory.
@@ -123,7 +123,7 @@ and restore operations against known Diamond and Pytac PV's. See
 
 Note that running pytest against `integration` without running the test IOC
  first,
-as described in `integration/README.md`, will cause the tests to
+as described in `test/integration/README.md`, will cause the tests to
 fail.
 
 ## Developing outside Diamond

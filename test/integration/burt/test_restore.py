@@ -9,8 +9,8 @@ import pytest
 from cothread.catools import caget, caput
 
 import burt
-import integration
 import test
+from test import integration
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
@@ -136,7 +136,7 @@ def test_various_types_restore():
     caput(integration.IOC_LOCAL_PV_ARR_CHAR, "dummy")
 
     # Execute the restore.
-    burt.restore(test.CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP)
+    burt.restore(integration.CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP)
 
     pv_long = caget(integration.IOC_LOCAL_PV_LONG)
     pv_double = caget(integration.IOC_LOCAL_PV_DBL)

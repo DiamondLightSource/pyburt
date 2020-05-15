@@ -11,6 +11,7 @@ LONG_SNAP = "testables/snap/ioc_restore_long.snap"
 ENUM_SNAP = "testables/snap/ioc_restore_enum.snap"
 STRING_SNAP = "testables/snap/ioc_restore_string.snap"
 BCDORBIT_SNAP = "testables/snap/ioc_restore_bcdorbit.snap"
+CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP = "testables/snap/ioc_restore_control_room_types.snap"
 
 # The local running PVs initialized with the local_ioc.py script.
 IOC_LOCAL_PV_FLOAT = "SR-CS-SOFT-01:AI"
@@ -32,7 +33,3 @@ IOC_LOCAL_PV_ARR_CHAR = "SR-CS-SOFT-01:CHAR_ARR"
 
 IOC_LOCAL_PV_SHORT = "SR-CS-SOFT-01:TESTPV_SHORT"
 IOC_LOCAL_PV_ARR_SHORT = "SR-CS-SOFT-01:SHORT_ARR"
-
-# Tmp files.
-TMP_BURT_OUT = "integration/tmp_burt.snap"
-TMP_PYBURT_OUT = "integration/tmp_pyburt.snap"

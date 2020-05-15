@@ -7,32 +7,12 @@ import time
 import pytest
 
 import burt
-import integration
 import test
+from test import integration
 from burt import SnapParser as sp
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
-
-
-@pytest.fixture
-def burt_tmpfile():
-    """Temporary file used by Burt."""
-    yield integration.TMP_BURT_OUT
-    try:
-        os.remove(integration.TMP_BURT_OUT)
-    except FileNotFoundError:
-        pass
-
-
-@pytest.fixture
-def pyburt_tmpfile():
-    """Temporary file used by Pyburt."""
-    yield integration.TMP_PYBURT_OUT
-    try:
-        os.remove(integration.TMP_PYBURT_OUT)
-    except FileNotFoundError:
-        pass
 
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
