@@ -109,7 +109,7 @@ def test_snapshot_req_file_length_bigger_than_pv(pyburt_tmpfile):
         burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
 
 
-@pytest.mark.xfail  # The output is no long exactly the Ysame.
+@pytest.mark.xfail  # The output is no longer exactly the same.
 def test_burt_vanilla_rb(burt_tmpfile, pyburt_tmpfile):
     """Compare vanilla BURT against pyburt snapshots."""
     comment = "Hello World"
@@ -203,9 +203,10 @@ def test_various_types_against_burt(pyburt_tmpfile):
             assert pyburt_out_str.strip().lower() == burt_out_str.strip().lower()
 
 
+@pytest.mark.skip  # take_snapshot_group is not yet implemented
 def test_speed_snapshot_group():
     """Speed comparison between different snapshot group schemes."""
-    pass
+    assert False
 
 
 def _vanilla_burtrb(input_req, output_snap, comments, keywords):

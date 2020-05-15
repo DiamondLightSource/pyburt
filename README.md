@@ -119,10 +119,10 @@ Note: the unit tests should be run from the root project directory.
 
 There are separate DLS integration tests for pyburt. These tests run snapshot
 and restore operations against known Diamond and Pytac PV's. See 
-`integration/README.md` for instructions.
+`test/integration/README.md` for instructions.
 
-Note that running pytest against `integration` without running the test IOC
- first,
+Note that running pytest against `test/integration` without running the test
+IOC first,
 as described in `test/integration/README.md`, will cause the tests to
 fail.
 

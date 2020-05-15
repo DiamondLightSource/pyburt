@@ -1,15 +1,12 @@
 # DLS integration tests for pyburt
 
-Listed below are a set of instructions for running the DLS integration tests 
+Listed below are a set of instructions for running the DLS integration tests
 for the **snapshot** and
 **restore** functionality of **pyburt**.
 
-## Soft IOCs
-There are two soft IOCs included in this directory:
+## Soft IOC
 
-### softioc.db
-
-This contains all the types of PVs that Pyburt can handle. There is also
+`softioc.db` contains all the types of PVs that Pyburt can handle. There is also
 `softioc.req` and `softioc.burt.snap`, which shows how the original Burt
 saves these values. To run this IOC
 
@@ -19,8 +16,8 @@ softIoc -d softioc.db
 
 ## Integration tests.
 
-These involves running an IOC server which hosts a local IOC `SR-CS-TEST-01` and 
-performing snapshots on DLS PV's, as well as restore operations on some `.snap` files 
+These involves running an IOC server which hosts a local IOC `SR-CS-TEST-01` and
+performing snapshots on DLS PV's, as well as restore operations on some `.snap` files
 which write to the below PV's:
 
 ```
@@ -39,7 +36,7 @@ SR-CS-TEST-01:TESTPV_SHORT
 SR-CS-TEST-01:TESTPV_ARR_SHORT
 ```
 
-It also involves doing some comparison tests against the vanilla BURT outputs, which 
+It also involves doing some comparison tests against the vanilla BURT outputs, which
 requires running BURT on a set of `.req` and `.snap` files.
 
 ## Test Steps
@@ -50,44 +47,53 @@ requires running BURT on a set of `.req` and `.snap` files.
 $ pwd
 .../pyburt
 
-$ integration/local_ioc.py
+$ softIoc -d test/integration/softioc.db
+dbLoadDatabase("/home/will/code/epics-base/bin/linux-x86_64/../../dbd/softIoc.dbd")
+softIoc_registerRecordDeviceDriver(pdbbase)
+dbLoadRecords("test/integration/softioc.db")
+iocInit()
 Starting iocInit
 ############################################################################
-## EPICS R3.14.12.3 $Date: Mon 2012-12-17 14:11:47 -0600$
-## EPICS Base built Nov  8 2018
+## EPICS R7.0.3.2-DEV
+## Rev. R7.0.3.1-220-g514962724234c0777a42
 ############################################################################
 iocRun: All initialization complete
-Python 2.7.3 (default, Jan 18 2013, 21:33:46) 
-[GCC 4.4.6 20120305 (Red Hat 4.4.6-4)] on linux2
-Type "help", "copyright", "credits" or "license" for more information.
-(InteractiveConsole)
->>> 
+epics>
 ```
-2.) In a separate terminal, run the pytest integration tests via `pytest -vv
- integration`. This will perform some BURT restore calls on the test IOC 
- server, some snapshot tests on real PVs at DLS, as well
- as comparison tests against vanilla BURT.
+
+2.) In a separate terminal, run the pytest integration tests via `pipenv run python -m pytest test/integration`.
+This will perform some BURT restore calls on the test IOC
+server, some snapshot tests on real PVs at DLS, as well
+as comparison tests against vanilla BURT.
 
 Observe the output and check that all tests pass. This may take several seconds to complete:
 
 ```bash
 $ pwd
-.../pyburtgit
+.../pyburt
 
-$ pytest -vv integration
-=============================================================================================== test session starts ===============================================================================================
-platform linux2 -- Python 2.7.13, pytest-4.3.1, py-1.8.0, pluggy-0.9.0 -- /scratch/tph19377/EPICS_REPOS/pyburt/venv/bin/dls-python
+$ pipenv run python -m pytest -vv test/integration
+========================================== test session starts ==========================================
+platform linux -- Python 3.6.9, pytest-5.0.0, py-1.8.0, pluggy-0.12.0 -- /home/will/.local/share/virtualenvs/pyburt-6wgA0aKN/bin/python
 cachedir: .pytest_cache
-rootdir: /scratch/tph19377/EPICS_REPOS/pyburt, inifile:
-plugins: cov-2.6.1
-collected 6 items                                                                                                                                                                                                 
+rootdir: /home/will/code/pyburt
+plugins: cov-2.7.1
+collected 14 items
 
-integration/burt/test_restore.py::test_restore PASSED                                                                                                                                                       [ 16%]
-integration/burt/test_restore.py::test_restore_group PASSED                                                                                                                                                 [ 33%]
-integration/burt/test_snapshot.py::test_snapshot_normal PASSED                                                                                                                                              [ 50%]
-integration/burt/test_snapshot.py::test_snapshot_group_normal PASSED                                                                                                                                        [ 66%]
-integration/burt/test_snapshot.py::test_snapshot_invalid_save_len PASSED                                                                                                                                    [ 83%]
-integration/burt/test_snapshot.py::test_burt_vanilla_rb PASSED                                                                                                                                              [100%]
+test/integration/burt/test_restore.py::test_restore PASSED                                        [  7%]
+test/integration/burt/test_restore.py::test_restore_long PASSED                                   [ 14%]
+test/integration/burt/test_restore.py::test_restore_string PASSED                                 [ 21%]
+test/integration/burt/test_restore.py::test_restore_enum err PASSED                               [ 28%]
+test/integration/burt/test_restore.py::test_restore_group PASSED                                  [ 35%]
+test/integration/burt/test_restore.py::test_speed_restore SKIPPED                                 [ 42%]
+test/integration/burt/test_restore.py::test_various_types_restore PASSED                          [ 50%]
+test/integration/burt/test_snapshot.py::test_snapshot_normal SKIPPED                              [ 57%]
+test/integration/burt/test_snapshot.py::test_snapshot_group_normal XFAIL                          [ 64%]
+test/integration/burt/test_snapshot.py::test_snapshot_req_file_length_bigger_than_pv PASSED       [ 71%]
+test/integration/burt/test_snapshot.py::test_burt_vanilla_rb XFAIL                                [ 78%]
+test/integration/burt/test_snapshot.py::test_speed_snapshot SKIPPED                               [ 85%]
+test/integration/burt/test_snapshot.py::test_various_types_against_burt SKIPPED                   [ 92%]
+test/integration/burt/test_snapshot.py::test_speed_snapshot_group SKIPPED                         [100%]
 
-============================================================================================ 6 passed in 19.62 seconds ============================================================================================
+============================ 7 passed, 5 skipped, 2 xfailed in 0.59 seconds =============================
 ```
