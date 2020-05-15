@@ -1,0 +1,12 @@
+--- Start BURT header
+Time:      Fri May 15 16:57:50 2020
+Login ID:  will ("",,,)
+Eff  UID:  1000
+Group ID:  1000
+Keywords:  
+Comments:  
+Type:      Absolute
+Directory: /home/will/code/pyburt
+Req File: testables/req/array.req
+--- End BURT header
+SR-CS-SOFT-01:LONG_ARR 8 \0 \0 \0 \0 \0 \0 \0 \0

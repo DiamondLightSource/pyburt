@@ -221,7 +221,9 @@ def test_restore_group_normal(mock_connect, mock_caput):
         (5, ["2", "3", "1", "\0", "\0"], DBR_DOUBLE, [2.0, 3.0, 1.0]),
         (1, ["A"], DBR_CHAR, 65),
         (3, ["A", "B", "\0"], DBR_CHAR, [65, 66]),
-        (3, ["\0", "\0", "\0"], DBR_CHAR, []),
+        # We can't restore empty lists, so if completely null then
+        # we restore all zeros.
+        (3, ["\0", "\0", "\0"], DBR_CHAR, [0, 0, 0]),
     ],
 )
 def test_snap_entry_to_ca_type(length, values, datatype, result):

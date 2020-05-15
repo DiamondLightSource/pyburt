@@ -304,8 +304,10 @@ def _gen_snap_footer(ca_readings, pv_entries):
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
         if ca_reading.element_count > 1 and len(ca_reading) == 0:
-            _logger.warning(f"Uninitialised array {pv_entry.name}")
-            _logger.warning("This PV cannot be restored to its uniitialised state.")
+            _logger.warning(f"Uninitialised array PV {pv_entry.name}.")
+            _logger.warning(
+                "It will not be possible to restore this PV to its uninitialised state."
+            )
         try:
             length, ca_reading_str = _ca_val_to_snap_entry(
                 ca_reading, pv_entry.save_len

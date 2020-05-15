@@ -5,6 +5,7 @@ import subprocess
 import time
 from random import randint
 
+import numpy
 import pytest
 from cothread.catools import caget, caput
 
@@ -79,6 +80,14 @@ def test_restore_enum():
     burt.restore(integration.ENUM_SNAP)
     # Gets the numeric value.
     assert caget(integration.IOC_LOCAL_PV_ENUM) == 1
+
+
+def test_restore_null_array():
+    """Check that all nulls in a snap file is restored to all 0s."""
+    # Ensure IOC start value is not zeros.
+    caput(integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3])
+    burt.restore(integration.NULL_ARRAY_SNAP)
+    assert numpy.all(caget(integration.IOC_LOCAL_PV_ARR_LONG) == 0)
 
 
 def test_restore_group():

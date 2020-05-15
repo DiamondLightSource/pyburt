@@ -220,9 +220,14 @@ def _snap_entry_to_ca_type(
     pv_entry: SnapParser.SNAP_PV, datatype: int
 ) -> Union[CaValue, List[CaValue]]:
     """Coerce the correct ca type from the channel type."""
-    # Non CA array case.
+    # Array value.
     if pv_entry.dtype_len > 1:
         converted_vals = [_convert_to_ca_type(val, datatype) for val in pv_entry.vals]
+        # There is no way to reset an array to completely uninitialised.
+        if all(val is None for val in converted_vals):
+            logging.warning(f"Snap entry for array {pv_entry.name} is all null.")
+            logging.warning("All elements will be set to zero")
+            converted_vals = [0] * pv_entry.dtype_len
         if None in converted_vals:
             stripped_converted_vals = converted_vals[: converted_vals.index(None)]
         else:
@@ -230,7 +235,7 @@ def _snap_entry_to_ca_type(
 
         # Tell Mypy that we have removed the Nones.
         return cast(List[CaValue], stripped_converted_vals)
-
+    # Scalar value
     else:
         converted_val = _convert_to_ca_type(pv_entry.vals[0], datatype)
 
