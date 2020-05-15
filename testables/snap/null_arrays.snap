@@ -10,3 +10,4 @@ Directory: /home/will/code/pyburt
 Req File: testables/req/array.req
 --- End BURT header
 SR-CS-SOFT-01:LONG_ARR 8 \0 \0 \0 \0 \0 \0 \0 \0
+SR-CS-SOFT-01:STRING_ARR 3 \0 \0 \0

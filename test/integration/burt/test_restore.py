@@ -82,12 +82,20 @@ def test_restore_enum():
     assert caget(integration.IOC_LOCAL_PV_ENUM) == 1
 
 
-def test_restore_null_array():
+def test_restore_null_long_array():
     """Check that all nulls in a snap file is restored to all 0s."""
     # Ensure IOC start value is not zeros.
     caput(integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3])
     burt.restore(integration.NULL_ARRAY_SNAP)
     assert numpy.all(caget(integration.IOC_LOCAL_PV_ARR_LONG) == 0)
+
+
+def test_restore_null_string_array():
+    """Check that all nulls in a snap file is restored to all 0s."""
+    # Ensure IOC start value is not zeros.
+    caput(integration.IOC_LOCAL_PV_ARR_STR, ["one", "two", "three"])
+    burt.restore(integration.NULL_ARRAY_SNAP)
+    assert numpy.all(caget(integration.IOC_LOCAL_PV_ARR_STR) == "")
 
 
 def test_restore_group():

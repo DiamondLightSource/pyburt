@@ -225,9 +225,14 @@ def _snap_entry_to_ca_type(
         converted_vals = [_convert_to_ca_type(val, datatype) for val in pv_entry.vals]
         # There is no way to reset an array to completely uninitialised.
         if all(val is None for val in converted_vals):
-            logging.warning(f"Snap entry for array {pv_entry.name} is all null.")
-            logging.warning("All elements will be set to zero")
-            converted_vals = [0] * pv_entry.dtype_len
+            if datatype == DBR_STRING:
+                logging.warning(f"Snap entry for array {pv_entry.name} is all null.")
+                logging.warning("All elements will be set to an empty string.")
+                converted_vals = [""] * pv_entry.dtype_len
+            else:
+                logging.warning(f"Snap entry for array {pv_entry.name} is all null.")
+                logging.warning("All elements will be set to zero")
+                converted_vals = [0] * pv_entry.dtype_len
         if None in converted_vals:
             stripped_converted_vals = converted_vals[: converted_vals.index(None)]
         else:
