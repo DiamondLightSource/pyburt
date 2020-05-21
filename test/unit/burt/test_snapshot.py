@@ -133,16 +133,11 @@ def test_simple_snapshot(mock_get_vals, mock_caget, pyburt_tmpfile):
 
 def test_burtinter_req_file_prefix_compatability():
     """Test the header logic from the old burtinter."""
-    import logging
-
     test_pyburt_header_1 = burt.read._gen_snap_header(
-        ["/home/DUMMY.req"], "dummy", "dummy", logging.getLogger()
+        ["/home/DUMMY.req"], "dummy", "dummy"
     )
     test_pyburt_header_2 = burt.read._gen_snap_header(
-        ["/home/DUMMY.req", "/home/DUMMY2.req", "/home/DUMMY3.req"],
-        "dummy",
-        "dummy",
-        logging.getLogger(),
+        ["/home/DUMMY.req", "/home/DUMMY2.req", "/home/DUMMY3.req"], "dummy", "dummy"
     )
 
     bad_req_entry_1 = "Req File:  /home/space.req"

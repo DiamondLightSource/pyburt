@@ -17,6 +17,7 @@ restore operation proceeding. It is used for bulk restoring of PVs.
 """
 import argparse
 import logging
+import os
 import sys
 from collections import OrderedDict
 from typing import Any, cast, Dict, List, Optional, Union
@@ -41,7 +42,7 @@ from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_fi
 CaValue = Union[str, int, float]
 
 
-def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
+def restore(snap_file: str) -> List[str]:
     """Restores the state of the PVs in the .snap file.
 
     This function does nothing for PVs marked with RO or RON specifiers.
@@ -55,7 +56,6 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
     Args:
         snap_file (str): The path to the .snap file.
-        _logger (logging.Logger): Internal logger, do not override.
 
     Returns:
         list(str): The list of pvs which failed to be caput-ed to.
@@ -68,7 +68,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     if not is_snap_file(snap_file, True):
         raise ValueError(f"Invalid .snap file {snap_file}.")
 
-    pvs = _get_pvs_in_snap(snap_file, _logger)
+    pvs = _get_pvs_in_snap(snap_file)
 
     # Improve performance by putting all at once later on.
     pvs_to_restore: Dict[str, Any] = OrderedDict()
@@ -80,14 +80,14 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     pvs_to_restore = OrderedDict()
 
     for pv_entry, ca_info in zip(pvs, ca_infos):
-        if _is_write_instr(pv_entry, _logger):
+        if _is_write_instr(pv_entry):
             if not ca_info.ok:
-                _logger.warning(f"PV invalid, skipping: {ca_info}")
+                logging.warning(f"PV invalid, skipping: {ca_info}")
             else:
                 pvs_to_restore[pv_entry.name] = _snap_entry_to_ca_type(
                     pv_entry, ca_info.datatype
                 )
-                _logger.debug(f"Restoring PVs: {pvs_to_restore}.")
+                logging.debug(f"Restoring PVs: {pvs_to_restore}.")
 
     failed_pvs = []
     return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
@@ -99,9 +99,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
     return failed_pvs
 
 
-def restore_group(
-    rgr_file: str, check: bool = True, _logger=logging.getLogger()
-) -> List[str]:
+def restore_group(rgr_file: str, check: bool = True) -> List[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
@@ -109,7 +107,6 @@ def restore_group(
     Args:
         rgr_file (str): The path to the .rgr file.
         check (bool): Whether to inspect .check files or not.
-        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         list(str): The list of pvs which failed to be caput-ed to.
@@ -124,7 +121,7 @@ def restore_group(
 
     rgr_parser = burt.RgrParser(rgr_file)
     _, body = rgr_parser.parse()
-    _logger.debug(f"Parsed .snap files: {body}")
+    logging.debug(f"Parsed .snap files: {body}")
 
     all_failed_pvs = []
     for file_path in body:
@@ -156,18 +153,20 @@ def main():
 
     logconfig.setup_logging(log_file_path=args.l)
 
+    if "DLS_EPICS_RELEASE" in os.environ:
+        # Add graylog if running inside DLS.
+        logging.getLogger().addHandler(logconfig.get_graylog_handler())
+
     if args.l:
-        restore_logger = logging.getLogger("console_entry_with_logfile")
-    else:
-        restore_logger = logging.getLogger("console_entry")
+        logging.getLogger().addHandler(logconfig.get_logfile_handler(args.l))
 
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
 
     if is_snap_file(args.restore_file):
-        failed_pvs = restore(args.restore_file, restore_logger)
+        failed_pvs = restore(args.restore_file)
     elif is_rgr_file(args.restore_file):
-        failed_pvs = restore_group(args.restore_file, _logger=restore_logger)
+        failed_pvs = restore_group(args.restore_file)
     else:
         logging.critical(f"Invalid restore file argument {args.restore_file}.")
         sys.exit(1)
@@ -179,12 +178,11 @@ def main():
         sys.exit(1)
 
 
-def _is_write_instr(pv_entry: SnapParser.SNAP_PV, _logger) -> bool:
+def _is_write_instr(pv_entry: SnapParser.SNAP_PV) -> bool:
     """Check pv modifier prefix for write/no write instructions.
 
     Args:
         pv_entry: PV currently being checked.
-        _logger: Internal logger, do not override.
 
     Returns:
         True if writing to PV, False if flagged otherwise.
@@ -193,26 +191,26 @@ def _is_write_instr(pv_entry: SnapParser.SNAP_PV, _logger) -> bool:
 
     if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
         # TODO: write to the no write snapshot file
-        _logger.warning("RON type PVs currently unimplemented.")
+        logging.warning("RON type PVs currently unimplemented.")
         ret = False
 
     elif pv_entry.modifier == burt.READONLY_SPECIFIER:
-        _logger.debug(f"Readonly PV {pv_entry.name}. Skipping write.")
+        logging.debug(f"Readonly PV {pv_entry.name}. Skipping write.")
         ret = False
 
     elif pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
         # TODO: write the "correct" value, not the saved ones.
-        _logger.warning("WO type PVs currently unimplemented.")
+        logging.warning("WO type PVs currently unimplemented.")
         ret = True
 
     return ret
 
 
-def _get_pvs_in_snap(snap_file, _logger):
+def _get_pvs_in_snap(snap_file):
     """Parse and extract the PV entries in a snap file."""
     snap_parser = SnapParser(snap_file)
     _, body = snap_parser.parse()
-    _logger.debug(f"Parsed .snap PVs: {body}")
+    logging.debug(f"Parsed .snap PVs: {body}")
     return body
 
 
