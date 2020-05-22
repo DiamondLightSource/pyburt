@@ -19,5 +19,5 @@ SR-CS-SOFT-01:STRINGIN 1 \0
 % No way to create a scalar short PV in a soft IOC.
 % SR-CS-SOFT-01:TESTPV_SHORT 1 0
 % It doesn't appear that Burt would create the below string.
-SR-CS-SOFT-01:CHAR_ARR 20 U s e r " " B e a m " " t i m e
+SR-CS-SOFT-01:CHAR_ARR 20 H i " " L o !
 SR-CS-SOFT-01:SHORT_ARR 3 4368.0000 \0 \0

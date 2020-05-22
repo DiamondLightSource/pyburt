@@ -40,6 +40,14 @@ record (waveform, "SR-CS-SOFT-01:FLOAT_ARR")
     field (PINI, "YES")
     field (DISS, "3")
 }
+# Float waveform - remains uninitialised during testing
+record (waveform, "SR-CS-SOFT-01:FLOAT_ARR_UNINIT")
+{
+    field (NELM, "8")
+    field (FTVL, "FLOAT")
+    field (PINI, "YES")
+    field (DISS, "3")
+}
 # Empty string
 record(stringin, "SR-CS-SOFT-01:EMPTYSTRING") {
 }
@@ -58,7 +66,15 @@ record(stringout, "SR-CS-SOFT-01:STRINGOUT") {
 # String waveform
 record (waveform, "SR-CS-SOFT-01:STRING_ARR")
 {
-    field (NELM, "3")
+    field (NELM, "8")
+    field (FTVL, "STRING")
+    field (PINI, "YES")
+    field (DISS, "3")
+}
+# String waveform - remains uninitialised during testing
+record (waveform, "SR-CS-SOFT-01:STRING_ARR_UNINIT")
+{
+    field (NELM, "8")
     field (FTVL, "STRING")
     field (PINI, "YES")
     field (DISS, "3")
@@ -66,7 +82,15 @@ record (waveform, "SR-CS-SOFT-01:STRING_ARR")
 # Char waveform (no simple char record)
 record (waveform, "SR-CS-SOFT-01:CHAR_ARR")
 {
-    field (NELM, "20")
+    field (NELM, "8")
+    field (FTVL, "CHAR")
+    field (PINI, "YES")
+    field (DISS, "3")
+}
+# Char waveform - remains uninitialised during testing
+record (waveform, "SR-CS-SOFT-01:CHAR_ARR_UNINIT")
+{
+    field (NELM, "8")
     field (FTVL, "CHAR")
     field (PINI, "YES")
     field (DISS, "3")

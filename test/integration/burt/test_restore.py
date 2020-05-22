@@ -165,7 +165,7 @@ def test_various_types_restore():
     pv_arr_short = caget(integration.IOC_LOCAL_PV_ARR_SHORT)
 
     # Note the curious format in the snap file for this PV.
-    for a, b in itertools.zip_longest(pv_arr_char, "User Beam time"):
+    for a, b in itertools.zip_longest(pv_arr_char, "Hi Lo!"):
         print(f"{a} {b}")
         assert a == ord(b)
 

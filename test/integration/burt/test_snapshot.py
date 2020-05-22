@@ -5,6 +5,7 @@ import subprocess
 import time
 
 import pytest
+from cothread.catools import caput
 
 import burt
 import test
@@ -16,18 +17,80 @@ NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 
 
 DOUBLE_ZERO_STR = "0.000000000000000e+00"
+FLOAT_ZERO_STR = "0.000000e+00"
 NULL_STR = "\\0"
 
 
-def test_snapshot_uninitialised_array(pyburt_tmpfile):
+@pytest.mark.parametrize(
+    "index,null_value",
+    [
+        (0, NULL_STR),
+        (1, DOUBLE_ZERO_STR),
+        (2, FLOAT_ZERO_STR),
+        (3, NULL_STR),
+        (4, NULL_STR),
+    ],
+)
+def test_snapshot_uninitialised_array_compat(index, null_value, pyburt_tmpfile):
+    """Run a snapshot against uninitialised arrays."""
+    burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile, compat=True)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    _, body = snap_parser.parse()
+    array_entry = body[index]
+    assert all(val == null_value for val in array_entry.vals)
+
+
+@pytest.mark.parametrize(
+    "index,null_value",
+    [(0, NULL_STR), (1, NULL_STR), (2, NULL_STR), (3, NULL_STR), (4, NULL_STR)],
+)
+def test_snapshot_uninitialised_array_no_compat(index, null_value, pyburt_tmpfile):
     """Run a snapshot against uninitialised arrays."""
     burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile)
     snap_parser = burt.SnapParser(pyburt_tmpfile)
     _, body = snap_parser.parse()
-    double_array_entry = body[0]
-    assert all(val == DOUBLE_ZERO_STR for val in double_array_entry.vals)
-    long_array_entry = body[1]
-    assert all(val == NULL_STR for val in long_array_entry.vals)
+    array_entry = body[index]
+    assert all(val == null_value for val in array_entry.vals)
+
+
+@pytest.mark.parametrize("compat", [True, False])
+def test_snapshot_partial_array(pyburt_tmpfile, compat):
+    """Run a snapshot against uninitialised arrays.
+    
+    Parameterising this fully proved too fiddly.
+    
+    """
+    # Define the expected compatibility behaviour.
+    DOUBLE_NULL = DOUBLE_ZERO_STR if compat else NULL_STR
+    FLOAT_NULL = FLOAT_ZERO_STR if compat else NULL_STR
+
+    caput(integration.IOC_LOCAL_PV_ARR_CHAR, [1, 2, 3])
+    caput(integration.IOC_LOCAL_PV_ARR_DBL, [1.1, 2.2, 3.3])
+    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, [1.1, 2.2, 3.3])
+    caput(integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3])
+    caput(integration.IOC_LOCAL_PV_ARR_STR, ["x", "y", "z"])
+    burt.take_snapshot([integration.ARR_REQ], "out.snap", compat=compat)
+    snap_parser = burt.SnapParser("out.snap")
+    _, body = snap_parser.parse()
+    char_array_entry = body[5]
+    char_expected = ["\x01", "\x02", "\x03"] + [NULL_STR] * 5
+    assert char_array_entry.vals == char_expected
+    double_array_entry = body[6]
+    double_expected = [
+        "1.100000000000000e+00",
+        "2.200000000000000e+00",
+        "3.300000000000000e+00",
+    ] + [DOUBLE_NULL] * 5
+    assert double_array_entry.vals == double_expected
+    float_array_entry = body[7]
+    float_expected = ["1.100000e+00", "2.200000e+00", "3.300000e+00"] + [FLOAT_NULL] * 5
+    assert float_array_entry.vals == float_expected
+    long_array_entry = body[8]
+    long_expected = ["1", "2", "3"] + [NULL_STR] * 5
+    assert long_array_entry.vals == long_expected
+    str_array_entry = body[9]
+    str_expected = ["x", "y", "z"] + [NULL_STR] * 5
+    assert str_array_entry.vals == str_expected
 
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
