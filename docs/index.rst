@@ -3,8 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to pyburt's documentation!
-==================================
+Pyburt
+======
+
+Pyburt is a simple Python package used for saving and restoring
+values of EPICS PVs.
 
 .. toctree::
    :maxdepth: 2

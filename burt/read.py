@@ -59,15 +59,15 @@ def take_snapshot(
     will be appended to the given snap file one after the other.
 
     Args:
-        req_files (iterable): An iterable of paths to (an) existing .req file(s).
-        snap_file (str): The path to the new .snap file.
-        comments (str): Comments to append to the BURT header.
-        keywords (str): A delimited string of keywords to append to the BURT
+        req_files: An iterable of paths to (an) existing .req file(s).
+        snap_file: The path to the new .snap file.
+        comments: Comments to append to the BURT header.
+        keywords: A delimited string of keywords to append to the BURT
             header.
         _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
-        list: A list of the PV names where something went wrong.
+        A list of the PV names where something went wrong.
 
     Raises:
         ValueError: If the request file or snap file arguments have an invalid
@@ -118,16 +118,16 @@ def take_snapshot_group(
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
-        rqg_file (str): The path to the existing .rqg file.
-        rgr_file (str): The path to the new .rgr file.
-        comments (str): Comments to append to the BURT header.
-        keywords (str): A delimited string of keywords to append to the BURT
+        rqg_file: The path to the existing .rqg file.
+        rgr_file: The path to the new .rgr file.
+        comments: Comments to append to the BURT header.
+        keywords: A delimited string of keywords to append to the BURT
             header.
-        check (bool): Whether to inspect .check files or not.
-        _logger (logging.Logger): Internal logger, do not specify.
+        check: Whether to inspect .check files or not.
+        _logger: Internal logger, do not specify.
 
     Returns:
-        list: A list of the PV names where something went wrong.
+        A list of the PV names where something went wrong.
 
     Raises:
         ValueError: If the rqg file or snap file arguments have an invalid
