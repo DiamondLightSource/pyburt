@@ -56,9 +56,9 @@ def test_snapshot_uninitialised_array_no_compat(index, null_value, pyburt_tmpfil
 @pytest.mark.parametrize("compat", [True, False])
 def test_snapshot_partial_array(pyburt_tmpfile, compat):
     """Run a snapshot against uninitialised arrays.
-    
+
     Parameterising this fully proved too fiddly.
-    
+
     """
     # Define the expected compatibility behaviour.
     DOUBLE_NULL = DOUBLE_ZERO_STR if compat else NULL_STR

@@ -82,20 +82,60 @@ def test_restore_enum():
     assert caget(integration.IOC_LOCAL_PV_ENUM) == 1
 
 
-def test_restore_null_long_array():
-    """Check that all nulls in a snap file is restored to all 0s."""
+@pytest.mark.parametrize(
+    "pv,set_value,expected",
+    [
+        (integration.IOC_LOCAL_PV_ARR_CHAR, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_DBL, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_FLOAT, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_STR, ["1", "2", "3"], ""),
+    ],
+)
+def test_restore_null_arrays(pv, set_value, expected):
+    """Check that all nulls in a snap file are restored.
+
+    Zeros for numeric types and empty string for string types.
+
+    """
     # Ensure IOC start value is not zeros.
-    caput(integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3])
+    caput(pv, set_value)
+    assert not numpy.all(caget(pv) == expected)
     burt.restore(integration.NULL_ARRAY_SNAP)
-    assert numpy.all(caget(integration.IOC_LOCAL_PV_ARR_LONG) == 0)
+    assert numpy.all(caget(pv) == expected)
 
 
-def test_restore_null_string_array():
-    """Check that all nulls in a snap file is restored to all 0s."""
+@pytest.mark.parametrize(
+    "pv,expected",
+    [
+        (integration.IOC_LOCAL_PV_ARR_CHAR, [120, 33, 70, 32]),
+        (integration.IOC_LOCAL_PV_ARR_DBL, [-12.3, 0]),
+        (integration.IOC_LOCAL_PV_ARR_FLOAT, [0.432, -1.1]),
+        (integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3]),
+    ],
+)
+def test_restore_partial_numeric_arrays(pv, expected):
+    """Check that partial arrays in a snap file are restored."""
     # Ensure IOC start value is not zeros.
-    caput(integration.IOC_LOCAL_PV_ARR_STR, ["one", "two", "three"])
-    burt.restore(integration.NULL_ARRAY_SNAP)
-    assert numpy.all(caget(integration.IOC_LOCAL_PV_ARR_STR) == "")
+    caput(pv, [0])
+    assert not numpy.all(caget(pv) == expected)
+    burt.restore(integration.PARTIAL_ARRAY_SNAP)
+
+    val = caget(pv)
+    numpy.testing.assert_allclose(val, expected)
+
+
+def test_restore_partial_string_array():
+    """Check that partial string arrays in a snap file are restored."""
+    # Ensure IOC start value is not zeros.
+    pv = integration.IOC_LOCAL_PV_ARR_STR
+    caput(pv, ["hello", "world"])
+    burt.restore(integration.PARTIAL_ARRAY_SNAP)
+
+    val = caget(pv)
+    assert len(val) == 2
+    assert val[0] == "three"
+    assert val[1] == "blind mice"
 
 
 def test_restore_group():
