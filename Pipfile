@@ -13,6 +13,7 @@ flake8-import-order = "*"
 black = "==19.3b0"
 sphinx = "*"
 mypy = "*"
+sphinx-rtd-theme = "*"
 
 [packages]
 cothread = ">=2.15"

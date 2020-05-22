@@ -41,7 +41,7 @@ def check(check_file: str) -> None:
 
     Raises:
         ValueError: If the check file has an invalid extension, or if it does
-        not exist.
+            not exist.
 
         CheckFailedException: If the check fails.
 

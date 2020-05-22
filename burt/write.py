@@ -62,7 +62,7 @@ def restore(snap_file: str, _logger=logging.getLogger()) -> List[str]:
 
     Raises:
         ValueError: If the snap file has an invalid extension, or if it does
-        not exist.
+            not exist.
 
     """
     if not is_snap_file(snap_file, True):
@@ -116,7 +116,7 @@ def restore_group(
 
     Raises:
         ValueError: If the rgr file has an invalid extension, or if it does
-        not exist.
+            not exist.
 
     """
     if not is_rgr_file(rgr_file):
@@ -130,7 +130,7 @@ def restore_group(
     for file_path in body:
 
         if check and is_check_file(file_path):
-            burt.checks.check(file_path)
+            burt.check(file_path)
 
         elif is_snap_file(file_path):
             failed_pvs = restore(file_path)
