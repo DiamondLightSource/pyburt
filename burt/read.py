@@ -574,14 +574,20 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     if is_req_file(args.request_file):
+        logging.info(
+            "Taking snapshot: %s -> %s", args.request_file, args.snap_destination
+        )
         take_snapshot(
             [args.request_file], args.snap_destination, comments=args.c, keywords=args.k
         )
 
     elif is_rqg_file(args.request_file):
+        logging.info(
+            "Taking snapshot group: %s -> %s", args.request_file, args.snap_destination
+        )
         take_snapshot_group(
             args.request_file, args.snap_destination, comments=args.c, keywords=args.k
         )
 
     else:
-        logging.critical("Invalid request file argument.")
+        logging.critical(f"Invalid request file argument {args.request_file}.")

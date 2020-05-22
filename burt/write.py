@@ -164,8 +164,10 @@ def main():
         logging.getLogger().setLevel(logging.DEBUG)
 
     if is_snap_file(args.restore_file):
+        logging.info(f"Restoring {args.restore_file}")
         failed_pvs = restore(args.restore_file)
     elif is_rgr_file(args.restore_file):
+        logging.info(f"Restoring {args.restore_file}")
         failed_pvs = restore_group(args.restore_file)
     else:
         logging.critical(f"Invalid restore file argument {args.restore_file}.")
