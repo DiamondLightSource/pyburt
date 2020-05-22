@@ -32,17 +32,18 @@ DEFAULT_CONFIG = {
 
 
 def get_graylog_handler():
-    return pygelf.GelfUdpHandler(
+    handler = pygelf.GelfUdpHandler(
         GRAYLOG_HOST,
         GRAYLOG_PORT,
-        include_extra_fields=True,
-        username=getpass.getuser(),
-        package=__package__,
-        pid=os.getpid(),
-        application_name="pyburt",
         debug=True,
-        level="INFO",
+        include_extra_fields=True,
+        _username=getpass.getuser(),
+        _package=__package__,
+        _pid=os.getpid(),
+        _application_name="pyburt",
     )
+    handler.setLevel(logging.DEBUG)
+    return handler
 
 
 def get_logfile_handler(log_file_path: str):
