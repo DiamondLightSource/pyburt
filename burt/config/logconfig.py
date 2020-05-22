@@ -1,15 +1,18 @@
 """Modified logconfig.py from dls_ade."""
 import getpass
+import logging
 import logging.config
+import logging.handlers
 import os
 import sys
+
+import pygelf
 
 GRAYLOG_HOST = "graylog2.diamond.ac.uk"
 GRAYLOG_PORT = 12201
 
 DEFAULT_LOG_FORMAT = (
-    "%(asctime)5s - %(filename)s:%(lineno)d - %(name)s - %("
-    "levelname)5s - %(message)s"
+    "%(asctime)5s - %(filename)s:%(lineno)d - %(" "levelname)5s - %(message)s"
 )
 
 DEFAULT_CONFIG = {
@@ -22,50 +25,40 @@ DEFAULT_CONFIG = {
             "level": "DEBUG",
             "formatter": "extended",
             "stream": "ext://sys.stdout",
-        },
-        "logfile_handler": {
-            "class": "logging.FileHandler",
-            "level": "DEBUG",
-            "formatter": "extended",
-            "filename": "",
-            "mode": "a+",
-            "delay": True,
-        },
-        "graylog_handler": {
-            "class": "pygelf.GelfUdpHandler",
-            "level": "INFO",
-            "host": GRAYLOG_HOST,
-            "port": GRAYLOG_PORT,
-            "debug": True,
-            "include_extra_fields": True,
-            "username": getpass.getuser(),
-            "pid": os.getpid(),
-            "package": __package__,
-            "application_name": "pyburt",
-        },
+        }
     },
-    "loggers": {
-        "console_entry": {
-            "level": "INFO",
-            "handlers": ["graylog_handler"],
-            "propagate": True,
-        },
-        "console_entry_with_logfile": {
-            "level": "INFO",
-            "handlers": ["graylog_handler", "logfile_handler"],
-            "propagate": True,
-        },
-    },
-    "root": {
-        # Set the level here to be the default minimum level of log record to be
-        # produced
-        # If you set a handler to level DEBUG you will need to set either this level, or
-        # the level of one of the loggers above to DEBUG or you won't see any DEBUG
-        # messages
-        "level": "INFO",
-        "handlers": ["console"],
-    },
+    "root": {"level": "INFO", "handlers": ["console"]},
 }
+
+
+def get_graylog_handler():
+    """Return the DLS Graylog handler."""
+    handler = pygelf.GelfUdpHandler(
+        GRAYLOG_HOST,
+        GRAYLOG_PORT,
+        debug=True,
+        include_extra_fields=True,
+        _username=getpass.getuser(),
+        _package=__package__,
+        _pid=os.getpid(),
+        _application_name="pyburt",
+    )
+    handler.setLevel(logging.DEBUG)
+    return handler
+
+
+def get_logfile_handler(log_file_path: str):
+    """Return a handler that logs to the specified file.
+
+    Args:
+        log_file_path: path to which to log
+
+    """
+    formatter = logging.Formatter(DEFAULT_LOG_FORMAT)
+    handler = logging.FileHandler(log_file_path, "a+")
+    handler.setFormatter(formatter)
+    handler.setLevel(logging.DEBUG)
+    return handler
 
 
 def setup_logging(default_level: int = logging.INFO, log_file_path: str = None):

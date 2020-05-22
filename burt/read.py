@@ -47,11 +47,7 @@ class InvalidReadingException(Exception):
 
 
 def take_snapshot(
-    req_files: List[str],
-    snap_file: str,
-    comments: str = None,
-    keywords: str = None,
-    _logger=logging.getLogger(),
+    req_files: List[str], snap_file: str, comments: str = None, keywords: str = None
 ) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
@@ -64,7 +60,6 @@ def take_snapshot(
         comments: Comments to append to the BURT header.
         keywords: A delimited string of keywords to append to the BURT
             header.
-        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         A list of the PV names where something went wrong.
@@ -76,8 +71,8 @@ def take_snapshot(
     """
     _check_snapshot_params(req_files, snap_file)
 
-    snap_header = _gen_snap_header(req_files, comments, keywords, _logger)
-    _logger.debug(f"Generated .snap header: {snap_header}")
+    snap_header = _gen_snap_header(req_files, comments, keywords)
+    logging.debug(f"Generated .snap header: {snap_header}")
 
     all_req_failed_pvs: List[str] = []
     all_req_snap_footer_entries = []
@@ -85,20 +80,20 @@ def take_snapshot(
     for req_file in req_files:
         req_parser = burt.ReqParser(req_file)
         _, pvs = req_parser.parse()
-        _logger.debug(f"Parsed PVs: {pvs}")
+        logging.debug(f"Parsed PVs: {pvs}")
 
         # Use the special DBR_ENUM_STR datatype request, which gets the natural type
         # unless the channel is enum, in which case it gets the string value.
         ca_readings = caget([pv.name for pv in pvs], datatype=DBR_ENUM_STR, throw=False)
         singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(
-            ca_readings, pvs, _logger
+            ca_readings, pvs
         )
 
         all_req_snap_footer_entries.append(singleton_req_snap_footer)
-        _logger.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
+        logging.debug(f"Generated .snap footer: {singleton_req_snap_footer}")
 
         all_req_failed_pvs.extend(singleton_req_failed_pvs)
-        _logger.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
+        logging.debug(f"Failed PVs for {req_file}: {singleton_req_failed_pvs}")
 
     snap_footer = os.linesep.join(all_req_snap_footer_entries)
 
@@ -113,7 +108,6 @@ def take_snapshot_group(
     comments: str = None,
     keywords: str = None,
     check: bool = True,
-    _logger=logging.getLogger(),
 ) -> List[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
@@ -124,7 +118,6 @@ def take_snapshot_group(
         keywords: A delimited string of keywords to append to the BURT
             header.
         check: Whether to inspect .check files or not.
-        _logger: Internal logger, do not specify.
 
     Returns:
         A list of the PV names where something went wrong.
@@ -174,7 +167,7 @@ def _check_snapshot_group_params(rgr_file, rqg_file):
         raise ValueError("Invalid .rgr file destination.")
 
 
-def _gen_snap_header(req_files, comments, keywords, _logger):
+def _gen_snap_header(req_files, comments, keywords):
     """Generate the .snap file BURT header as a string.
 
     This will precede the list of PVs in the .snap file and will contain
@@ -184,20 +177,19 @@ def _gen_snap_header(req_files, comments, keywords, _logger):
         req_files (list): A list of req files to take a snapshot of.
         comments: Optional comments.
         keywords: Optional keywords, with an arbitrary delimiter (or none).
-        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         str: The .snap file BURT header as a string.
 
     """
-    curr_user, curr_time, directory, gid, uid = _get_snap_header_system_vals(_logger)
+    curr_user, curr_time, directory, gid, uid = _get_snap_header_system_vals()
 
     # Carriage returns and newlines from user input can malform the BURT header
     # so write to the snap file as escaped symbols.
     sanitised_keywords = "" if keywords is None else _sanitise_header_line(keywords)
     sanitised_comments = "" if comments is None else _sanitise_header_line(comments)
-    _logger.debug(f"Keywords: {keywords}")
-    _logger.debug(f"Comments: {comments}")
+    logging.debug(f"Keywords: {keywords}")
+    logging.debug(f"Comments: {comments}")
 
     # Always absolute in current burt implementations.
     snap_type = Snap.TYPE_DEFAULT_VAL
@@ -225,11 +217,8 @@ def _gen_snap_header(req_files, comments, keywords, _logger):
     return os.linesep.join(header_lines)
 
 
-def _get_snap_header_system_vals(_logger):
+def _get_snap_header_system_vals():
     """Obtain the required system values for the .snap header.
-
-    Args:
-        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         str, str, str, int, int: The current user, current time, directory, gid,
@@ -238,23 +227,23 @@ def _get_snap_header_system_vals(_logger):
     """
     # DAY MMM  D hh:mm:ss YYYY format
     current_time = time.ctime()
-    _logger.debug(f"Current time: {current_time}")
+    logging.debug(f"Current time: {current_time}")
 
     # Username (Lastname, Initials (Firstname)) format
     username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
     curr_user = username + " (" + ugroup + ")"
-    _logger.debug(f"Current user: {username}")
-    _logger.debug(f"Current user group: {ugroup}")
+    logging.debug(f"Current user: {username}")
+    logging.debug(f"Current user group: {ugroup}")
 
     # Effective user and group ID.
     uid = os.getuid()
     gid = pwd.getpwnam(getpass.getuser()).pw_gid
-    _logger.debug(f"uid: {uid}")
-    _logger.debug(f"gid: {gid}")
+    logging.debug(f"uid: {uid}")
+    logging.debug(f"gid: {gid}")
 
     # Absolute path to current directory.
     directory = os.getcwd()
-    _logger.debug(f"Cwd: {directory}")
+    logging.debug(f"Cwd: {directory}")
 
     return curr_user, current_time, directory, gid, uid
 
@@ -289,7 +278,7 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
-def _gen_snap_footer(ca_readings, pv_entries, _logger):
+def _gen_snap_footer(ca_readings, pv_entries):
     """Generate the .snap file BURT footer as a string.
 
     A snapshot of the PVs in the req file(s) is(are) performed by storing the values
@@ -298,7 +287,6 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
     Args:
         ca_readings (list(ca_value)): Values returned by caget()
         pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
-        _logger (logging.Logger): Internal logger, do not specify.
 
     Returns:
         str: The .snap file footer.
@@ -308,8 +296,8 @@ def _gen_snap_footer(ca_readings, pv_entries, _logger):
         ValueError: If the save length is invalid.
 
     """
-    _logger.debug(f"ca_reading: {ca_readings}")
-    _logger.debug(f"ca_reading type: {type(ca_readings)}")
+    logging.debug(f"ca_reading: {ca_readings}")
+    logging.debug(f"ca_reading type: {type(ca_readings)}")
 
     snap_entries = []
     failed_pvs = []
@@ -575,31 +563,31 @@ def main():
 
     logconfig.setup_logging(log_file_path=args.l)
 
+    if "DLS_EPICS_RELEASE" in os.environ:
+        # Add graylog if running inside DLS.
+        logging.getLogger().addHandler(logconfig.get_graylog_handler())
+
     if args.l:
-        snapshot_logger = logging.getLogger("console_entry_with_logfile")
-    else:
-        snapshot_logger = logging.getLogger("console_entry")
+        logging.getLogger().addHandler(logconfig.get_logfile_handler(args.l))
 
     if args.v:
         logging.getLogger().setLevel(logging.DEBUG)
 
     if is_req_file(args.request_file):
+        logging.info(
+            "Taking snapshot: %s -> %s", args.request_file, args.snap_destination
+        )
         take_snapshot(
-            [args.request_file],
-            args.snap_destination,
-            comments=args.c,
-            keywords=args.k,
-            _logger=snapshot_logger,
+            [args.request_file], args.snap_destination, comments=args.c, keywords=args.k
         )
 
     elif is_rqg_file(args.request_file):
+        logging.info(
+            "Taking snapshot group: %s -> %s", args.request_file, args.snap_destination
+        )
         take_snapshot_group(
-            args.request_file,
-            args.snap_destination,
-            comments=args.c,
-            keywords=args.k,
-            _logger=snapshot_logger,
+            args.request_file, args.snap_destination, comments=args.c, keywords=args.k
         )
 
     else:
-        logging.critical("Invalid request file argument.")
+        logging.critical(f"Invalid request file argument {args.request_file}.")
