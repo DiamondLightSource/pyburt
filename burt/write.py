@@ -172,7 +172,7 @@ def main():
         sys.exit(1)
 
     if failed_pvs:
-        logging.warning(f"Restore failed for the following PVs:")
+        logging.warning("Restore failed for the following PVs:")
         for pv in failed_pvs:
             logging.warning(pv)
         sys.exit(1)

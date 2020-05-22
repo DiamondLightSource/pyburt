@@ -32,6 +32,7 @@ DEFAULT_CONFIG = {
 
 
 def get_graylog_handler():
+    """Return the DLS Graylog handler."""
     handler = pygelf.GelfUdpHandler(
         GRAYLOG_HOST,
         GRAYLOG_PORT,
@@ -47,6 +48,12 @@ def get_graylog_handler():
 
 
 def get_logfile_handler(log_file_path: str):
+    """Return a handler that logs to the specified file.
+
+    Args:
+        log_file_path: path to which to log
+
+    """
     formatter = logging.Formatter(DEFAULT_LOG_FORMAT)
     handler = logging.FileHandler(log_file_path, "a+")
     handler.setFormatter(formatter)

@@ -246,7 +246,7 @@ def test_burt_write_cli_returns_1_if_restore_fails(
     mock_isfile.return_value = True
     mock_args = mock.MagicMock()
     mock_args.restore_file = "hello.snap"
-    mock_args.l = None
+    mock_args.l = None  # noqa
     mock_argument_parser.return_value.parse_args.return_value = mock_args
     with pytest.raises(SystemExit):
         burt.write.main()
@@ -272,7 +272,7 @@ def test_burt_write_cli_returns_1_if_restore_group_fails(
     mock_is_rgr_file.return_value = True
     mock_args = mock.MagicMock()
     mock_args.restore_file = "hello.rgr"
-    mock_args.l = None
+    mock_args.l = None  # noqa
     mock_argument_parser.return_value.parse_args.return_value = mock_args
     with pytest.raises(SystemExit):
         burt.write.main()
@@ -287,7 +287,7 @@ def test_burt_write_cli_returns_1_if_invalid_file(mock_argument_parser):
     """
     mock_args = mock.MagicMock()
     mock_args.restore_file = "hello.dummy"
-    mock_args.l = None
+    mock_args.l = None  # noqa
     mock_argument_parser.return_value.parse_args.return_value = mock_args
     with pytest.raises(SystemExit):
         burt.write.main()

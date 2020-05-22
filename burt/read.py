@@ -117,12 +117,7 @@ def take_snapshot_group(
         comments: Comments to append to the BURT header.
         keywords: A delimited string of keywords to append to the BURT
             header.
-<<<<<<< HEAD
         check: Whether to inspect .check files or not.
-        _logger: Internal logger, do not specify.
-=======
-        check (bool): Whether to inspect .check files or not.
->>>>>>> 586ab8e... Simplify logging.
 
     Returns:
         A list of the PV names where something went wrong.
