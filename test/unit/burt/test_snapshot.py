@@ -101,10 +101,12 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
         ([97, 98], DBR_CHAR, 3, 2, "a b \\0"),
     ],
 )
-def test_flatten_ca_array(vals, datatype, array_length, requested_length, output):
+def test_flatten_ca_array_no_compat(
+    vals, datatype, array_length, requested_length, output
+):
     """Check formatting arrays for snap files."""
     ca_reading = aug_val(vals, count=array_length, dtype=datatype)
-    assert _flatten_ca_array(ca_reading, requested_length) == output
+    assert _flatten_ca_array(ca_reading, requested_length, False) == output
 
 
 @pytest.mark.parametrize(
@@ -121,7 +123,7 @@ def test_flatten_ca_array_compat(
 ):
     """Check formatting arrays for snap files."""
     ca_reading = aug_val(vals, count=array_length, dtype=datatype)
-    assert _flatten_ca_array(ca_reading, requested_length, compat=True) == output
+    assert _flatten_ca_array(ca_reading, requested_length, True) == output
 
 
 @mock.patch("burt.read.caget")
