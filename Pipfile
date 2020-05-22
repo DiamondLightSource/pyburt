@@ -18,3 +18,8 @@ sphinx-rtd-theme = "*"
 [packages]
 cothread = ">=2.15"
 pygelf = "*"
+
+[scripts]
+
+tests = "python -m pytest --cov=burt test/unit"
+docs = "sphinx-build -E -b html docs build/html"
