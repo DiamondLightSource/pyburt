@@ -84,9 +84,9 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
     "vals,datatype,array_length,requested_length,output",
     [
         ([1, 2], DBR_FLOAT, 2, 2, "1.000000e+00 2.000000e+00"),
-        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
+        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 \\0"),
         ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
-        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 0.000000000000000e+00"),
+        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 \\0"),
         ([1, 2], DBR_SHORT, 2, 2, "1 2"),
         ([1, 2], DBR_SHORT, 3, 2, "1 2 \\0"),
         ([], DBR_SHORT, 2, 2, "\\0 \\0"),
@@ -105,6 +105,23 @@ def test_flatten_ca_array(vals, datatype, array_length, requested_length, output
     """Check formatting arrays for snap files."""
     ca_reading = aug_val(vals, count=array_length, dtype=datatype)
     assert _flatten_ca_array(ca_reading, requested_length) == output
+
+
+@pytest.mark.parametrize(
+    "vals,datatype,array_length,requested_length,output",
+    [
+        ([1, 2], DBR_FLOAT, 2, 2, "1.000000e+00 2.000000e+00"),
+        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
+        ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
+        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 0.000000000000000e+00"),
+    ],
+)
+def test_flatten_ca_array_compat(
+    vals, datatype, array_length, requested_length, output
+):
+    """Check formatting arrays for snap files."""
+    ca_reading = aug_val(vals, count=array_length, dtype=datatype)
+    assert _flatten_ca_array(ca_reading, requested_length, compat=True) == output
 
 
 @mock.patch("burt.read.caget")

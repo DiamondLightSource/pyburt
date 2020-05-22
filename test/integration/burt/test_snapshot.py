@@ -23,7 +23,7 @@ def test_snapshot_uninitialised_array(pyburt_tmpfile):
     """Run a snapshot against uninitialised arrays."""
     burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile)
     snap_parser = burt.SnapParser(pyburt_tmpfile)
-    header, body = snap_parser.parse()
+    _, body = snap_parser.parse()
     double_array_entry = body[0]
     assert all(val == DOUBLE_ZERO_STR for val in double_array_entry.vals)
     long_array_entry = body[1]
