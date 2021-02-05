@@ -36,6 +36,8 @@ import burt
 from burt.config import logconfig
 from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
+from burt.utils.utils import get_user_details
+
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_LONG_PYFORMAT = "{:.15e}"
@@ -229,15 +231,9 @@ def _get_snap_header_system_vals():
     current_time = time.ctime()
     logging.debug(f"Current time: {current_time}")
 
-    # Username (Lastname, Initials (Firstname)) format
-    username, ugroup = getpass.getuser(), pwd.getpwuid(os.getuid())[4]
-    curr_user = username + " (" + ugroup + ")"
-    logging.debug(f"Current user: {username}")
-    logging.debug(f"Current user group: {ugroup}")
+    curr_user, uid, gid = get_user_details()
 
-    # Effective user and group ID.
-    uid = os.getuid()
-    gid = pwd.getpwnam(getpass.getuser()).pw_gid
+    logging.debug(f"curr_user: {curr_user}")
     logging.debug(f"uid: {uid}")
     logging.debug(f"gid: {gid}")
 
