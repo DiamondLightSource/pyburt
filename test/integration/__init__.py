@@ -3,6 +3,7 @@
 # Shared test .req files.
 NORMAL_REQ = "testables/req/normal.req"
 BCDORBIT_REQ = "/home/ops/burt/requestFiles/bcdorbit.req"
+ARR_REQ = "testables/req/array.req"
 
 # Shared test .snap files.
 ARR_SNAP = "testables/snap/ioc_restore_array.snap"
@@ -12,6 +13,8 @@ ENUM_SNAP = "testables/snap/ioc_restore_enum.snap"
 STRING_SNAP = "testables/snap/ioc_restore_string.snap"
 BCDORBIT_SNAP = "testables/snap/ioc_restore_bcdorbit.snap"
 CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP = "testables/snap/ioc_restore_control_room_types.snap"
+NULL_ARRAY_SNAP = "testables/snap/null_arrays.snap"
+PARTIAL_ARRAY_SNAP = "testables/snap/partial_arrays.snap"
 
 # The local running PVs initialized with the local_ioc.py script.
 IOC_LOCAL_PV_FLOAT = "SR-CS-SOFT-01:AI"

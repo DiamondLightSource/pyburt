@@ -3,7 +3,6 @@ import os
 
 import cothread
 import mock
-import numpy
 import pytest
 from cothread.catools import (
     DBR_CHAR,
@@ -24,8 +23,7 @@ from test import aug_val
 @mock.patch("burt.read.caget")
 def test_blank_snapshot(mock_caget, pyburt_tmpfile):
     """Run the burt snapshot against a blank .req file."""
-    mock_caget.return_value = cothread.dbr.ca_array(numpy.array([0, 0, 0])).flatten()
-    mock_caget.return_value.ok = True
+    mock_caget.return_value = aug_val([0, 0, 0], count=3)
 
     burt.take_snapshot([test.BLANK_REQ], pyburt_tmpfile)
 
@@ -86,9 +84,9 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
     "vals,datatype,array_length,requested_length,output",
     [
         ([1, 2], DBR_FLOAT, 2, 2, "1.000000e+00 2.000000e+00"),
-        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
+        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 \\0"),
         ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
-        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 0.000000000000000e+00"),
+        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 \\0"),
         ([1, 2], DBR_SHORT, 2, 2, "1 2"),
         ([1, 2], DBR_SHORT, 3, 2, "1 2 \\0"),
         ([], DBR_SHORT, 2, 2, "\\0 \\0"),
@@ -103,23 +101,37 @@ def test_ca_types_snap_formatting(ca_reading, ca_type, expected_str):
         ([97, 98], DBR_CHAR, 3, 2, "a b \\0"),
     ],
 )
-def test_flatten_ca_array(vals, datatype, array_length, requested_length, output):
+def test_flatten_ca_array_no_compat(
+    vals, datatype, array_length, requested_length, output
+):
     """Check formatting arrays for snap files."""
     ca_reading = aug_val(vals, count=array_length, dtype=datatype)
-    assert _flatten_ca_array(ca_reading, requested_length) == output
+    assert _flatten_ca_array(ca_reading, requested_length, False) == output
+
+
+@pytest.mark.parametrize(
+    "vals,datatype,array_length,requested_length,output",
+    [
+        ([1, 2], DBR_FLOAT, 2, 2, "1.000000e+00 2.000000e+00"),
+        ([1, 2], DBR_FLOAT, 3, 2, "1.000000e+00 2.000000e+00 0.000000e+00"),
+        ([1, 2], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 2.000000000000000e+00"),
+        ([1], DBR_DOUBLE, 2, 2, "1.000000000000000e+00 0.000000000000000e+00"),
+    ],
+)
+def test_flatten_ca_array_compat(
+    vals, datatype, array_length, requested_length, output
+):
+    """Check formatting arrays for snap files."""
+    ca_reading = aug_val(vals, count=array_length, dtype=datatype)
+    assert _flatten_ca_array(ca_reading, requested_length, True) == output
 
 
 @mock.patch("burt.read.caget")
 @mock.patch("burt.read._get_snap_header_system_vals")
 def test_simple_snapshot(mock_get_vals, mock_caget, pyburt_tmpfile):
     """Run a simple snapshot."""
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([2]))
-    singleton_return_value[0] = 1
-    singleton_return_value[1] = 2
-    singleton_return_value.ok = True
-    singleton_return_value.element_count = 2
-    singleton_return_value.datatype = DBR_DOUBLE
-    mock_caget.return_value = [singleton_return_value]
+    array_return_value = aug_val([1, 2], count=2, dtype=DBR_DOUBLE)
+    mock_caget.return_value = [array_return_value]
     mock_get_vals.return_value = ("user", "time", "dir", "group", 100)
 
     test_comment = "Hello World"
@@ -189,11 +201,8 @@ def test_burtinter_req_file_prefix_compatability():
 def test_snapshot_arrays(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test of a normal .req file."""
     # Caget return value is a 12 element list of arrays of 40 elements.
-    singleton_return_value = cothread.dbr.ca_array((40,), dtype=numpy.uint16)
-    singleton_return_value.ok = True
-    singleton_return_value.element_count = 40
-    singleton_return_value.datatype = DBR_SHORT
-    mock_caget.return_value = [singleton_return_value for i in range(12)]
+    array_return_value = aug_val([0] * 40, count=40, dtype=DBR_SHORT)
+    mock_caget.return_value = [array_return_value for i in range(12)]
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
@@ -379,7 +388,7 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget, pyburt_tmpfile):
 
     Test the failed values for validity.
     """
-    singleton_return_value = cothread.dbr.ca_str("DIAD")
+    singleton_return_value = aug_val("DIAD", dtype=DBR_STRING)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     # Every PV will fail in test.NORMAL_REQ.
@@ -503,11 +512,9 @@ def test_snapshot_newlines_in_args(mock_caget, pyburt_tmpfile):
     The newlines should appear as is in the .snap file,
     with the help of an extra backslash, and not interpreted.
     """
-    # Flattened ndarray is a 12 element list of 40 elements.
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 40])).flatten()
-    singleton_return_value.ok = False
-    singleton_return_value.errorcode = 1
-    mock_caget.return_value = [singleton_return_value for i in range(12)]
+    # caget return value a 12 element list of arrays of 40 elements.
+    array_return_value = aug_val([0] * 40, ok=False, count=40)
+    mock_caget.return_value = [array_return_value for i in range(12)]
 
     test_comment = "\nHello\r\n \nWorld\r\n\r"
     test_keywords = "\r\ncool\n,\r\nsnap,file\n\r\r"
@@ -535,12 +542,10 @@ def test_snapshot_req_file_length_bigger_than_pv(mock_caget, pyburt_tmpfile):
 
     This is a case which would not be caught by the parser.
     """
-    # Flattened ndarray is a 8 element list.
+    # return value is a 8 element array.
     # The requested save length in the .req file is 9.
-    singleton_return_value = cothread.dbr.ca_array(numpy.array([1, 1, 8])).flatten()
-    singleton_return_value.ok = True
-    singleton_return_value.element_count = 8
-    mock_caget.return_value = [singleton_return_value]
+    array_return_value = aug_val([0] * 8, count=8)
+    mock_caget.return_value = [array_return_value]
 
     with pytest.raises(ValueError):
         burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)

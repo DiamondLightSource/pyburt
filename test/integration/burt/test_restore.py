@@ -5,6 +5,7 @@ import subprocess
 import time
 from random import randint
 
+import numpy
 import pytest
 from cothread.catools import caget, caput
 
@@ -81,6 +82,62 @@ def test_restore_enum():
     assert caget(integration.IOC_LOCAL_PV_ENUM) == 1
 
 
+@pytest.mark.parametrize(
+    "pv,set_value,expected",
+    [
+        (integration.IOC_LOCAL_PV_ARR_CHAR, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_DBL, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_FLOAT, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3], 0),
+        (integration.IOC_LOCAL_PV_ARR_STR, ["1", "2", "3"], ""),
+    ],
+)
+def test_restore_null_arrays(pv, set_value, expected):
+    """Check that all nulls in a snap file are restored.
+
+    Zeros for numeric types and empty string for string types.
+
+    """
+    # Ensure IOC start value is not zeros.
+    caput(pv, set_value)
+    assert not numpy.all(caget(pv) == expected)
+    burt.restore(integration.NULL_ARRAY_SNAP)
+    assert numpy.all(caget(pv) == expected)
+
+
+@pytest.mark.parametrize(
+    "pv,expected",
+    [
+        (integration.IOC_LOCAL_PV_ARR_CHAR, [120, 33, 70, 32]),
+        (integration.IOC_LOCAL_PV_ARR_DBL, [-12.3, 0]),
+        (integration.IOC_LOCAL_PV_ARR_FLOAT, [0.432, -1.1]),
+        (integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3]),
+    ],
+)
+def test_restore_partial_numeric_arrays(pv, expected):
+    """Check that partial arrays in a snap file are restored."""
+    # Ensure IOC start value is not zeros.
+    caput(pv, [0])
+    assert not numpy.all(caget(pv) == expected)
+    burt.restore(integration.PARTIAL_ARRAY_SNAP)
+
+    val = caget(pv)
+    numpy.testing.assert_allclose(val, expected)
+
+
+def test_restore_partial_string_array():
+    """Check that partial string arrays in a snap file are restored."""
+    # Ensure IOC start value is not zeros.
+    pv = integration.IOC_LOCAL_PV_ARR_STR
+    caput(pv, ["hello", "world"])
+    burt.restore(integration.PARTIAL_ARRAY_SNAP)
+
+    val = caget(pv)
+    assert len(val) == 2
+    assert val[0] == "three"
+    assert val[1] == "blind mice"
+
+
 def test_restore_group():
     """Runs burt restore group against a normal case.
 
@@ -148,7 +205,7 @@ def test_various_types_restore():
     pv_arr_short = caget(integration.IOC_LOCAL_PV_ARR_SHORT)
 
     # Note the curious format in the snap file for this PV.
-    for a, b in itertools.zip_longest(pv_arr_char, "User Beam time"):
+    for a, b in itertools.zip_longest(pv_arr_char, "Hi Lo!"):
         print(f"{a} {b}")
         assert a == ord(b)
 
