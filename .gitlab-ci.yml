@@ -1,6 +1,6 @@
 include:
   - project: 'controls/reports/ci_templates'
-    ref: k8s-runners
+    ref: master
     file: 'python3/dls_py3_template.yml'
 
 variables:
