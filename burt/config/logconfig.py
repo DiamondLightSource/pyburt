@@ -31,6 +31,14 @@ DEFAULT_CONFIG = {
 }
 
 
+def get_username():
+    try:
+        return getpass.getuser()
+    except KeyError:
+        # Special case for Kubernetes Gitlab runners?
+        return os.getenv("GITLAB_USER_LOGIN", os.getenv("USER", "unknown"))
+
+
 def get_graylog_handler():
     """Return the DLS Graylog handler."""
     handler = pygelf.GelfUdpHandler(
@@ -38,7 +46,7 @@ def get_graylog_handler():
         GRAYLOG_PORT,
         debug=True,
         include_extra_fields=True,
-        _username=getpass.getuser(),
+        _username=get_username(),
         _package=__package__,
         _pid=os.getpid(),
         _application_name="pyburt",
