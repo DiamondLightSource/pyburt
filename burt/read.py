@@ -49,7 +49,11 @@ class InvalidReadingException(Exception):
 
 
 def take_snapshot(
-    req_files: List[str], snap_file: str, comments: str = None, keywords: str = None
+    req_files: List[str],
+    snap_file: str,
+    comments: str = None,
+    keywords: str = None,
+    compat: bool = False,
 ) -> List[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
@@ -60,8 +64,9 @@ def take_snapshot(
         req_files: An iterable of paths to (an) existing .req file(s).
         snap_file: The path to the new .snap file.
         comments: Comments to append to the BURT header.
-        keywords: A delimited string of keywords to append to the BURT
+        keywords: A delimited string of keywords to append to the Burt
             header.
+        compat: Whether to ensure output is compatible with Burt
 
     Returns:
         A list of the PV names where something went wrong.
@@ -88,7 +93,7 @@ def take_snapshot(
         # unless the channel is enum, in which case it gets the string value.
         ca_readings = caget([pv.name for pv in pvs], datatype=DBR_ENUM_STR, throw=False)
         singleton_req_snap_footer, singleton_req_failed_pvs = _gen_snap_footer(
-            ca_readings, pvs
+            ca_readings, pvs, compat
         )
 
         all_req_snap_footer_entries.append(singleton_req_snap_footer)
@@ -274,7 +279,7 @@ def _gen_padded_header_line(prefix, value):
     return header_line
 
 
-def _gen_snap_footer(ca_readings, pv_entries):
+def _gen_snap_footer(ca_readings, pv_entries, compat=False):
     """Generate the .snap file BURT footer as a string.
 
     A snapshot of the PVs in the req file(s) is(are) performed by storing the values
@@ -283,6 +288,7 @@ def _gen_snap_footer(ca_readings, pv_entries):
     Args:
         ca_readings (list(ca_value)): Values returned by caget()
         pv_entries (list(namedtuple(PV))): A list of PV entries in a .req file.
+        compat (bool): Ensure output is compatible with Burt
 
     Returns:
         str: The .snap file footer.
@@ -299,9 +305,14 @@ def _gen_snap_footer(ca_readings, pv_entries):
     failed_pvs = []
 
     for ca_reading, pv_entry in zip(ca_readings, pv_entries):
+        if ca_reading.element_count > 1 and len(ca_reading) == 0:
+            logging.warning(f"Uninitialised array PV {pv_entry.name}.")
+            logging.warning(
+                "It will not be possible to restore this PV to its uninitialised state."
+            )
         try:
             length, ca_reading_str = _ca_val_to_snap_entry(
-                ca_reading, pv_entry.save_len
+                ca_reading, pv_entry.save_len, compat
             )
             formatted_snapshot_entry = _format_snap_footer_entry(
                 length, ca_reading_str, pv_entry
@@ -314,7 +325,9 @@ def _gen_snap_footer(ca_readings, pv_entries):
     return os.linesep.join(snap_entries), failed_pvs
 
 
-def _ca_val_to_snap_entry(ca_reading: Any, requested_save_len: int) -> Tuple[int, str]:
+def _ca_val_to_snap_entry(
+    ca_reading: Any, requested_save_len: int, compat: bool
+) -> Tuple[int, str]:
     """Format a reading returned from caget into a string for a snap file.
 
     Cothread automatically converts a DBR channel access type into its python
@@ -323,6 +336,7 @@ def _ca_val_to_snap_entry(ca_reading: Any, requested_save_len: int) -> Tuple[int
     Args:
         ca_reading: reading from caget
         requested_save_len: requested length of array to store
+        compat: Ensure behaviour is compatible with Burt
 
     Returns:
         int: actual saved length
@@ -342,7 +356,7 @@ def _ca_val_to_snap_entry(ca_reading: Any, requested_save_len: int) -> Tuple[int
     # cothread array length to the desired value.
     if ca_reading.element_count > 1:
         save_len = _extract_save_len(ca_reading, requested_save_len)
-        ca_reading_str = _flatten_ca_array(ca_reading, save_len)
+        ca_reading_str = _flatten_ca_array(ca_reading, save_len, compat)
 
     else:
         ca_reading_str = _format_ca_reading(ca_reading, ca_reading.datatype)
@@ -377,7 +391,7 @@ def _extract_save_len(ca_reading, requested_length):
     return actual_save_len
 
 
-def _flatten_ca_array(ca_reading, requested_length):
+def _flatten_ca_array(ca_reading, requested_length, compat):
     """Flatten the ca array into a string and obtain the save length if specified.
 
     NOTE: cothread returns a truncated EPICS array, so len(ca_reading) and
@@ -402,6 +416,7 @@ def _flatten_ca_array(ca_reading, requested_length):
     Args:
         ca_reading (any): Return value from cothread.
         requested_length (int): length specified in .req file.
+        compat: Ensure behaviour is compatible with Burt
 
     Returns:
         str: The flattened ca array as a string
@@ -425,9 +440,15 @@ def _flatten_ca_array(ca_reading, requested_length):
 
         # Zero is shown in a snap file to a certain precision for floats and doubles.
         elif ca_reading.datatype == DBR_FLOAT:
-            empty_elem_identifier = SNAP_PRECISION_SHORT_PYFORMAT.format(0)
+            if compat:
+                empty_elem_identifier = SNAP_PRECISION_SHORT_PYFORMAT.format(0)
+            else:
+                empty_elem_identifier = "\\0"
         elif ca_reading.datatype == DBR_DOUBLE:
-            empty_elem_identifier = SNAP_PRECISION_LONG_PYFORMAT.format(0)
+            if compat:
+                empty_elem_identifier = SNAP_PRECISION_LONG_PYFORMAT.format(0)
+            else:
+                empty_elem_identifier = "\\0"
 
         else:
             logging.warning(f"Unexpected type: {ca_reading.datatype}.")

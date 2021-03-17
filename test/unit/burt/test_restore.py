@@ -174,7 +174,6 @@ def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
     for pv in pvs_from_snap:
         return_value = cothread.catools.ca_nothing(pv)
         return_value.ok = False
-        return_value.errorcode = "dummy"
         return_values.append(return_value)
     mock_caput.return_value = return_values
 
@@ -222,7 +221,11 @@ def test_restore_group_normal(mock_connect, mock_caput):
         (5, ["2", "3", "1", "\0", "\0"], DBR_DOUBLE, [2.0, 3.0, 1.0]),
         (1, ["A"], DBR_CHAR, 65),
         (3, ["A", "B", "\0"], DBR_CHAR, [65, 66]),
-        (3, ["\0", "\0", "\0"], DBR_CHAR, []),
+        # We can't restore empty lists, so if completely null then
+        # we restore all zeros.
+        (3, ["\0", "\0", "\0"], DBR_CHAR, [0, 0, 0]),
+        # For strings, restore all empty strings.
+        (3, ["\0", "\0", "\0"], DBR_STRING, ["", "", ""]),
     ],
 )
 def test_snap_entry_to_ca_type(length, values, datatype, result):

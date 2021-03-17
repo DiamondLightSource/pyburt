@@ -95,7 +95,19 @@ TMP_PYBURT_OUT = "test/tmp.snap"
 
 
 def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
-    """Create a dummy augmented value as returned by cothread."""
+    """Create a dummy augmented value as returned by cothread.
+
+    Note that an augmented value may have a shorter length
+    than the length of the array that it came from, so count
+    may not match len(val).
+
+    Args:
+        val: value to return
+        ok: ok attribute of returned value
+        count: length of simulated PV array
+        dtype: cothread DBR type
+
+    """
     # noqa D202  https://github.com/PyCQA/pydocstyle/pull/395
     class AugFloat(float):
         ok = True
@@ -129,7 +141,7 @@ def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
         f = AugFloat(val)
     elif dtype in (DBR_SHORT, DBR_LONG):
         f = AugInt(val)
-    elif dtype in (DBR_STRING):
+    elif dtype == DBR_STRING:
         f = AugStr(val)
     else:
         f = AugFloat(val)
