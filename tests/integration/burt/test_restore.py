@@ -12,10 +12,10 @@ from cothread.catools import caget, caput
 import burt
 from tests import paths
 from tests import integration
-from tests.integration.softioc import create_ioc_manager
+import tests.integration.softioc as ioc
 
 
-ioc_manager = create_ioc_manager()
+ioc_manager = ioc.create_ioc_manager()
 
 
 def setup_module(module):
@@ -33,18 +33,18 @@ def test_restore():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
+    caput(ioc.LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
     # CA array PV.
     burt.restore(integration.ARR_SNAP)
-    ca_arr = caget(integration.IOC_LOCAL_PV_ARR_DBL)
+    ca_arr = caget(ioc.LOCAL_PV_ARR_DBL)
     assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
 
     # Scalar PV.
     burt.restore(integration.SCALAR_SNAP)
-    ca_long = caget(integration.IOC_LOCAL_PV_LONG)
+    ca_long = caget(ioc.LOCAL_PV_LONG)
     assert ca_long == 2
 
 
@@ -55,13 +55,13 @@ def test_restore_long():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV_LONG, randint(1, 100))
+    caput(ioc.LOCAL_PV_LONG, randint(1, 100))
 
     # CA long PV.
     burt.restore(integration.LONG_SNAP)
 
     # Before fixing #34 this value would incorrectly read 1.
-    new_val = caget(integration.IOC_LOCAL_PV_LONG)
+    new_val = caget(ioc.LOCAL_PV_LONG)
     assert new_val == 14
 
 
@@ -72,10 +72,10 @@ def test_restore_string():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV_STR, "dummyEnumStr")
+    caput(ioc.LOCAL_PV_STR, "dummyEnumStr")
     burt.restore(integration.STRING_SNAP)
 
-    assert caget(integration.IOC_LOCAL_PV_STR) == "DIAD"
+    assert caget(ioc.LOCAL_PV_STR) == "DIAD"
 
 
 def test_restore_enum():
@@ -85,20 +85,20 @@ def test_restore_enum():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV_ENUM, "OK")
+    caput(ioc.LOCAL_PV_ENUM, "OK")
     burt.restore(integration.ENUM_SNAP)
     # Gets the numeric value.
-    assert caget(integration.IOC_LOCAL_PV_ENUM) == 1
+    assert caget(ioc.LOCAL_PV_ENUM) == 1
 
 
 @pytest.mark.parametrize(
     "pv,set_value,expected",
     [
-        (integration.IOC_LOCAL_PV_ARR_CHAR, [1, 2, 3], 0),
-        (integration.IOC_LOCAL_PV_ARR_DBL, [1, 2, 3], 0),
-        (integration.IOC_LOCAL_PV_ARR_FLOAT, [1, 2, 3], 0),
-        (integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3], 0),
-        (integration.IOC_LOCAL_PV_ARR_STR, ["1", "2", "3"], ""),
+        (ioc.LOCAL_PV_ARR_CHAR, [1, 2, 3], 0),
+        (ioc.LOCAL_PV_ARR_DBL, [1, 2, 3], 0),
+        (ioc.LOCAL_PV_ARR_FLOAT, [1, 2, 3], 0),
+        (ioc.LOCAL_PV_ARR_LONG, [1, 2, 3], 0),
+        (ioc.LOCAL_PV_ARR_STR, ["1", "2", "3"], ""),
     ],
 )
 def test_restore_null_arrays(pv, set_value, expected):
@@ -117,10 +117,10 @@ def test_restore_null_arrays(pv, set_value, expected):
 @pytest.mark.parametrize(
     "pv,expected",
     [
-        (integration.IOC_LOCAL_PV_ARR_CHAR, [120, 33, 70, 32]),
-        (integration.IOC_LOCAL_PV_ARR_DBL, [-12.3, 0]),
-        (integration.IOC_LOCAL_PV_ARR_FLOAT, [0.432, -1.1]),
-        (integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3]),
+        (ioc.LOCAL_PV_ARR_CHAR, [120, 33, 70, 32]),
+        (ioc.LOCAL_PV_ARR_DBL, [-12.3, 0]),
+        (ioc.LOCAL_PV_ARR_FLOAT, [0.432, -1.1]),
+        (ioc.LOCAL_PV_ARR_LONG, [1, 2, 3]),
     ],
 )
 def test_restore_partial_numeric_arrays(pv, expected):
@@ -137,7 +137,7 @@ def test_restore_partial_numeric_arrays(pv, expected):
 def test_restore_partial_string_array():
     """Check that partial string arrays in a snap file are restored."""
     # Ensure IOC start value is not zeros.
-    pv = integration.IOC_LOCAL_PV_ARR_STR
+    pv = ioc.LOCAL_PV_ARR_STR
     caput(pv, ["hello", "world"])
     burt.restore(integration.PARTIAL_ARRAY_SNAP)
 
@@ -154,12 +154,12 @@ def test_restore_group():
     value to as specified in the .snap file.
     """
     # Randomize IOC start value.
-    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
+    caput(ioc.LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
     burt.restore_group(paths.NORMAL_ALT_RGR, False)
 
     # CA array PV.
-    ca_arr = caget(integration.IOC_LOCAL_PV_ARR_DBL)
+    ca_arr = caget(ioc.LOCAL_PV_ARR_DBL)
     assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
@@ -172,30 +172,30 @@ def test_various_types_restore():
     one in a soft IOC, other than an array of length one.
     """
     # Randomize IOC start values.
-    caput(integration.IOC_LOCAL_PV_FLOAT, randint(1, 100))
-    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
-    caput(integration.IOC_LOCAL_PV_LONG, randint(1, 100))
-    caput(integration.IOC_LOCAL_PV_ARR_LONG, randint(1, 100))
-    caput(integration.IOC_LOCAL_PV_DBL, randint(1, 100))
-    caput(integration.IOC_LOCAL_PV_ARR_DBL, randint(1, 100))
-    caput(integration.IOC_LOCAL_PV_STR, "dummy")
-    caput(integration.IOC_LOCAL_PV_ARR_STR, ["dummy", "rummy"])
+    caput(ioc.LOCAL_PV_FLOAT, randint(1, 100))
+    caput(ioc.LOCAL_PV_ARR_FLOAT, randint(1, 100))
+    caput(ioc.LOCAL_PV_LONG, randint(1, 100))
+    caput(ioc.LOCAL_PV_ARR_LONG, randint(1, 100))
+    caput(ioc.LOCAL_PV_DBL, randint(1, 100))
+    caput(ioc.LOCAL_PV_ARR_DBL, randint(1, 100))
+    caput(ioc.LOCAL_PV_STR, "dummy")
+    caput(ioc.LOCAL_PV_ARR_STR, ["dummy", "rummy"])
     # Scalar short only available in a waveform in a soft IOC.
-    caput(integration.IOC_LOCAL_PV_ARR_SHORT, randint(1, 100))
+    caput(ioc.LOCAL_PV_ARR_SHORT, randint(1, 100))
     # Ignored cases
-    caput(integration.IOC_LOCAL_PV_ARR_CHAR, "dummy")
+    caput(ioc.LOCAL_PV_ARR_CHAR, "dummy")
 
     # Execute the restore.
     burt.restore(integration.CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP)
 
-    pv_long = caget(integration.IOC_LOCAL_PV_LONG)
-    pv_double = caget(integration.IOC_LOCAL_PV_DBL)
-    pv_arr_double = caget(integration.IOC_LOCAL_PV_ARR_DBL)
-    pv_arr_float = caget(integration.IOC_LOCAL_PV_ARR_FLOAT)
-    pv_str = caget(integration.IOC_LOCAL_PV_STR)
-    pv_arr_str = caget(integration.IOC_LOCAL_PV_ARR_STR)
-    pv_arr_char = caget(integration.IOC_LOCAL_PV_ARR_CHAR)
-    pv_arr_short = caget(integration.IOC_LOCAL_PV_ARR_SHORT)
+    pv_long = caget(ioc.LOCAL_PV_LONG)
+    pv_double = caget(ioc.LOCAL_PV_DBL)
+    pv_arr_double = caget(ioc.LOCAL_PV_ARR_DBL)
+    pv_arr_float = caget(ioc.LOCAL_PV_ARR_FLOAT)
+    pv_str = caget(ioc.LOCAL_PV_STR)
+    pv_arr_str = caget(ioc.LOCAL_PV_ARR_STR)
+    pv_arr_char = caget(ioc.LOCAL_PV_ARR_CHAR)
+    pv_arr_short = caget(ioc.LOCAL_PV_ARR_SHORT)
 
     # Note the curious format in the snap file for this PV.
     for a, b in itertools.zip_longest(pv_arr_char, "Hi Lo!"):

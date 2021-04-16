@@ -11,7 +11,7 @@ import burt
 from burt import SnapParser as sp
 from tests import integration
 from tests import paths
-from tests.integration.softioc import create_ioc_manager
+import tests.integration.softioc as ioc
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
@@ -22,7 +22,7 @@ FLOAT_ZERO_STR = "0.000000e+00"
 NULL_STR = "\\0"
 
 
-ioc_manager = create_ioc_manager()
+ioc_manager = ioc.create_ioc_manager()
 
 
 def setup_module(module):
@@ -76,11 +76,11 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
     DOUBLE_NULL = DOUBLE_ZERO_STR if compat else NULL_STR
     FLOAT_NULL = FLOAT_ZERO_STR if compat else NULL_STR
 
-    caput(integration.IOC_LOCAL_PV_ARR_CHAR, [1, 2, 3])
-    caput(integration.IOC_LOCAL_PV_ARR_DBL, [1.1, 2.2, 3.3])
-    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, [1.1, 2.2, 3.3])
-    caput(integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3])
-    caput(integration.IOC_LOCAL_PV_ARR_STR, ["x", "y", "z"])
+    caput(ioc.LOCAL_PV_ARR_CHAR, [1, 2, 3])
+    caput(ioc.LOCAL_PV_ARR_DBL, [1.1, 2.2, 3.3])
+    caput(ioc.LOCAL_PV_ARR_FLOAT, [1.1, 2.2, 3.3])
+    caput(ioc.LOCAL_PV_ARR_LONG, [1, 2, 3])
+    caput(ioc.LOCAL_PV_ARR_STR, ["x", "y", "z"])
     burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile, compat=compat)
     snap_parser = burt.SnapParser(pyburt_tmpfile)
     _, body = snap_parser.parse()
