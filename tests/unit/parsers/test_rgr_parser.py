@@ -2,15 +2,15 @@
 import pytest
 
 import burt
-import tests
+from tests import paths
 from burt import RgrParser as rp
 from burt.parsers import ParserException
 
 
 def test_base_case():
     """Run the .rgr parser against mostly blank files."""
-    rgr_parser = burt.RgrParser(tests.BLANK_RGR)
-    assert tests.BLANK_RGR == rgr_parser.path
+    rgr_parser = burt.RgrParser(paths.BLANK_RGR)
+    assert paths.BLANK_RGR == rgr_parser.path
 
     with pytest.raises(ParserException):
         rgr_parser.parse()
@@ -32,9 +32,9 @@ def test_inline_comments():
         "/home/ops/burt/backupFiles/SR02A-PC-DDBA/SR-rtf26_190226_164119.snap",
     ]
 
-    rgr_parser = rp(tests.INLINE_COMMENTS_RGR)
+    rgr_parser = rp(paths.INLINE_COMMENTS_RGR)
     header, body = rgr_parser.parse()
-    assert tests.INLINE_COMMENTS_RGR == rgr_parser.path
+    assert paths.INLINE_COMMENTS_RGR == rgr_parser.path
     assert "/home/ops/sample.rqg" == header[rp.RQG_PREFIX]
     assert (
         header["Comments"]
@@ -49,14 +49,14 @@ def test_inline_comments():
 @pytest.mark.parametrize(
     "filename",
     [
-        tests.MISSING_BOTTOM_HEADER_RGR,
-        tests.MISSING_TOP_HEADER_RGR,
-        tests.MISORDERED_HEADER_RGR,
-        tests.DUPLICATE_HEADERS_RGR,
-        tests.MALFORMED_HEADER_TYPO_RGR,
-        tests.MALFORMED_HEADER_PREFIX_TYPO_RGR,
-        tests.MALFORMED_BODY_RGR,
-        tests.MALFORMED_BODY_MISORDERED_CHECKS_RGR,
+        paths.MISSING_BOTTOM_HEADER_RGR,
+        paths.MISSING_TOP_HEADER_RGR,
+        paths.MISORDERED_HEADER_RGR,
+        paths.DUPLICATE_HEADERS_RGR,
+        paths.MALFORMED_HEADER_TYPO_RGR,
+        paths.MALFORMED_HEADER_PREFIX_TYPO_RGR,
+        paths.MALFORMED_BODY_RGR,
+        paths.MALFORMED_BODY_MISORDERED_CHECKS_RGR,
     ],
 )
 def test_malformed_files(filename):
@@ -70,7 +70,7 @@ def test_malformed_but_valid_file():
     """Run the .rgr parser against a malformed but valid file."""
     # Entries should still be parsed fine as header is valid, but values could
     # be problematic.
-    rgr_parser = rp(tests.MALFORMED_HEADER_ENTRIES_RGR)
+    rgr_parser = rp(paths.MALFORMED_HEADER_ENTRIES_RGR)
     rgr_parser.parse()
 
 
@@ -93,9 +93,9 @@ def normal_case():
         "/home/ops/burt/backupFiles/SR02A-PC-DDBA/SR-rtf26_190226_164119.snap",
     ]
 
-    rgr_parser = rp(tests.NORMAL_RGR)
+    rgr_parser = rp(paths.NORMAL_RGR)
     header, body = rgr_parser.parse()
-    assert tests.INLINE_COMMENTS_RGR == rgr_parser.path
+    assert paths.INLINE_COMMENTS_RGR == rgr_parser.path
     assert "/home/ops/sample.rqg" == header[rp.RQG_PREFIX]
     assert (
         header["Comments"]

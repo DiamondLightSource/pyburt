@@ -10,7 +10,7 @@ import pytest
 from cothread.catools import caget, caput
 
 import burt
-import tests
+from tests import paths
 from tests import integration
 
 
@@ -147,7 +147,7 @@ def test_restore_group():
     # Randomize IOC start value.
     caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
-    burt.restore_group(tests.NORMAL_ALT_RGR, False)
+    burt.restore_group(paths.NORMAL_ALT_RGR, False)
 
     # CA array PV.
     ca_arr = caget(integration.IOC_LOCAL_PV_ARR_DBL)

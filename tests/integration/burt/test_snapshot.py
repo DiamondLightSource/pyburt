@@ -8,9 +8,9 @@ import pytest
 from cothread.catools import caput
 
 import burt
-import tests
 from burt import SnapParser as sp
 from tests import integration
+from tests import paths
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
@@ -99,7 +99,7 @@ def test_snapshot_normal(pyburt_tmpfile):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot([tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    burt.take_snapshot([paths.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -117,7 +117,7 @@ def test_snapshot_normal(pyburt_tmpfile):
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert tests.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
+    assert paths.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
 
     # Known scalar PV
     scalar_pv_snapshot = body[0]
@@ -156,7 +156,7 @@ def test_snapshot_group_normal(pyburt_tmpfile):
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot_group(
-        tests.NORMAL_RQG, pyburt_tmpfile, test_comment, test_keywords, False
+        paths.NORMAL_RQG, pyburt_tmpfile, test_comment, test_keywords, False
     )
 
     assert os.path.isfile(pyburt_tmpfile)
@@ -184,7 +184,7 @@ def test_snapshot_req_file_length_bigger_than_pv(pyburt_tmpfile):
     size. This is a case which would not be caught by the parser.
     """
     with pytest.raises(ValueError):
-        burt.take_snapshot([tests.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
+        burt.take_snapshot([paths.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
 
 
 @pytest.mark.xfail  # The output is no longer exactly the same.
@@ -267,11 +267,11 @@ def test_various_types_against_burt(pyburt_tmpfile):
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    burt.take_snapshot([tests.TYPES_REQ], pyburt_tmpfile, comment, keyword)
+    burt.take_snapshot([paths.TYPES_REQ], pyburt_tmpfile, comment, keyword)
 
     # Read into strings to discard time dependent header.
     with open(pyburt_tmpfile, "r") as pyburt_out:
-        with open(tests.CONTROL_ROOM_TYPES_SNAP, "r") as burt_out:
+        with open(paths.CONTROL_ROOM_TYPES_SNAP, "r") as burt_out:
             pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
             burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
 

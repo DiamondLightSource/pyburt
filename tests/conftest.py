@@ -3,15 +3,15 @@ import os
 
 import pytest
 
-import tests
+from tests import paths
 
 
 @pytest.fixture
 def burt_tmpfile():
     """Temporary file used by Burt."""
-    yield tests.TMP_BURT_OUT
+    yield paths.TMP_BURT_OUT
     try:
-        os.remove(tests.TMP_BURT_OUT)
+        os.remove(paths.TMP_BURT_OUT)
     except FileNotFoundError:
         pass
 
@@ -19,8 +19,23 @@ def burt_tmpfile():
 @pytest.fixture
 def pyburt_tmpfile():
     """Temporary file used by Pyburt."""
-    yield tests.TMP_PYBURT_OUT
+    yield paths.TMP_PYBURT_OUT
     try:
-        os.remove(tests.TMP_PYBURT_OUT)
+        os.remove(paths.TMP_PYBURT_OUT)
     except FileNotFoundError:
         pass
+
+
+def pytest_sessionstart():
+    """Set EPICS environment variables for Python code.
+
+    Ensure that only PVs hosted on this machine are available.
+
+    Note that any soft IOCs use these variables at launch - see
+    ioc_manager.py.
+
+    """
+    os.environ["EPICS_CA_SERVER_PORT"] = "5064"
+    os.environ["EPICS_CA_REPEATER_PORT"] = "5065"
+    # os.environ["EPICS_CA_AUTO_ADDR_LIST"] = "NO"
+    # os.environ["EPICS_CA_ADDR_LIST"] = "localhost"
