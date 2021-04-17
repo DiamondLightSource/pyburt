@@ -7,23 +7,17 @@ from tests import paths
 
 
 @pytest.fixture
-def burt_tmpfile():
+def burt_tmpfile(tmp_path):
     """Temporary file used by Burt."""
-    yield paths.TMP_BURT_OUT
-    try:
-        os.remove(paths.TMP_BURT_OUT)
-    except FileNotFoundError:
-        pass
+    pyburt_out = tmp_path / paths.BURT_OUT_FILE
+    return pyburt_out
 
 
 @pytest.fixture
-def pyburt_tmpfile():
+def pyburt_tmpfile(tmp_path):
     """Temporary file used by Pyburt."""
-    yield paths.TMP_PYBURT_OUT
-    try:
-        os.remove(paths.TMP_PYBURT_OUT)
-    except FileNotFoundError:
-        pass
+    pyburt_out = tmp_path / paths.PYBURT_OUT_FILE
+    return pyburt_out
 
 
 def pytest_sessionstart():
