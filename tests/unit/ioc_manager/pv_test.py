@@ -18,8 +18,8 @@ class PVTest(TestCase):
     @classmethod
     def setUpClass(cls):
         # Build a very soft IOC
-        cls.ioc_manager.addAIRecord(MYPV)
-        cls.ioc_manager.startIoc()
+        cls.ioc_manager.add_ai_record(MYPV)
+        cls.ioc_manager.start_ioc()
 
     def setUp(self):
         # initialise
@@ -30,7 +30,7 @@ class PVTest(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.ioc_manager.exitIoc()
+        cls.ioc_manager.exit_ioc()
 
     def test_ioc_setup(self):
         """Test that the IOC is working as expected."""

@@ -15,6 +15,7 @@ sphinx = "*"
 mypy = "*"
 sphinx-rtd-theme = "*"
 epicscorelibs = "*"
+epicsdbbuilder = "*"
 
 [packages]
 # All other package requirements from setup.cfg

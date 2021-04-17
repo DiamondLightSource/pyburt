@@ -12,19 +12,18 @@ from cothread.catools import caget, caput
 import burt
 from tests import paths
 from tests import integration
-from tests.ioc_manager import IocManager
+from tests.integration.softioc import create_ioc_manager
 
 
-ioc_manager = IocManager()
+ioc_manager = create_ioc_manager()
 
 
 def setup_module(module):
-    ioc_manager.addRecords("tests/integration/softioc.db")
-    ioc_manager.startIoc()
+    ioc_manager.start_ioc()
 
 
 def teardown_module(module):
-    ioc_manager.exitIoc()
+    ioc_manager.exit_ioc()
 
 
 def test_restore():

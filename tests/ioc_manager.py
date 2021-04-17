@@ -4,22 +4,37 @@ import subprocess
 import sys
 import time
 from tempfile import NamedTemporaryFile
-from typing import Optional
+from typing import Optional, Dict, List, Any, IO
+from dataclasses import dataclass, field
+
+from epicsdbbuilder import (
+    InitialiseDbd,
+    SetSimpleRecordNames,
+    records,
+    WriteRecords,
+    ResetRecords,
+)
 
 import cothread
 from cothread import catools
 
-from tests.db_templates import (
-    AI_TEMPLATE,
-    BI_TEMPLATE,
-    MBBI_TEMPLATE,
-    MBBO_TEMPLATE,
-    STRINGIN_TEMPLATE,
-    WAVEFORM_TEMPLATE,
-)
-
 EPICS_SERVER_PORT = os.getenv("EPICS_CA_SERVER_PORT", "7064")
 EPICS_REPEATER_PORT = os.getenv("EPICS_CA_REPEATER_PORT", "7065")
+
+InitialiseDbd()
+SetSimpleRecordNames()
+
+
+@dataclass
+class Record:
+    """Represents a single record for use in an IOC.
+
+    There is no ability to link records to each other.
+    """
+
+    typ: str
+    name: str
+    fields: Dict[str, Any] = field(default_factory=dict)
 
 
 class IocManager:
@@ -28,15 +43,37 @@ class IocManager:
 
         IOC will start using defined EPICS environment variables.
         """
-        self.db_string = ""
-        self.db_file = NamedTemporaryFile("w+t")
+        self.record_list: List[Record] = []
+        self.db_file: IO = NamedTemporaryFile("w+t")
         self.process: Optional[subprocess.Popen] = None
 
-    def startIoc(self) -> None:
+    def _add_record(self, typ, pv_name, **fields):
+        assert (
+            not self.is_started()
+        ), f"Cannot add {typ} record to running IOC ({pv_name})"
+        self.record_list.append(Record(typ, pv_name, fields))
+
+    def _generate_db_file(self) -> None:
+        """Convert the list of records into the equivalent db file.
+
+        Note that epicsdbbuilder is currently unable to handle multiple independent
+        record sets. As a result, we keep all of that code in this function, and reset
+        before and after use.
+        """
+        ResetRecords()
+
+        for record in self.record_list:
+            getattr(records, record.typ)(record.name, **record.fields)
+
+        WriteRecords(self.db_file.name)
+        ResetRecords()
+
+    def start_ioc(self) -> None:
         """Launch IOC."""
-        logging.debug(self.db_string)
-        self.db_file.write(self.db_string)
-        self.db_file.flush()
+        self._generate_db_file()
+        with open(self.db_file.name) as f:
+            logging.debug(f.read())
+
         self.process = subprocess.Popen(
             [
                 sys.executable,
@@ -56,7 +93,7 @@ class IocManager:
         )
         self.wait_for_ioc()
 
-    def exitIoc(self) -> None:
+    def exit_ioc(self) -> None:
         """Close the soft IOC."""
         if self.process is not None:
             self.process.communicate("exit")
@@ -67,7 +104,7 @@ class IocManager:
         # This is not cothread API.
         catools._channel_cache.purge()
 
-    def isStarted(self):
+    def is_started(self):
         return self.process is not None
 
     def wait_for_ioc(self, timeout: float = 5) -> None:
@@ -86,79 +123,76 @@ class IocManager:
                 #    logging.info(out)
                 return
 
-    def addRecords(self, path):
-        """Add records from the given db file."""
-        assert not self.isStarted(), "Cannot add records to running IOC"
-        with open(path) as f:
-            self.db_string += f.read()
+    def add_waveform_record(self, pv_name, length, ftvl="DOUBLE", **fields):
+        """Add a new waveform PV record."""
+        final_fields = {"NELM": length, "FTVL": ftvl}
+        final_fields.update(fields)
 
-    def addWaveformRecord(self, pvName, length, ftvl="DOUBLE"):
-        """Add a new float-valued PV waveform record."""
-        assert (
-            not self.isStarted()
-        ), f"Cannot add Waveform record to running IOC ({pvName})"
-        self.db_string += WAVEFORM_TEMPLATE.format(pvName, length, ftvl)
+        self._add_record("waveform", pv_name, **final_fields)
 
-    def addAIRecord(self, pvName, initial_value=0.0):
-        """Add a new float-valued PV AI record."""
-        assert not self.isStarted(), "Cannot add AI record to running IOC (%s)" % pvName
-        self.db_string += AI_TEMPLATE.format(pvName, initial_value)
+    def add_ai_record(self, pv_name, initial_value=0.0, **fields):
+        """Add a new float-valued ai PV record."""
+        final_fields = {"VAL": initial_value}
+        final_fields.update(fields)
 
-    def addBIRecord(self, pvName):
-        """Add a new binary-valued PV AI record."""
-        assert not self.isStarted(), "Cannot add BI record to running IOC (%s)" % pvName
-        self.db_string += BI_TEMPLATE.format(pvName)
+        self._add_record("ai", pv_name, **final_fields)
 
-    def addBORecord(self, pvName):
-        """Add a new binary-valued PV AI record."""
-        assert not self.isStarted(), "Cannot add BO record to running IOC (%s)" % pvName
-        raise NotImplementedError()
+    def add_ao_record(self, pv_name, initial_value=0.0, **fields):
+        """Add a new float-valued ao PV record."""
+        final_fields = {"VAL": initial_value}
+        final_fields.update(fields)
 
-    def addStringInRecord(self, pvName):
+        self._add_record("ao", pv_name, **final_fields)
+
+    def add_bi_record(self, pv_name, **fields):
+        """Add a new binary-valued bi PV record."""
+        self._add_record("bi", pv_name, **fields)
+
+    def add_bo_record(self, pv_name, **fields):
+        """Add a new binary-valued bo PV record."""
+        self._add_record("bo", pv_name, **fields)
+
+    def add_stringin_record(self, pv_name, **fields):
         """Add a new stringin PV record."""
-        assert not self.isStarted(), (
-            "Cannot add stringin record to running IOC (%s)" % pvName
-        )
-        self.db_string += STRINGIN_TEMPLATE.format(pvName)
+        self._add_record("stringin", pv_name, **fields)
 
-    def addStringOutRecord(self, pvName):
+    def add_stringout_record(self, pv_name, **fields):
         """Add a new stringout PV record."""
-        assert not self.isStarted(), (
-            "Cannot add stringout record to running IOC (%s)" % pvName
-        )
-        raise NotImplementedError()
+        self._add_record("stringout", pv_name, **fields)
 
-    def addMBBIRecord(self, pvName, states):
-        """Add a new MBBI PV record."""
-        assert not self.isStarted(), f"Cannot add MBBI record to running IOC ({pvName})"
+    def add_longin_record(self, pv_name, **fields):
+        """Add a new longin PV record."""
+        self._add_record("longin", pv_name, **fields)
+
+    def add_longout_record(self, pv_name, **fields):
+        """Add a new longout PV record."""
+        self._add_record("longout", pv_name, **fields)
+
+    def add_mbbi_record(self, pv_name, states, **fields):
+        """Add a new mbbi PV record."""
         nstates = len(states)
         assert (
             nstates <= 16
-        ), f"MBBI record does not support more than 16 states ({nstates} requested)"
+        ), f"mbbi record does not support more than 16 states ({nstates} requested)"
         states.extend([""] * (16 - nstates))
-        self.db_string += MBBI_TEMPLATE.format(pvName, *states)
 
-    def addMBBORecord(self, pvName, states):
-        """Add a new MBBI PV record."""
-        assert not self.isStarted(), (
-            "Cannot add MBBO record to running IOC (%s)" % pvName
-        )
+        final_fields = self.build_mbbx_fields(states)
+        final_fields.update(fields)
+
+        self._add_record("mbbi", pv_name, **final_fields)
+
+    def add_mbbo_record(self, pv_name, states, **fields):
+        """Add a new mbbo PV record."""
         nstates = len(states)
         assert (
             nstates <= 16
-        ), f"MBBO record does not support more than 16 states ({nstates} required)"
+        ), f"mbbo record does not support more than 16 states ({nstates} requested)"
         states.extend([""] * (16 - nstates))
-        self.db_string += MBBO_TEMPLATE.format(pvName, *states)
 
-    @staticmethod
-    def split_pvname(pvName):
-        """Split the PV name into the ioc_name and PV name.
+        final_fields = self.build_mbbx_fields(states)
+        final_fields.update(fields)
 
-        If the PV name contains multiple ':', e.g. ioc:ILKS:STATE
-        identify everything before the first ':' as the IOC name
-        """
-        (ioc_name, record_name) = pvName.split(":", 1)
-        return ioc_name, record_name
+        self._add_record("mbbo", pv_name, **final_fields)
 
     @staticmethod
     def build_mbbx_fields(states):
@@ -195,8 +229,8 @@ class IocManager:
         vl_dict = {nn + "VL": i for i, nn in enumerate(number_names)}
 
         # All calls use VAL=0, PINI='YES'
-        kwargs = {"VAL": 0, "PINI": "YES"}
-        kwargs.update(st_dict)
-        kwargs.update(vl_dict)
+        fields = {"VAL": 0, "PINI": "YES"}
+        fields.update(st_dict)
+        fields.update(vl_dict)
 
-        return kwargs
+        return fields

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b68be960304c3662e47711b60e6e22bc757f27c43494acd55a3a95f2acb32efa"
+            "sha256": "2cf32f2b09cf704c8c4d3174d02dcae7f24f107eb4fa2c15d2105fad7923d6b3"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -219,6 +219,14 @@
             ],
             "index": "pypi",
             "version": "==7.0.4.99.1.2"
+        },
+        "epicsdbbuilder": {
+            "hashes": [
+                "sha256:0e751b6ba9a07f96d165294716740cf6db4cd03812c2652b3322577c537279c9",
+                "sha256:623ae286a8a491b3c43f33cdc1e4cbf679be8b3d3109340c4c3e17013cf8f114"
+            ],
+            "index": "pypi",
+            "version": "==1.4"
         },
         "flake8": {
             "hashes": [
