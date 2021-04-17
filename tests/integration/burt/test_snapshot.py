@@ -11,6 +11,7 @@ import burt
 from burt import SnapParser as sp
 from tests import integration
 from tests import paths
+from tests.ioc_manager import IocManager
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
@@ -19,6 +20,18 @@ NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 DOUBLE_ZERO_STR = "0.000000000000000e+00"
 FLOAT_ZERO_STR = "0.000000e+00"
 NULL_STR = "\\0"
+
+
+ioc_manager = IocManager()
+
+
+def setup_module(module):
+    ioc_manager.addRecords("tests/integration/softioc.db")
+    ioc_manager.startIoc()
+
+
+def teardown_module(module):
+    ioc_manager.exitIoc()
 
 
 @pytest.mark.parametrize(

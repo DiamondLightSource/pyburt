@@ -29,8 +29,6 @@ def pyburt_tmpfile():
 def pytest_sessionstart():
     """Set EPICS environment variables for Python code.
 
-    Ensure that only PVs hosted on this machine are available.
-
     Note that any soft IOCs use these variables at launch - see
     ioc_manager.py.
 
