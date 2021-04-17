@@ -16,7 +16,7 @@ from cothread.catools import (
 )
 
 import burt
-import test
+import tests
 from burt.parsers import ParserException, SnapParser
 from burt.write import _snap_entry_to_ca_type
 
@@ -52,7 +52,7 @@ def test_restore_normal(mock_connect, mock_caput):
         MockCainfo(DBR_FLOAT),
     ]
 
-    burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+    burt.restore(tests.ARRAYS_AND_SCALARS_SNAP)
     args, _ = mock_caput.call_args_list[0]
     keys, values = args
 
@@ -77,32 +77,32 @@ def test_restore_channel_types(mock_connect, mock_caput):
     # Arrays are always coerced to float, so should not throw.
     for int_channel_type in INT_CHANNEL_TYPES:
         mock_channel_types[0] = MockCainfo(int_channel_type)
-        burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+        burt.restore(tests.ARRAYS_AND_SCALARS_SNAP)
 
     # Trying to convert float from an int channel type.
     # Should now just log and convert to int anyway, instead of failing.
     for int_channel_type in INT_CHANNEL_TYPES:
         mock_channel_types[1] = MockCainfo(int_channel_type)
-        burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+        burt.restore(tests.ARRAYS_AND_SCALARS_SNAP)
 
     # Trying to convert float from a string channel type.
     for str_channel_type in STR_CHANNEL_TYPES:
         mock_channel_types[1] = MockCainfo(str_channel_type)
-        burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+        burt.restore(tests.ARRAYS_AND_SCALARS_SNAP)
 
     # Enums: "lower voltage", NIL, etc.
     # Trying to convert an enum string from an int channel type.
     for int_channel_type in INT_CHANNEL_TYPES:
         mock_channel_types[0] = MockCainfo(int_channel_type)
         with pytest.raises(ValueError):
-            burt.restore(test.ENUM_SNAP)
+            burt.restore(tests.ENUM_SNAP)
         mock_channel_types[1] = MockCainfo(int_channel_type)
         with pytest.raises(ValueError):
-            burt.restore(test.ENUM_SNAP)
+            burt.restore(tests.ENUM_SNAP)
     for str_channel_type in STR_CHANNEL_TYPES:
         mock_channel_types[0] = MockCainfo(str_channel_type)
         mock_channel_types[1] = MockCainfo(str_channel_type)
-        burt.restore(test.ENUM_SNAP)
+        burt.restore(tests.ENUM_SNAP)
 
 
 @mock.patch("burt.write.caput")
@@ -114,7 +114,7 @@ def test_restore_write_fail(mock_connect, mock_caput):
     # TODO: discuss if anything special needs to occur on write failure.
     # Probable solution is to not do anything.
     with pytest.raises(Exception):
-        burt.restore(test.ARRAYS_AND_SCALARS_WITH_MODS_SNAP)
+        burt.restore(tests.ARRAYS_AND_SCALARS_WITH_MODS_SNAP)
 
 
 @mock.patch("burt.write.caput")
@@ -122,13 +122,13 @@ def test_restore_write_fail(mock_connect, mock_caput):
 @pytest.mark.parametrize(
     "snapfile",
     [
-        test.MISSING_BOTTOM_HEADER_SNAP,
-        test.MISSING_TOP_HEADER_SNAP,
-        test.MISORDERED_BURT_HEADER_SNAP,
-        test.DUPLICATE_BURT_HEADERS_SNAP,
-        test.MALFORMED_HEADER_TYPO_SNAP,
-        test.MALFORMED_BODY_SNAP,
-        test.MALFORMED_HEADER_COLONS_SNAP,
+        tests.MISSING_BOTTOM_HEADER_SNAP,
+        tests.MISSING_TOP_HEADER_SNAP,
+        tests.MISORDERED_BURT_HEADER_SNAP,
+        tests.DUPLICATE_BURT_HEADERS_SNAP,
+        tests.MALFORMED_HEADER_TYPO_SNAP,
+        tests.MALFORMED_BODY_SNAP,
+        tests.MALFORMED_HEADER_COLONS_SNAP,
     ],
 )
 def test_restore_bad_snap(mock_connect, mock_caput, snapfile):
@@ -143,7 +143,7 @@ def test_restore_ok_snap(mock_connect, mock_caput):
     """Run BURT restore against ok .snap file."""
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")] * 2
     # Strange entries, but should not raise an exception.
-    burt.restore(test.MALFORMED_HEADER_ENTRIES_SNAP)
+    burt.restore(tests.MALFORMED_HEADER_ENTRIES_SNAP)
 
 
 @pytest.mark.parametrize("filename", ["", "goodbyeworld", "helloworld.snap"])
@@ -179,7 +179,7 @@ def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
 
     mock_connect.return_value = [MockCainfo()] * 4
 
-    failed_pvs = burt.restore(test.ARRAYS_AND_SCALARS_SNAP)
+    failed_pvs = burt.restore(tests.ARRAYS_AND_SCALARS_SNAP)
 
     assert failed_pvs == pvs_from_snap
 
@@ -187,7 +187,7 @@ def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
 def test_blank_restore():
     """Run burt restore against a blank .snap file."""
     with pytest.raises(ParserException):
-        burt.restore(test.BLANK_SNAP)
+        burt.restore(tests.BLANK_SNAP)
 
 
 @mock.patch("burt.write.caput")
@@ -196,7 +196,7 @@ def test_restore_group_normal(mock_connect, mock_caput):
     """Run BURT restore against a normal case."""
     # Just one caput of one PV expected.
     mock_caput.return_value = [cothread.catools.ca_nothing("dummy")]
-    burt.restore_group(test.NORMAL_ALT_RGR, False)
+    burt.restore_group(tests.NORMAL_ALT_RGR, False)
 
 
 @pytest.mark.parametrize(

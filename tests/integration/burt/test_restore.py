@@ -10,8 +10,8 @@ import pytest
 from cothread.catools import caget, caput
 
 import burt
-import test
-from test import integration
+import tests
+from tests import integration
 
 
 NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
@@ -147,7 +147,7 @@ def test_restore_group():
     # Randomize IOC start value.
     caput(integration.IOC_LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
-    burt.restore_group(test.NORMAL_ALT_RGR, False)
+    burt.restore_group(tests.NORMAL_ALT_RGR, False)
 
     # CA array PV.
     ca_arr = caget(integration.IOC_LOCAL_PV_ARR_DBL)

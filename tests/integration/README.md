@@ -47,10 +47,10 @@ requires running BURT on a set of `.req` and `.snap` files.
 $ pwd
 .../pyburt
 
-$ softIoc -d test/integration/softioc.db
+$ softIoc -d tests/integration/softioc.db
 dbLoadDatabase("/home/will/code/epics-base/bin/linux-x86_64/../../dbd/softIoc.dbd")
 softIoc_registerRecordDeviceDriver(pdbbase)
-dbLoadRecords("test/integration/softioc.db")
+dbLoadRecords("tests/integration/softioc.db")
 iocInit()
 Starting iocInit
 ############################################################################
@@ -61,7 +61,7 @@ iocRun: All initialization complete
 epics>
 ```
 
-2.) In a separate terminal, run the pytest integration tests via `pipenv run python -m pytest test/integration`.
+2.) In a separate terminal, run the pytest integration tests via `pipenv run python -m pytest tests/integration`.
 This will perform some BURT restore calls on the test IOC
 server, some snapshot tests on real PVs at DLS, as well
 as comparison tests against vanilla BURT.
@@ -72,7 +72,7 @@ Observe the output and check that all tests pass. This may take several seconds 
 $ pwd
 .../pyburt
 
-$ pipenv run python -m pytest -vv test/integration
+$ pipenv run python -m pytest -vv tests/integration
 ========================================== test session starts ==========================================
 platform linux -- Python 3.6.9, pytest-5.0.0, py-1.8.0, pluggy-0.12.0 -- /home/will/.local/share/virtualenvs/pyburt-6wgA0aKN/bin/python
 cachedir: .pytest_cache
@@ -80,20 +80,20 @@ rootdir: /home/will/code/pyburt
 plugins: cov-2.7.1
 collected 14 items
 
-test/integration/burt/test_restore.py::test_restore PASSED                                        [  7%]
-test/integration/burt/test_restore.py::test_restore_long PASSED                                   [ 14%]
-test/integration/burt/test_restore.py::test_restore_string PASSED                                 [ 21%]
-test/integration/burt/test_restore.py::test_restore_enum err PASSED                               [ 28%]
-test/integration/burt/test_restore.py::test_restore_group PASSED                                  [ 35%]
-test/integration/burt/test_restore.py::test_speed_restore SKIPPED                                 [ 42%]
-test/integration/burt/test_restore.py::test_various_types_restore PASSED                          [ 50%]
-test/integration/burt/test_snapshot.py::test_snapshot_normal SKIPPED                              [ 57%]
-test/integration/burt/test_snapshot.py::test_snapshot_group_normal XFAIL                          [ 64%]
-test/integration/burt/test_snapshot.py::test_snapshot_req_file_length_bigger_than_pv PASSED       [ 71%]
-test/integration/burt/test_snapshot.py::test_burt_vanilla_rb XFAIL                                [ 78%]
-test/integration/burt/test_snapshot.py::test_speed_snapshot SKIPPED                               [ 85%]
-test/integration/burt/test_snapshot.py::test_various_types_against_burt SKIPPED                   [ 92%]
-test/integration/burt/test_snapshot.py::test_speed_snapshot_group SKIPPED                         [100%]
+tests/integration/burt/test_restore.py::test_restore PASSED                                        [  7%]
+tests/integration/burt/test_restore.py::test_restore_long PASSED                                   [ 14%]
+tests/integration/burt/test_restore.py::test_restore_string PASSED                                 [ 21%]
+tests/integration/burt/test_restore.py::test_restore_enum err PASSED                               [ 28%]
+tests/integration/burt/test_restore.py::test_restore_group PASSED                                  [ 35%]
+tests/integration/burt/test_restore.py::test_speed_restore SKIPPED                                 [ 42%]
+tests/integration/burt/test_restore.py::test_various_types_restore PASSED                          [ 50%]
+tests/integration/burt/test_snapshot.py::test_snapshot_normal SKIPPED                              [ 57%]
+tests/integration/burt/test_snapshot.py::test_snapshot_group_normal XFAIL                          [ 64%]
+tests/integration/burt/test_snapshot.py::test_snapshot_req_file_length_bigger_than_pv PASSED       [ 71%]
+tests/integration/burt/test_snapshot.py::test_burt_vanilla_rb XFAIL                                [ 78%]
+tests/integration/burt/test_snapshot.py::test_speed_snapshot SKIPPED                               [ 85%]
+tests/integration/burt/test_snapshot.py::test_various_types_against_burt SKIPPED                   [ 92%]
+tests/integration/burt/test_snapshot.py::test_speed_snapshot_group SKIPPED                         [100%]
 
 ============================ 7 passed, 5 skipped, 2 xfailed in 0.59 seconds =============================
 ```
