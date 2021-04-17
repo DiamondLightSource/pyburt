@@ -69,8 +69,8 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
     caput(integration.IOC_LOCAL_PV_ARR_FLOAT, [1.1, 2.2, 3.3])
     caput(integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3])
     caput(integration.IOC_LOCAL_PV_ARR_STR, ["x", "y", "z"])
-    burt.take_snapshot([integration.ARR_REQ], "out.snap", compat=compat)
-    snap_parser = burt.SnapParser("out.snap")
+    burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile, compat=compat)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
     _, body = snap_parser.parse()
     char_array_entry = body[5]
     char_expected = ["\x01", "\x02", "\x03"] + [NULL_STR] * 5
