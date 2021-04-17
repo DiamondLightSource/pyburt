@@ -7,13 +7,17 @@ TYPES_REQ = "tests/resources/req/types.req"
 MALFORMED_REQ = "tests/resources/req/malformed.req"
 MALFORMED_SAVE_LEN_NEG_INT_REQ = "tests/resources/req/malformed_save_len_neg_int.req"
 MALFORMED_SAVE_LEN_NON_INT_REQ = "tests/resources/req/malformed_save_len_non_int.req"
-MALFORMED_SAVE_LEN_TOO_LARGE_REQ = "tests/resources/req/malformed_save_len_too_large.req"
+MALFORMED_SAVE_LEN_TOO_LARGE_REQ = (
+    "tests/resources/req/malformed_save_len_too_large.req"
+)
 
 # Shared test .snap files.
 SIMPLE_SNAP = "tests/resources/snap/simple.snap"
 ENUM_SNAP = "tests/resources/snap/enum_with_spaces.snap"
 ARRAYS_AND_SCALARS_SNAP = "tests/resources/snap/arrays_and_scalars.snap"
-ARRAYS_AND_SCALARS_WITH_MODS_SNAP = "tests/resources/snap/arrays_and_scalars_with_mods.snap"
+ARRAYS_AND_SCALARS_WITH_MODS_SNAP = (
+    "tests/resources/snap/arrays_and_scalars_with_mods.snap"
+)
 BLANK_SNAP = "tests/resources/snap/blank.snap"
 SCALARS_SNAP = "tests/resources/snap/scalars.snap"
 INLINE_COMMENTS_SNAP = "tests/resources/snap/inline_comments.snap"
@@ -24,11 +28,17 @@ CONTROL_ROOM_TYPES_SNAP = "tests/resources/snap/types.controlroom.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = "tests/resources/snap/duplicate_burt_headers.snap"
 MALFORMED_BODY_SNAP = "tests/resources/snap/malformed_body.snap"
-MALFORMED_HEADER_COLONS_SNAP = "tests/resources/snap/malformed_header_missing_colons.snap"
-MALFORMED_HEADER_ENTRIES_SNAP = "tests/resources/snap/malformed_header_strange_entries.snap"
+MALFORMED_HEADER_COLONS_SNAP = (
+    "tests/resources/snap/malformed_header_missing_colons.snap"
+)
+MALFORMED_HEADER_ENTRIES_SNAP = (
+    "tests/resources/snap/malformed_header_strange_entries.snap"
+)
 MALFORMED_HEADER_BURT_TYPO_SNAP = "tests/resources/snap/malformed_header_burt_typo.snap"
 MALFORMED_HEADER_TYPO_SNAP = "tests/resources/snap/malformed_header_typo_prefixes.snap"
-MALFORMED_FOOTER_PREFIX_SNAP = "tests/resources/snap/malformed_footer_unknown_prefix.snap"
+MALFORMED_FOOTER_PREFIX_SNAP = (
+    "tests/resources/snap/malformed_footer_unknown_prefix.snap"
+)
 MALFORMED_FOOTER_NON_INT_LENGTH_SNAP = (
     "tests/resources/snap/malformed_footer_non_int_length.snap"
 )
@@ -49,9 +59,13 @@ MALFORMED_BODY_RGR = "tests/resources/rgr/malformed_body.rgr"
 MALFORMED_BODY_MISORDERED_CHECKS_RGR = (
     "tests/resources/rgr/malformed_body_misordered_checks.rgr"
 )
-MALFORMED_HEADER_ENTRIES_RGR = "tests/resources/rgr/malformed_header_strange_entries.rgr"
+MALFORMED_HEADER_ENTRIES_RGR = (
+    "tests/resources/rgr/malformed_header_strange_entries.rgr"
+)
 MALFORMED_HEADER_TYPO_RGR = "tests/resources/rgr/malformed_header_typo.rgr"
-MALFORMED_HEADER_PREFIX_TYPO_RGR = "tests/resources/rgr/malformed_header_typo_prefixes.rgr"
+MALFORMED_HEADER_PREFIX_TYPO_RGR = (
+    "tests/resources/rgr/malformed_header_typo_prefixes.rgr"
+)
 MISORDERED_HEADER_RGR = "tests/resources/rgr/misordered_headers.rgr"
 MISSING_BOTTOM_HEADER_RGR = "tests/resources/rgr/missing_bottom_rgr_header.rgr"
 MISSING_TOP_HEADER_RGR = "tests/resources/rgr/missing_top_rgr_header.rgr"
