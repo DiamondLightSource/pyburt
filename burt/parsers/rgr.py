@@ -18,7 +18,7 @@ class RgrParser(BurtParser):
         <.check file path n>
         <.snap file path n>
 
-    See the testables folder for examples.
+    See the tests/resources folder for examples.
 
     Attributes:
         path (str): The path to the .rgr file.

@@ -7,6 +7,6 @@ Keywords:  cool,snap,file
 Comments:  Hello World
 Type:      Absolute
 Directory: dir
-Req File: testables/req/normal.req
+Req File: tests/resources/req/normal.req
 --- End BURT header
 SR01C-DI-COL-01:CENTRE 2 1.000000000000000e+00 2.000000000000000e+00

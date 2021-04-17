@@ -7,7 +7,7 @@ Keywords:
 Comments:  
 Type:      Absolute
 Directory: /home/will/code/pyburt
-Req File: testables/req/array.req
+Req File: tests/resources/req/array.req
 --- End BURT header
 SR-CS-SOFT-01:CHAR_ARR 8 \0 \0 \0 \0 \0 \0 \0 \0
 SR-CS-SOFT-01:DOUBLE_ARR 8 \0 \0 \0 \0 \0 \0 \0 \0

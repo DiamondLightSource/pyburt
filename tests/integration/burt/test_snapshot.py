@@ -130,7 +130,7 @@ def test_snapshot_normal(pyburt_tmpfile):
     assert len(snapshot_ca_arr_pv.vals) == 936
 
     # The PVs below have a known specified max save length (see
-    # testables/normal.req) and readonly modifiers.
+    # tests/resources/normal.req) and readonly modifiers.
     snapshot_save_length_spec_1 = body[4]
     assert snapshot_save_length_spec_1.name == "SR-DI-PICO-01:BUCKETS"
     assert len(snapshot_save_length_spec_1.vals) == 5

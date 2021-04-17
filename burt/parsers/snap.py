@@ -23,7 +23,7 @@ class SnapParser(BurtParser):
 
     Where <DATATYPE LENGTH> is 1 if the PV readings are scalar.
 
-    See the testables folder for examples.
+    See the tests/resources folder for examples.
 
     Attributes:
         path (str): The path to the .snap file.

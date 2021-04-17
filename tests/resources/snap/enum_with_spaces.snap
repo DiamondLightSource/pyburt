@@ -7,7 +7,7 @@ Keywords:  cool,snap,file
 Comments:  Hello World
 Type:      Absolute
 Directory: dir
-Req File:  testables/req/normal.req
+Req File:  tests/resources/req/normal.req
 --- End BURT header
 SR01C-DI-COL-01:ENUM 1 NIL
 SR01C-DI-COL-01:ENUM2 1 "lower voltage"

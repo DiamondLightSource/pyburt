@@ -15,7 +15,7 @@ class RqgParser(BurtParser):
         ...
         <.req file path n>
 
-    See the testables folder for examples.
+    See the tests/resources folder for examples.
 
     Attributes:
         path (str): The absolute path to a .rqg file.
