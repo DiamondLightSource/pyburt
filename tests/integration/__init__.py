@@ -2,7 +2,6 @@
 
 # Shared test .req files.
 NORMAL_REQ = "tests/resources/req/normal.req"
-BCDORBIT_REQ = "/home/ops/burt/requestFiles/bcdorbit.req"
 ARR_REQ = "tests/resources/req/array.req"
 
 # Shared test .snap files.
@@ -11,7 +10,6 @@ SCALAR_SNAP = "tests/resources/snap/ioc_restore_scalar.snap"
 LONG_SNAP = "tests/resources/snap/ioc_restore_long.snap"
 ENUM_SNAP = "tests/resources/snap/ioc_restore_enum.snap"
 STRING_SNAP = "tests/resources/snap/ioc_restore_string.snap"
-BCDORBIT_SNAP = "tests/resources/snap/ioc_restore_bcdorbit.snap"
 CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP = (
     "tests/resources/snap/ioc_restore_control_room_types.snap"
 )

@@ -201,40 +201,6 @@ def test_burt_vanilla_rb(burt_tmpfile, pyburt_tmpfile):
 
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_speed_snapshot(pyburt_tmpfile):
-    """Speed comparison between different snapshot schemes."""
-    test_comment = "Hello World"
-    test_keywords = "cool,snap,file"
-
-    t0 = time.time()
-    burt.take_snapshot(
-        [integration.BCDORBIT_REQ], pyburt_tmpfile, test_comment, test_keywords
-    )
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_snapshot_pyburt_1:{tend}")
-
-    t0 = time.time()
-    burt.take_snapshot(
-        [integration.BCDORBIT_REQ], pyburt_tmpfile, test_comment, test_keywords
-    )
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_snapshot_pyburt_2:{tend}")
-
-    t0 = time.time()
-    _vanilla_burtrb(
-        "/home/ops/burt/requestFiles/bcdorbit.req",
-        pyburt_tmpfile,
-        test_comment,
-        test_keywords,
-    )
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_snapshot_burt_vanilla:{tend}")
-
-
-@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_various_types_against_burt(pyburt_tmpfile):
     """Test edge case types against old burt.
 

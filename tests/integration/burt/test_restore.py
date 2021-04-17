@@ -14,9 +14,6 @@ from tests import paths
 from tests import integration
 
 
-NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
-
-
 def test_restore():
     """Runs burt restore against a .snap file with ca array and scalar pvs.
 
@@ -154,22 +151,6 @@ def test_restore_group():
     assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
-
-
-@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_speed_restore():
-    """Speed comparison between different restore schemes."""
-    t0 = time.time()
-    burt.restore(integration.BCDORBIT_SNAP)
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_restore_1:{tend}")
-
-    t0 = time.time()
-    _vanilla_burtwb(integration.BCDORBIT_SNAP)
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_restore_burt_vanilla:{tend}")
 
 
 def test_various_types_restore():
