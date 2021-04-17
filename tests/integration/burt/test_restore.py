@@ -10,8 +10,8 @@ import pytest
 from cothread.catools import caget, caput
 
 import burt
-from tests import paths
-from tests import integration
+from tests import paths as core_paths
+from tests.integration import paths
 import tests.integration.softioc as ioc
 
 
@@ -36,14 +36,14 @@ def test_restore():
     caput(ioc.LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
     # CA array PV.
-    burt.restore(integration.ARR_SNAP)
+    burt.restore(paths.ARR_SNAP)
     ca_arr = caget(ioc.LOCAL_PV_ARR_DBL)
     assert abs(ca_arr[0] - 3.259328000000000e00) <= 0.2  # Allowed truncation margin
     assert ca_arr[1] == 4
     assert ca_arr[2] == -1
 
     # Scalar PV.
-    burt.restore(integration.SCALAR_SNAP)
+    burt.restore(paths.SCALAR_SNAP)
     ca_long = caget(ioc.LOCAL_PV_LONG)
     assert ca_long == 2
 
@@ -58,7 +58,7 @@ def test_restore_long():
     caput(ioc.LOCAL_PV_LONG, randint(1, 100))
 
     # CA long PV.
-    burt.restore(integration.LONG_SNAP)
+    burt.restore(paths.LONG_SNAP)
 
     # Before fixing #34 this value would incorrectly read 1.
     new_val = caget(ioc.LOCAL_PV_LONG)
@@ -73,7 +73,7 @@ def test_restore_string():
     """
     # Randomize IOC start value.
     caput(ioc.LOCAL_PV_STR, "dummyEnumStr")
-    burt.restore(integration.STRING_SNAP)
+    burt.restore(paths.STRING_SNAP)
 
     assert caget(ioc.LOCAL_PV_STR) == "DIAD"
 
@@ -86,7 +86,7 @@ def test_restore_enum():
     """
     # Randomize IOC start value.
     caput(ioc.LOCAL_PV_ENUM, "OK")
-    burt.restore(integration.ENUM_SNAP)
+    burt.restore(paths.ENUM_SNAP)
     # Gets the numeric value.
     assert caget(ioc.LOCAL_PV_ENUM) == 1
 
@@ -110,7 +110,7 @@ def test_restore_null_arrays(pv, set_value, expected):
     # Ensure IOC start value is not zeros.
     caput(pv, set_value)
     assert not numpy.all(caget(pv) == expected)
-    burt.restore(integration.NULL_ARRAY_SNAP)
+    burt.restore(paths.NULL_ARRAY_SNAP)
     assert numpy.all(caget(pv) == expected)
 
 
@@ -128,7 +128,7 @@ def test_restore_partial_numeric_arrays(pv, expected):
     # Ensure IOC start value is not zeros.
     caput(pv, [0])
     assert not numpy.all(caget(pv) == expected)
-    burt.restore(integration.PARTIAL_ARRAY_SNAP)
+    burt.restore(paths.PARTIAL_ARRAY_SNAP)
 
     val = caget(pv)
     numpy.testing.assert_allclose(val, expected)
@@ -139,7 +139,7 @@ def test_restore_partial_string_array():
     # Ensure IOC start value is not zeros.
     pv = ioc.LOCAL_PV_ARR_STR
     caput(pv, ["hello", "world"])
-    burt.restore(integration.PARTIAL_ARRAY_SNAP)
+    burt.restore(paths.PARTIAL_ARRAY_SNAP)
 
     val = caget(pv)
     assert len(val) == 2
@@ -156,7 +156,7 @@ def test_restore_group():
     # Randomize IOC start value.
     caput(ioc.LOCAL_PV_ARR_FLOAT, randint(1, 100))
 
-    burt.restore_group(paths.NORMAL_ALT_RGR, False)
+    burt.restore_group(core_paths.NORMAL_ALT_RGR, False)
 
     # CA array PV.
     ca_arr = caget(ioc.LOCAL_PV_ARR_DBL)
@@ -186,7 +186,7 @@ def test_various_types_restore():
     caput(ioc.LOCAL_PV_ARR_CHAR, "dummy")
 
     # Execute the restore.
-    burt.restore(integration.CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP)
+    burt.restore(paths.CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP)
 
     pv_long = caget(ioc.LOCAL_PV_LONG)
     pv_double = caget(ioc.LOCAL_PV_DBL)
