@@ -1,18 +1,18 @@
 """Various tests for the req parser."""
 import pytest
 
-import test
+import tests
 from burt import ReqParser as rp
 from burt.parsers import ParserException
 
 
 def test_base_case():
     """Run the .req parser against mostly blank files."""
-    req_parser = rp(test.BLANK_REQ)
-    assert test.BLANK_REQ == req_parser.path
+    req_parser = rp(tests.BLANK_REQ)
+    assert tests.BLANK_REQ == req_parser.path
 
     _, body = req_parser.parse()
-    assert test.BLANK_REQ == req_parser.path
+    assert tests.BLANK_REQ == req_parser.path
     assert 0 == len(body)
 
 
@@ -24,9 +24,9 @@ def test_inline_comments():
         rp.REQ_PV("SR01C-DI-COL-01:LEFT", None, None),
     ]
 
-    req_parser = rp(test.INLINE_COMMENTS_REQ)
+    req_parser = rp(tests.INLINE_COMMENTS_REQ)
     _, body = req_parser.parse()
-    assert test.INLINE_COMMENTS_REQ == req_parser.path
+    assert tests.INLINE_COMMENTS_REQ == req_parser.path
     assert 3 == len(body)
     assert correct_pv_list == body
 
@@ -34,9 +34,9 @@ def test_inline_comments():
 @pytest.mark.parametrize(
     "filename",
     [
-        test.MALFORMED_REQ,
-        test.MALFORMED_SAVE_LEN_NEG_INT_REQ,
-        test.MALFORMED_SAVE_LEN_NON_INT_REQ,
+        tests.MALFORMED_REQ,
+        tests.MALFORMED_SAVE_LEN_NEG_INT_REQ,
+        tests.MALFORMED_SAVE_LEN_NON_INT_REQ,
     ],
 )
 def test_malformed_files(filename):
@@ -63,10 +63,10 @@ def test_req_parser_normal():
         rp.REQ_PV("SR-CS-RING-01:MODE", None, None),
     ]
 
-    req_parser = rp(test.NORMAL_REQ)
-    assert test.NORMAL_REQ == req_parser.path
+    req_parser = rp(tests.NORMAL_REQ)
+    assert tests.NORMAL_REQ == req_parser.path
 
     _, body = req_parser.parse()
-    assert test.NORMAL_REQ == req_parser.path
+    assert tests.NORMAL_REQ == req_parser.path
     assert 12 == len(body)
     assert correct_pv_list == body

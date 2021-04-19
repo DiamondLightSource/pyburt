@@ -3,15 +3,15 @@ import os
 
 import pytest
 
-import test
+import tests
 
 
 @pytest.fixture
 def burt_tmpfile():
     """Temporary file used by Burt."""
-    yield test.TMP_BURT_OUT
+    yield tests.TMP_BURT_OUT
     try:
-        os.remove(test.TMP_BURT_OUT)
+        os.remove(tests.TMP_BURT_OUT)
     except FileNotFoundError:
         pass
 
@@ -19,8 +19,8 @@ def burt_tmpfile():
 @pytest.fixture
 def pyburt_tmpfile():
     """Temporary file used by Pyburt."""
-    yield test.TMP_PYBURT_OUT
+    yield tests.TMP_PYBURT_OUT
     try:
-        os.remove(test.TMP_PYBURT_OUT)
+        os.remove(tests.TMP_PYBURT_OUT)
     except FileNotFoundError:
         pass

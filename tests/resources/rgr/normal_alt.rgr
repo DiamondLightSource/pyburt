@@ -6,4 +6,4 @@ Rqg File: /home/ops/sample.rqg
 /home/ops/burt/checkFiles/fastchic.check
 % Line comment, with blank line below.
 
-testables/snap/ioc_restore_array.snap
+tests/resources/snap/ioc_restore_array.snap

@@ -15,7 +15,7 @@ class ReqParser(BurtParser):
         % File comments are preceded by a percentage sign.
         <Optional prefix> <PV N> <Optional save length>
 
-    See the testables folder for examples.
+    See the tests/resources folder for examples.
 
     Attributes:
         path (str): The path to the .req file.

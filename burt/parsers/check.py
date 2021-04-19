@@ -22,7 +22,7 @@ class CheckParser(BurtParser):
     Where <OPTIONAL TOLERANCE> defaults to 0 if not specified, and
     abs(<PV VALUE> - <TARGET>) < <TOLERANCE> otherwise the check fails.
 
-    See the testables folder for examples.
+    See the tests/resources folder for examples.
 
     Attributes:
         path (str): The path to the .check file.

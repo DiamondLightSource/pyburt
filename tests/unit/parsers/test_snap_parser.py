@@ -2,15 +2,15 @@
 import pytest
 
 import burt
-import test
+import tests
 from burt import SnapParser as sp
 from burt.parsers import ParserException
 
 
 def test_base_case():
     """Run the .snap parser against mostly blank files."""
-    snap_parser = burt.SnapParser(test.BLANK_SNAP)
-    assert test.BLANK_SNAP == snap_parser.path
+    snap_parser = burt.SnapParser(tests.BLANK_SNAP)
+    assert tests.BLANK_SNAP == snap_parser.path
 
     with pytest.raises(ParserException):
         snap_parser.parse()
@@ -25,9 +25,9 @@ def test_inline_comments():
         sp.SNAP_PV("SR01C-DI-COL-03:POS3", 1, ["666"], None),
     ]
 
-    snap_parser = sp(test.INLINE_COMMENTS_SNAP)
+    snap_parser = sp(tests.INLINE_COMMENTS_SNAP)
     header, body = snap_parser.parse()
-    assert test.INLINE_COMMENTS_SNAP == snap_parser.path
+    assert tests.INLINE_COMMENTS_SNAP == snap_parser.path
     assert 4 == len(body)
     assert "Tue Sep 21 15:07:59 2010" == header[sp.TIME_PREFIX]
     assert "ops-cc83 (Chris Christou)" == header[sp.LOGINID_PREFIX]
@@ -49,16 +49,16 @@ def test_inline_comments():
 @pytest.mark.parametrize(
     "invalid_snap_file",
     [
-        test.MISSING_BOTTOM_HEADER_SNAP,
-        test.MISSING_TOP_HEADER_SNAP,
-        test.MISORDERED_BURT_HEADER_SNAP,
-        test.DUPLICATE_BURT_HEADERS_SNAP,
-        test.MALFORMED_HEADER_BURT_TYPO_SNAP,
-        test.MALFORMED_HEADER_TYPO_SNAP,
-        test.MALFORMED_BODY_SNAP,
-        test.MALFORMED_HEADER_COLONS_SNAP,
-        test.MALFORMED_FOOTER_PREFIX_SNAP,
-        test.MALFORMED_FOOTER_NON_INT_LENGTH_SNAP,
+        tests.MISSING_BOTTOM_HEADER_SNAP,
+        tests.MISSING_TOP_HEADER_SNAP,
+        tests.MISORDERED_BURT_HEADER_SNAP,
+        tests.DUPLICATE_BURT_HEADERS_SNAP,
+        tests.MALFORMED_HEADER_BURT_TYPO_SNAP,
+        tests.MALFORMED_HEADER_TYPO_SNAP,
+        tests.MALFORMED_BODY_SNAP,
+        tests.MALFORMED_HEADER_COLONS_SNAP,
+        tests.MALFORMED_FOOTER_PREFIX_SNAP,
+        tests.MALFORMED_FOOTER_NON_INT_LENGTH_SNAP,
     ],
 )
 def test_malformed_snap_files(invalid_snap_file):
@@ -72,7 +72,7 @@ def test_acceptably_malformed_snap_file():
     """Run the .snap parser against a malformed .snap file that is still valid."""
     # Entries should still be parsed fine as header is valid, but values could
     # be problematic.
-    snap_parser = sp(test.MALFORMED_HEADER_ENTRIES_SNAP)
+    snap_parser = sp(tests.MALFORMED_HEADER_ENTRIES_SNAP)
     snap_parser.parse()
 
 
@@ -85,10 +85,10 @@ def test_snap_parser_scalars():
         sp.SNAP_PV("SR01C-DI-COL-02:POS2", 1, ["1.200000000000000e+01"], None),
     ]
 
-    snap_parser = sp(test.SCALARS_SNAP)
+    snap_parser = sp(tests.SCALARS_SNAP)
     header, body = snap_parser.parse()
 
-    assert test.SCALARS_SNAP == snap_parser.path
+    assert tests.SCALARS_SNAP == snap_parser.path
     assert 4 == len(body)
     assert "Tue Sep 21 15:07:59 2010" == header[sp.TIME_PREFIX]
     assert "ops-cc83 (Chris Christou)" == header[sp.LOGINID_PREFIX]
@@ -109,10 +109,10 @@ def test_snap_parser_scalars():
 
 def test_snap_parser_multiple_req_paths():
     """Run the .snap parser against a case with multiple req paths in the header."""
-    snap_parser = sp(test.MULTIPLE_REQ_PATHS_SNAP)
+    snap_parser = sp(tests.MULTIPLE_REQ_PATHS_SNAP)
     header, body = snap_parser.parse()
 
-    assert test.MULTIPLE_REQ_PATHS_SNAP == snap_parser.path
+    assert tests.MULTIPLE_REQ_PATHS_SNAP == snap_parser.path
     assert [
         "/home/ops/burt/requestFiles/SR-DI.req",
         "/home/ops/burt/requestFiles/SR-DI2.req",

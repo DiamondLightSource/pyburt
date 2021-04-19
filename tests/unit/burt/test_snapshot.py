@@ -14,10 +14,10 @@ from cothread.catools import (
 )
 
 import burt
-import test
+import tests
 from burt import SnapParser as sp
 from burt.read import _flatten_ca_array, _format_ca_reading
-from test import aug_val
+from tests import aug_val
 
 
 @mock.patch("burt.read.caget")
@@ -25,7 +25,7 @@ def test_blank_snapshot(mock_caget, pyburt_tmpfile):
     """Run the burt snapshot against a blank .req file."""
     mock_caget.return_value = aug_val([0, 0, 0], count=3)
 
-    burt.take_snapshot([test.BLANK_REQ], pyburt_tmpfile)
+    burt.take_snapshot([tests.BLANK_REQ], pyburt_tmpfile)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -47,15 +47,15 @@ def test_bad_file_arguments(mock_caget):
     with pytest.raises(ValueError):
         burt.take_snapshot([], "helloworld.snap")
     with pytest.raises(ValueError):
-        burt.take_snapshot([test.BLANK_REQ], "helloworld.txt")
+        burt.take_snapshot([tests.BLANK_REQ], "helloworld.txt")
 
     # take_snapshot_group() not currently implemented
     with pytest.raises(NotImplementedError):
-        burt.take_snapshot_group(test.BLANK_REQ, "helloworld.snap")
+        burt.take_snapshot_group(tests.BLANK_REQ, "helloworld.snap")
     with pytest.raises(NotImplementedError):
         burt.take_snapshot_group("dummy.rqg", "helloworld.snap")
     with pytest.raises(NotImplementedError):
-        burt.take_snapshot_group(test.NORMAL_RQG, "helloworld.sn")
+        burt.take_snapshot_group(tests.NORMAL_RQG, "helloworld.sn")
 
 
 @pytest.mark.parametrize(
@@ -137,9 +137,9 @@ def test_simple_snapshot(mock_get_vals, mock_caget, pyburt_tmpfile):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    burt.take_snapshot([tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
     with open(pyburt_tmpfile) as f1:
-        with open(test.SIMPLE_SNAP) as f2:
+        with open(tests.SIMPLE_SNAP) as f2:
             assert f1.read() == f2.read()
 
 
@@ -207,7 +207,7 @@ def test_snapshot_arrays(mock_caget, pyburt_tmpfile):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    burt.take_snapshot([tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -225,7 +225,7 @@ def test_snapshot_arrays(mock_caget, pyburt_tmpfile):
     assert header[sp.COMMENTS_PREFIX]
     assert header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert test.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
+    assert tests.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
 
     assert body[0].name == "SR01C-DI-COL-01:CENTRE"
     assert len(body[0].vals) == 40
@@ -287,7 +287,7 @@ def test_snapshot_enum(mock_caget, pyburt_tmpfile):
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    burt.take_snapshot([tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -305,7 +305,7 @@ def test_snapshot_enum(mock_caget, pyburt_tmpfile):
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert test.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
+    assert tests.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
 
     assert body[0].name == "SR01C-DI-COL-01:CENTRE"
     assert len(body[0].vals) == 1
@@ -324,13 +324,13 @@ def test_snapshot_scalar(mock_caget, pyburt_tmpfile):
 
     Note that cothread will always return an augmented non scalar value.
     """
-    singleton_return_value = test.aug_val(-1e-16)
+    singleton_return_value = tests.aug_val(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    burt.take_snapshot([tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -348,7 +348,7 @@ def test_snapshot_scalar(mock_caget, pyburt_tmpfile):
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert test.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
+    assert tests.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
 
     assert body[0].name == "SR01C-DI-COL-01:CENTRE"
     assert len(body[0].vals) == 1
@@ -391,7 +391,7 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget, pyburt_tmpfile):
     singleton_return_value = aug_val("DIAD", dtype=DBR_STRING)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
-    # Every PV will fail in test.NORMAL_REQ.
+    # Every PV will fail in tests.NORMAL_REQ.
     for mocked in mock_caget.return_value:
         mocked.ok = False
         mocked.errorcode = "Hello Goodbye World!"
@@ -415,7 +415,7 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget, pyburt_tmpfile):
     ]
 
     failed_pvs = burt.take_snapshot(
-        [test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords
+        [tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords
     )
 
     assert os.path.isfile(pyburt_tmpfile)
@@ -429,14 +429,14 @@ def test_snapshot_scalar_failed_pvs_ret(mock_caget, pyburt_tmpfile):
 @mock.patch("burt.read.caget")
 def test_snapshot_multiple_reqs(mock_caget, pyburt_tmpfile):
     """Run a take snapshot test of a .req file with multiple req paths."""
-    singleton_return_value = test.aug_val(-1e-16)
+    singleton_return_value = tests.aug_val(-1e-16)
     mock_caget.return_value = [singleton_return_value for i in range(12)]
 
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot(
-        [test.NORMAL_REQ, test.INLINE_COMMENTS_REQ, test.BLANK_REQ],
+        [tests.NORMAL_REQ, tests.INLINE_COMMENTS_REQ, tests.BLANK_REQ],
         pyburt_tmpfile,
         test_comment,
         test_keywords,
@@ -458,7 +458,7 @@ def test_snapshot_multiple_reqs(mock_caget, pyburt_tmpfile):
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert [test.NORMAL_REQ, test.INLINE_COMMENTS_REQ, test.BLANK_REQ] == header[
+    assert [tests.NORMAL_REQ, tests.INLINE_COMMENTS_REQ, tests.BLANK_REQ] == header[
         sp.REQ_FILE_PREFIX
     ]
 
@@ -522,7 +522,7 @@ def test_snapshot_newlines_in_args(mock_caget, pyburt_tmpfile):
     expected_snap_comment = "\\nHello\\r\\n \\nWorld\\r\\n\\r"
     expected_snap_keywords = "\\r\\ncool\\n,\\r\\nsnap,file\\n\\r\\r"
 
-    burt.take_snapshot([test.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    burt.take_snapshot([tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -548,7 +548,7 @@ def test_snapshot_req_file_length_bigger_than_pv(mock_caget, pyburt_tmpfile):
     mock_caget.return_value = [array_return_value]
 
     with pytest.raises(ValueError):
-        burt.take_snapshot([test.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
+        burt.take_snapshot([tests.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
 
 
 @pytest.mark.xfail
