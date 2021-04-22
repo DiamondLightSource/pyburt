@@ -213,7 +213,7 @@ def test_burt_vanilla_rb(burt_tmpfile, pyburt_tmpfile):
 
     burt.take_snapshot([paths.NORMAL_REQ], pyburt_tmpfile, comment, keyword)
 
-    assert filecmp.cmp(burt_tmpfile, pyburt_tmpfile, shallow=False)
+    assert [row for row in open(pyburt_tmpfile)] == [row for row in open(burt_tmpfile)]
 
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
@@ -282,7 +282,7 @@ def _vanilla_burtrb(input_req, output_snap, comments, keywords):
         "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
         + input_req
         + " -o "
-        + output_snap
+        + str(output_snap)
         + " -c "
         + comments
         + " -k "
