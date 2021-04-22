@@ -213,19 +213,3 @@ def test_various_types_restore():
     assert pv_str == ""
     assert pv_arr_str[0] == "dummy"
     assert pv_arr_str[1] == "rummy"
-
-
-def _vanilla_burtwb(input_snap):
-    """Run the original burtwb implementation.
-
-    Args:
-        input_snap (str): input snap file
-    """
-    burt_rb_cmd = (
-        f"/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtwb -f {input_snap}"
-    )
-
-    # Without shell=True raises an exception on Python 2.7
-    process = subprocess.Popen(burt_rb_cmd, shell=True)
-    process.wait()
-    assert process.returncode == 0
