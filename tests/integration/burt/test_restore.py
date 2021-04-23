@@ -18,11 +18,11 @@ import tests.integration.softioc as ioc
 ioc_manager = ioc.create_ioc_manager()
 
 
-def setup_module(module):
+def setup_function(function):
     ioc_manager.start_ioc()
 
 
-def teardown_module(module):
+def teardown_function(function):
     ioc_manager.exit_ioc()
 
 
