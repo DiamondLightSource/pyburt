@@ -1,6 +1,6 @@
 from tests.ioc_manager import IocManager
 
-LOCAL_PV_FLOAT = "SR-CS-SOFT-01:AI"
+LOCAL_PV_FLOAT = "SR-CS-SOFT-01:FLOAT"
 LOCAL_PV_ARR_FLOAT = "SR-CS-SOFT-01:FLOAT_ARR"
 
 LOCAL_PV_LONG = "SR-CS-SOFT-01:LONGIN"
@@ -34,6 +34,9 @@ def create_ioc_manager():
     )
     manager.add_waveform_record(
         "SR-CS-SOFT-01:DOUBLE_ARR_UNINIT", length="8", ftvl="DOUBLE", PINI="YES"
+    )
+    manager.add_waveform_record(
+        "SR-CS-SOFT-01:FLOAT", length="1", ftvl="FLOAT", PINI="YES"
     )
     manager.add_waveform_record(
         "SR-CS-SOFT-01:FLOAT_ARR", length="8", ftvl="FLOAT", PINI="YES"

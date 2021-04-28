@@ -213,6 +213,7 @@ def test_various_types_restore():
     pv_long = caget(ioc.LOCAL_PV_LONG)
     pv_double = caget(ioc.LOCAL_PV_DBL)
     pv_arr_double = caget(ioc.LOCAL_PV_ARR_DBL)
+    pv_float = caget(ioc.LOCAL_PV_FLOAT)
     pv_arr_float = caget(ioc.LOCAL_PV_ARR_FLOAT)
     pv_str = caget(ioc.LOCAL_PV_STR)
     pv_arr_str = caget(ioc.LOCAL_PV_ARR_STR)
@@ -229,6 +230,7 @@ def test_various_types_restore():
     assert pv_arr_double[0] == 3.003617499404633e-02
     assert pv_arr_double[1] == 3.457100664366716e-02
     # Near equality
+    assert abs(pv_float + 7.900000e01) <= 1e-05  # arbitrary
     assert abs(pv_arr_float[0] - 3.800000e-01) <= 1e-05  # arbitrary
     assert abs(pv_arr_float[1] - 3.800000e-01) <= 1e-05  # arbitrary
     assert pv_arr_short[0] == 4368

@@ -135,7 +135,7 @@ def test_snapshot_with_modifiers_and_comments(pyburt_tmpfile):
     float_array_values = double_array_values
     short_values = [1, 2, 3, 4, 5, 6, 7, 8]
 
-    caput(ioc.LOCAL_PV_FLOAT, float_value)
+    caput(ioc.LOCAL_PV_DBL, float_value)
     caput(ioc.LOCAL_PV_ARR_DBL, double_array_values)
     caput(ioc.LOCAL_PV_ARR_FLOAT, float_array_values)
     caput(ioc.LOCAL_PV_ARR_SHORT, short_values)
@@ -146,7 +146,7 @@ def test_snapshot_with_modifiers_and_comments(pyburt_tmpfile):
 
     # Scalar value, no modifiers
     float_entry = body[0]
-    assert float_entry.name == ioc.LOCAL_PV_FLOAT
+    assert float_entry.name == ioc.LOCAL_PV_DBL
     assert len(float_entry.vals) == 1
     assert float_entry.modifier == None
 
@@ -202,12 +202,12 @@ def test_snapshot_basic(pyburt_tmpfile):
 
     # Scalar PV
     scalar_pv_snapshot = body[0]
-    assert scalar_pv_snapshot.name == ioc.LOCAL_PV_FLOAT
+    assert scalar_pv_snapshot.name == ioc.LOCAL_PV_DBL
     assert len(scalar_pv_snapshot.vals) == 1
 
     # Array PV
     snapshot_arr_pv = body[1]
-    assert snapshot_arr_pv.name == "SR-CS-SOFT-01:LONG_ARR"
+    assert snapshot_arr_pv.name == ioc.LOCAL_PV_ARR_LONG
     assert len(snapshot_arr_pv.vals) == 8
 
 
