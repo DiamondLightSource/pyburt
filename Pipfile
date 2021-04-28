@@ -22,5 +22,6 @@ epicsdbbuilder = "*"
 pyburt = {editable = true, path = "."}
 
 [scripts]
-tests = "python -m pytest --cov=burt tests/unit"
+tests = "python -m pytest --cov=burt tests"
+unit-tests = "python -m pytest --cov=burt tests/unit"
 docs = "sphinx-build -E -b html docs build/html"
