@@ -2,10 +2,12 @@
 NORMAL_REQ = "tests/resources/req/normal.req"
 BASIC_REQ = "tests/resources/req/basic.req"
 MODIFIERS_REQ = "tests/resources/req/modifiers_and_comments.req"
+VARIOUS_TYPES_REQ = "tests/resources/req/various_types.req"
 ARR_REQ = "tests/resources/req/array.req"
 CHAR_REQ = "tests/resources/req/char.req"
 
 # Shared test .snap files.
+BURT_VARIOUS_TYPES_SNAP = "tests/resources/snap/burt_various_types.snap"
 ARR_SNAP = "tests/resources/snap/ioc_restore_array.snap"
 CHAR_SNAP = "tests/resources/snap/ioc_restore_char.snap"
 SCALAR_SNAP = "tests/resources/snap/ioc_restore_scalar.snap"

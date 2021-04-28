@@ -18,7 +18,7 @@ LOCAL_PV_CHAR_UNINIT = "SR-CS-SOFT-01:CHAR_SCALAR_UNINIT"
 LOCAL_PV_CHAR = "SR-CS-SOFT-01:CHAR_SCALAR"
 LOCAL_PV_ARR_CHAR = "SR-CS-SOFT-01:CHAR_ARR"
 
-LOCAL_PV_SHORT = "SR-CS-SOFT-01:TESTPV_SHORT"
+LOCAL_PV_SHORT = "SR-CS-SOFT-01:SHORT"
 LOCAL_PV_ARR_SHORT = "SR-CS-SOFT-01:SHORT_ARR"
 
 
@@ -45,16 +45,8 @@ def create_ioc_manager():
         "SR-CS-SOFT-01:FLOAT_ARR_UNINIT", length="8", ftvl="FLOAT", PINI="YES"
     )
     manager.add_stringin_record("SR-CS-SOFT-01:EMPTYSTRING")
-    manager.add_stringin_record(
-        "SR-CS-SOFT-01:STRINGIN",
-        DESC="Gen Time Current Provider",
-        DTYP="General Time",
-        INP="@BESTTCP",
-        SCAN="1 second",
-    )
-    manager.add_stringout_record(
-        "SR-CS-SOFT-01:STRINGOUT", DESC="Gen Time Current Provider", SCAN="1 second"
-    )
+    manager.add_stringin_record("SR-CS-SOFT-01:STRINGIN")
+    manager.add_stringout_record("SR-CS-SOFT-01:STRINGOUT", SCAN="1 second")
     manager.add_waveform_record(
         "SR-CS-SOFT-01:STRING_ARR", length="8", ftvl="STRING", PINI="YES"
     )
@@ -72,6 +64,9 @@ def create_ioc_manager():
     )
     manager.add_waveform_record(
         "SR-CS-SOFT-01:CHAR_ARR_UNINIT", length="8", ftvl="CHAR", PINI="YES"
+    )
+    manager.add_waveform_record(
+        "SR-CS-SOFT-01:SHORT", length="1", ftvl="SHORT", PINI="YES"
     )
     manager.add_waveform_record(
         "SR-CS-SOFT-01:SHORT_ARR", length="8", ftvl="SHORT", PINI="YES"

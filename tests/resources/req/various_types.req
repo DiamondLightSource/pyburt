@@ -1,0 +1,39 @@
+% Scalar short
+SR-CS-SOFT-01:SHORT
+
+% Array short
+SR-CS-SOFT-01:SHORT_ARR
+
+% Scalar long
+SR-CS-SOFT-01:LONGIN
+
+% Array long
+SR-CS-SOFT-01:LONG_ARR
+
+% Scalar double
+SR-CS-SOFT-01:AI
+
+% Array double
+SR-CS-SOFT-01:DOUBLE_ARR
+
+% Scalar float
+SR-CS-SOFT-01:FLOAT
+
+% Array float
+SR-CS-SOFT-01:FLOAT_ARR
+
+% Scalar enum
+SR-CS-SOFT-01:MBBI
+
+% Scalar string
+SR-CS-SOFT-01:STRINGIN
+
+% Array string
+SR-CS-SOFT-01:STRING_ARR
+
+% Scalar char
+SR-CS-SOFT-01:CHAR_SCALAR
+
+% Array char
+SR-CS-SOFT-01:CHAR_ARR
+
