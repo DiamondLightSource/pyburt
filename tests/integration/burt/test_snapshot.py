@@ -309,9 +309,3 @@ def test_various_types_against_burt(pyburt_tmpfile):
             burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
 
             assert pyburt_out_str.strip() == burt_out_str.strip()
-
-
-@pytest.mark.skip  # take_snapshot_group is not yet implemented
-def test_speed_snapshot_group():
-    """Speed comparison between different snapshot group schemes."""
-    assert False
