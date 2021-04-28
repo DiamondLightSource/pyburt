@@ -71,22 +71,8 @@ def create_ioc_manager():
     manager.add_waveform_record(
         "SR-CS-SOFT-01:SHORT_ARR", length="8", ftvl="SHORT", PINI="YES"
     )
-    manager.add_longin_record(
-        "SR-CS-SOFT-01:LONGIN",
-        DESC="Gen Time Error Count",
-        DTYP="General Time",
-        INP="@GETERRCNT",
-        SCAN="1 second",
-        HIHI="1",
-        HHSV="MAJOR",
-    )
-    manager.add_longout_record(
-        "SR-CS-SOFT-01:LONGOUT",
-        DESC="Gen Time Error Count",
-        SCAN="1 second",
-        HIHI="1",
-        HHSV="MAJOR",
-    )
+    manager.add_longin_record("SR-CS-SOFT-01:LONGIN", HIHI="1", HHSV="MAJOR")
+    manager.add_longout_record("SR-CS-SOFT-01:LONGOUT", HIHI="1", HHSV="MAJOR")
     manager.add_waveform_record(
         "SR-CS-SOFT-01:LONG_ARR", length="8", ftvl="LONG", PINI="YES"
     )
@@ -106,13 +92,6 @@ def create_ioc_manager():
     manager.add_bi_record(
         "SR-CS-SOFT-01:BI", VAL="0", ZNAM="OK", ONAM="Fault", PINI="YES"
     )
-    manager.add_bo_record(
-        "SR-CS-SOFT-01:BO",
-        DESC="Gen Time Error Reset",
-        DTYP="General Time",
-        OUT="@RSTERRCNT",
-        ZNAM="Reset",
-        ONAM="Reset",
-    )
+    manager.add_bo_record("SR-CS-SOFT-01:BO", ZNAM="Reset", ONAM="Reset")
 
     return manager
