@@ -15,6 +15,9 @@ from tests.integration import paths
 import tests.integration.softioc as ioc
 
 
+NULL_CHAR = chr(0)
+
+
 ioc_manager = ioc.create_ioc_manager()
 
 
@@ -145,6 +148,25 @@ def test_restore_partial_string_array():
     assert len(val) == 2
     assert val[0] == "three"
     assert val[1] == "blind mice"
+
+
+@pytest.mark.xfail  # Restoration of null char is currently broken in Pyburt
+def test_restore_scalar_char(pyburt_tmpfile):
+    """Run a snapshot including scalar chars.
+
+    Scalar chars could not be restored properly in vanilla burt. Pyburt now records the
+    null value as a null character, rather than the digit zero, to prevent this.
+
+    We specifically test with a value of 48 (the digit zero) to test this case.
+    """
+    char = "c"
+    caput(ioc.LOCAL_PV_CHAR, ord(char))
+
+    burt.restore(paths.CHAR_SNAP)
+    ca_char_uninit = caget(ioc.LOCAL_PV_CHAR_UNINIT)
+    ca_char = caget(ioc.LOCAL_PV_CHAR)
+    assert ca_char_uninit == ord(NULL_CHAR)
+    assert ca_char == ord("0")
 
 
 def test_restore_group():

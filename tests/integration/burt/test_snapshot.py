@@ -20,6 +20,7 @@ NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
 DOUBLE_ZERO_STR = "0.000000000000000e+00"
 FLOAT_ZERO_STR = "0.000000e+00"
 NULL_STR = "\\0"
+NULL_CHAR = chr(0)
 
 
 ioc_manager = ioc.create_ioc_manager()
@@ -103,6 +104,28 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
     str_array_entry = body[9]
     str_expected = ["x", "y", "z"] + [NULL_STR] * 5
     assert str_array_entry.vals == str_expected
+
+
+@pytest.mark.xfail  # Scalar chars are not currently working correctly in Pyburt
+def test_snapshot_scalar_char(pyburt_tmpfile):
+    """Run a snapshot including scalar chars.
+
+    Pyburt now records the null value as a null character, rather than the digit zero.
+    """
+    char = "c"
+    caput(ioc.LOCAL_PV_CHAR, ord(char))
+
+    burt.take_snapshot([paths.CHAR_REQ], pyburt_tmpfile)
+
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    _, body = snap_parser.parse()
+    char_uninit_entry = body[0]
+    char_uninit_expected = NULL_CHAR
+    assert char_uninit_entry.vals == [char_uninit_expected]
+
+    char_entry = body[1]
+    char_expected = char
+    assert char_entry.vals == [char_expected]
 
 
 @pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")

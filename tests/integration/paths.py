@@ -1,9 +1,11 @@
 # Shared test .req files.
 NORMAL_REQ = "tests/resources/req/normal.req"
 ARR_REQ = "tests/resources/req/array.req"
+CHAR_REQ = "tests/resources/req/char.req"
 
 # Shared test .snap files.
 ARR_SNAP = "tests/resources/snap/ioc_restore_array.snap"
+CHAR_SNAP = "tests/resources/snap/ioc_restore_char.snap"
 SCALAR_SNAP = "tests/resources/snap/ioc_restore_scalar.snap"
 LONG_SNAP = "tests/resources/snap/ioc_restore_long.snap"
 ENUM_SNAP = "tests/resources/snap/ioc_restore_enum.snap"
