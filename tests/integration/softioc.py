@@ -14,8 +14,8 @@ LOCAL_PV_ARR_STR = "SR-CS-SOFT-01:STRING_ARR"
 
 LOCAL_PV_ENUM = "SR-CS-SOFT-01:MBBI"
 
-LOCAL_PV_CHAR_UNINIT = "SR-CS-SOFT-01:CHAR_SCALAR_UNINIT"
-LOCAL_PV_CHAR = "SR-CS-SOFT-01:CHAR_SCALAR"
+LOCAL_PV_CHAR_UNINIT = "SR-CS-SOFT-01:CHAR_UNINIT"
+LOCAL_PV_CHAR = "SR-CS-SOFT-01:CHAR"
 LOCAL_PV_ARR_CHAR = "SR-CS-SOFT-01:CHAR_ARR"
 
 LOCAL_PV_SHORT = "SR-CS-SOFT-01:SHORT"
@@ -54,10 +54,10 @@ def create_ioc_manager():
         "SR-CS-SOFT-01:STRING_ARR_UNINIT", length="8", ftvl="STRING", PINI="YES"
     )
     manager.add_waveform_record(
-        "SR-CS-SOFT-01:CHAR_SCALAR_UNINIT", length="1", ftvl="CHAR", PINI="YES"
+        "SR-CS-SOFT-01:CHAR_UNINIT", length="1", ftvl="CHAR", PINI="YES"
     )
     manager.add_waveform_record(
-        "SR-CS-SOFT-01:CHAR_SCALAR", length="1", ftvl="CHAR", PINI="YES"
+        "SR-CS-SOFT-01:CHAR", length="1", ftvl="CHAR", PINI="YES"
     )
     manager.add_waveform_record(
         "SR-CS-SOFT-01:CHAR_ARR", length="8", ftvl="CHAR", PINI="YES"
