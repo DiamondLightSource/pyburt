@@ -1,5 +1,7 @@
 # Shared test .req files.
 NORMAL_REQ = "tests/resources/req/normal.req"
+BASIC_REQ = "tests/resources/req/basic.req"
+MODIFIERS_REQ = "tests/resources/req/modifiers_and_comments.req"
 ARR_REQ = "tests/resources/req/array.req"
 CHAR_REQ = "tests/resources/req/char.req"
 

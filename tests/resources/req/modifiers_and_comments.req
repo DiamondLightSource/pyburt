@@ -1,0 +1,12 @@
+% Basic PVs
+SR-CS-SOFT-01:AI
+SR-CS-SOFT-01:DOUBLE_ARR % Inline comment
+
+% Save the first 4 elements only
+SR-CS-SOFT-01:DOUBLE_ARR 4
+
+% Specify RO PV
+RO SR-CS-SOFT-01:FLOAT_ARR
+
+% Specify RON PV with first 6 elements only
+RON SR-CS-SOFT-01:SHORT_ARR 6

@@ -128,15 +128,59 @@ def test_snapshot_scalar_char(pyburt_tmpfile):
     assert char_entry.vals == [char_expected]
 
 
-@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_snapshot_normal(pyburt_tmpfile):
-    """Take a snapshot of a normal .req file that specifies DLS PVs."""
+def test_snapshot_with_modifiers_and_comments(pyburt_tmpfile):
+    """Take a snapshot and check modifiers are applied."""
+    float_value = 1.1
+    double_array_values = [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]
+    float_array_values = double_array_values
+    short_values = [1, 2, 3, 4, 5, 6, 7, 8]
+
+    caput(ioc.LOCAL_PV_FLOAT, float_value)
+    caput(ioc.LOCAL_PV_ARR_DBL, double_array_values)
+    caput(ioc.LOCAL_PV_ARR_FLOAT, float_array_values)
+    caput(ioc.LOCAL_PV_ARR_SHORT, short_values)
+
+    burt.take_snapshot([paths.MODIFIERS_REQ], pyburt_tmpfile)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    _, body = snap_parser.parse()
+
+    # Scalar value, no modifiers
+    float_entry = body[0]
+    assert float_entry.name == ioc.LOCAL_PV_FLOAT
+    assert len(float_entry.vals) == 1
+    assert float_entry.modifier == None
+
+    # Double array, no modifiers
+    double_array_entry = body[1]
+    assert double_array_entry.name == ioc.LOCAL_PV_ARR_DBL
+    assert len(double_array_entry.vals) == 8
+    assert double_array_entry.modifier == None
+
+    # Double array, length specifier of 4
+    double_array_reduced = body[2]
+    assert double_array_reduced.name == ioc.LOCAL_PV_ARR_DBL
+    assert len(double_array_reduced.vals) == 4
+    assert double_array_reduced.modifier == None
+
+    # Float array, read-only
+    float_array_ro_entry = body[3]
+    assert float_array_ro_entry.name == ioc.LOCAL_PV_ARR_FLOAT
+    assert len(float_array_ro_entry.vals) == 8
+    assert float_array_ro_entry.modifier == "RO"
+
+    # Short array, read-only notify, length specifier of 6
+    short_array_ron_entry = body[4]
+    assert short_array_ron_entry.name == ioc.LOCAL_PV_ARR_SHORT
+    assert len(short_array_ron_entry.vals) == 6
+    assert short_array_ron_entry.modifier == "RON"
+
+
+def test_snapshot_basic(pyburt_tmpfile):
+    """Take a snapshot of a basic .req file and check header and body."""
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot(
-        [core_paths.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords
-    )
+    burt.take_snapshot([paths.BASIC_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -145,7 +189,7 @@ def test_snapshot_normal(pyburt_tmpfile):
     # properties, e.g. keywords, directory, etc.
     snap_parser = burt.SnapParser(pyburt_tmpfile)
     header, body = snap_parser.parse()
-    assert 12 == len(body)
+    assert 2 == len(body)
     assert header[sp.TIME_PREFIX]
     assert header[sp.LOGINID_PREFIX]
     assert header[sp.UID_PREFIX]
@@ -154,33 +198,17 @@ def test_snapshot_normal(pyburt_tmpfile):
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert core_paths.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
+    assert paths.BASIC_REQ == header[sp.REQ_FILE_PREFIX]
 
-    # Known scalar PV
+    # Scalar PV
     scalar_pv_snapshot = body[0]
-    assert scalar_pv_snapshot.name == "SR01C-DI-COL-01:CENTRE"
+    assert scalar_pv_snapshot.name == ioc.LOCAL_PV_FLOAT
     assert len(scalar_pv_snapshot.vals) == 1
 
-    # Known ca array PV
-    snapshot_ca_arr_pv = body[1]
-    assert snapshot_ca_arr_pv.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_ca_arr_pv.vals) == 936
-
-    # The PVs below have a known specified max save length (see
-    # tests/resources/normal.req) and readonly modifiers.
-    snapshot_save_length_spec_1 = body[4]
-    assert snapshot_save_length_spec_1.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_save_length_spec_1.vals) == 5
-
-    snapshot_save_length_spec_2 = body[5]
-    assert snapshot_save_length_spec_2.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_save_length_spec_2.vals) == 10
-    assert snapshot_save_length_spec_2.modifier == "RO"
-
-    snapshot_save_length_spec_3 = body[6]
-    assert snapshot_save_length_spec_3.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_save_length_spec_3.vals) == 25
-    assert snapshot_save_length_spec_3.modifier == "RON"
+    # Array PV
+    snapshot_arr_pv = body[1]
+    assert snapshot_arr_pv.name == "SR-CS-SOFT-01:LONG_ARR"
+    assert len(snapshot_arr_pv.vals) == 8
 
 
 @pytest.mark.xfail  # take_snapshot_group is not yet implemented
