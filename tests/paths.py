@@ -23,7 +23,6 @@ SCALARS_SNAP = "tests/resources/snap/scalars.snap"
 INLINE_COMMENTS_SNAP = "tests/resources/snap/inline_comments.snap"
 MULTIPLE_REQ_PATHS_SNAP = "tests/resources/snap/multiple_req_paths.snap"
 LONG_SNAP = "tests/resources/snap/ioc_restore_long.snap"
-VARIETY_SNAP = "tests/resources/snap/type_variety.snap"
 CONTROL_ROOM_TYPES_SNAP = "tests/resources/snap/types.controlroom.snap"
 
 DUPLICATE_BURT_HEADERS_SNAP = "tests/resources/snap/duplicate_burt_headers.snap"
