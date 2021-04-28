@@ -208,7 +208,7 @@ def test_various_types_restore():
     caput(ioc.LOCAL_PV_ARR_CHAR, "dummy")
 
     # Execute the restore.
-    burt.restore(paths.CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP)
+    burt.restore(paths.VARIOUS_TYPES_SNAP)
 
     pv_long = caget(ioc.LOCAL_PV_LONG)
     pv_double = caget(ioc.LOCAL_PV_DBL)

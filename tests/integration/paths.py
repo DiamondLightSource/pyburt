@@ -7,6 +7,7 @@ ARR_REQ = "tests/resources/req/array.req"
 CHAR_REQ = "tests/resources/req/char.req"
 
 # Shared test .snap files.
+VARIOUS_TYPES_SNAP = "tests/resources/snap/various_types.snap"
 BURT_VARIOUS_TYPES_SNAP = "tests/resources/snap/various_types.burt.snap"
 BURT_TEMPLATED_BASIC_SNAP = "tests/resources/snap/templated_basic.burt.snap"
 ARR_SNAP = "tests/resources/snap/ioc_restore_array.snap"
@@ -15,8 +16,5 @@ SCALAR_SNAP = "tests/resources/snap/ioc_restore_scalar.snap"
 LONG_SNAP = "tests/resources/snap/ioc_restore_long.snap"
 ENUM_SNAP = "tests/resources/snap/ioc_restore_enum.snap"
 STRING_SNAP = "tests/resources/snap/ioc_restore_string.snap"
-CONTROL_ROOM_LOCAL_IOC_TYPES_SNAP = (
-    "tests/resources/snap/ioc_restore_control_room_types.snap"
-)
 NULL_ARRAY_SNAP = "tests/resources/snap/null_arrays.snap"
 PARTIAL_ARRAY_SNAP = "tests/resources/snap/partial_arrays.snap"
