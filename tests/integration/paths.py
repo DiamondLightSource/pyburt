@@ -7,7 +7,7 @@ ARR_REQ = "tests/resources/req/array.req"
 CHAR_REQ = "tests/resources/req/char.req"
 
 # Shared test .snap files.
-VARIOUS_TYPES_SNAP = "tests/resources/snap/various_types.snap"
+VARIOUS_TYPES_ALT_SNAP = "tests/resources/snap/various_types.alternative.snap"
 BURT_VARIOUS_TYPES_SNAP = "tests/resources/snap/various_types.burt.snap"
 BURT_TEMPLATED_BASIC_SNAP = "tests/resources/snap/templated_basic.burt.snap"
 ARR_SNAP = "tests/resources/snap/ioc_restore_array.snap"

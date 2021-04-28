@@ -202,38 +202,45 @@ def test_various_types_restore():
     caput(ioc.LOCAL_PV_ARR_DBL, randint(1, 100))
     caput(ioc.LOCAL_PV_STR, "dummy")
     caput(ioc.LOCAL_PV_ARR_STR, ["dummy", "rummy"])
-    # Scalar short only available in a waveform in a soft IOC.
+    caput(ioc.LOCAL_PV_SHORT, randint(1, 100))
     caput(ioc.LOCAL_PV_ARR_SHORT, randint(1, 100))
-    # Ignored cases
+    # Ignored case: See test_restore_scalar_char
+    #caput(ioc.LOCAL_PV_CHAR, ord('c'))
     caput(ioc.LOCAL_PV_ARR_CHAR, "dummy")
 
     # Execute the restore.
-    burt.restore(paths.VARIOUS_TYPES_SNAP)
+    burt.restore(paths.VARIOUS_TYPES_ALT_SNAP)
 
-    pv_long = caget(ioc.LOCAL_PV_LONG)
-    pv_double = caget(ioc.LOCAL_PV_DBL)
-    pv_arr_double = caget(ioc.LOCAL_PV_ARR_DBL)
     pv_float = caget(ioc.LOCAL_PV_FLOAT)
     pv_arr_float = caget(ioc.LOCAL_PV_ARR_FLOAT)
+    pv_long = caget(ioc.LOCAL_PV_LONG)
+    pv_arr_long = caget(ioc.LOCAL_PV_ARR_LONG)
+    pv_double = caget(ioc.LOCAL_PV_DBL)
+    pv_arr_double = caget(ioc.LOCAL_PV_ARR_DBL)
     pv_str = caget(ioc.LOCAL_PV_STR)
     pv_arr_str = caget(ioc.LOCAL_PV_ARR_STR)
-    pv_arr_char = caget(ioc.LOCAL_PV_ARR_CHAR)
+    pv_short = caget(ioc.LOCAL_PV_SHORT)
     pv_arr_short = caget(ioc.LOCAL_PV_ARR_SHORT)
+    #pv_char = caget(ioc.LOCAL_PV_CHAR)
+    pv_arr_char = caget(ioc.LOCAL_PV_ARR_CHAR)
 
     # Note the curious format in the snap file for this PV.
     for a, b in itertools.zip_longest(pv_arr_char, "Hi Lo!"):
         print(f"{a} {b}")
         assert a == ord(b)
 
-    assert pv_long == 200
-    assert pv_double == -2.900000000000000e01
-    assert pv_arr_double[0] == 3.003617499404633e-02
-    assert pv_arr_double[1] == 3.457100664366716e-02
-    # Near equality
     assert abs(pv_float + 7.900000e01) <= 1e-05  # arbitrary
     assert abs(pv_arr_float[0] - 3.800000e-01) <= 1e-05  # arbitrary
     assert abs(pv_arr_float[1] - 3.800000e-01) <= 1e-05  # arbitrary
-    assert pv_arr_short[0] == 4368
+    assert pv_long == 200
+    assert pv_arr_long[0] == 65535
+    assert pv_double == -2.900000000000000e01
+    assert pv_arr_double[0] == 3.003617499404633e-02
+    assert pv_arr_double[1] == 3.457100664366716e-02
+
+    # Near equality
     assert pv_str == ""
     assert pv_arr_str[0] == "dummy"
     assert pv_arr_str[1] == "rummy"
+    assert pv_short == 858
+    assert pv_arr_short[0] == 4368

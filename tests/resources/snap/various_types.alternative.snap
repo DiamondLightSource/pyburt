@@ -21,4 +21,5 @@ SR-CS-SOFT-01:STRINGIN 1 \0
 % SR-CS-SOFT-01:TESTPV_SHORT 1 0
 % It doesn't appear that Burt would create the below string.
 SR-CS-SOFT-01:CHAR_ARR 20 H i " " L o !
-SR-CS-SOFT-01:SHORT_ARR 3 4368.0000 \0 \0
+SR-CS-SOFT-01:SHORT 1 858
+SR-CS-SOFT-01:SHORT_ARR 3 4368 \0 \0
