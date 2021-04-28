@@ -7,13 +7,6 @@ from tests import paths
 
 
 @pytest.fixture
-def burt_tmpfile(tmp_path):
-    """Temporary file used by Burt."""
-    pyburt_out = tmp_path / paths.BURT_OUT_FILE
-    return pyburt_out
-
-
-@pytest.fixture
 def pyburt_tmpfile(tmp_path):
     """Temporary file used by Pyburt."""
     pyburt_out = tmp_path / paths.PYBURT_OUT_FILE

@@ -252,16 +252,33 @@ def test_snapshot_req_file_length_bigger_than_pv(pyburt_tmpfile):
 
 
 @pytest.mark.xfail  # The output is no longer exactly the same.
-def test_burt_vanilla_rb(burt_tmpfile, pyburt_tmpfile):
-    """Compare vanilla BURT against pyburt snapshots."""
+def test_header_against_burt(pyburt_tmpfile):
+    """Compare vanilla BURT header against pyburt snapshots."""
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    _vanilla_burtrb(paths.NORMAL_REQ, burt_tmpfile, comment, keyword)
+    burt.take_snapshot([paths.BASIC_REQ], pyburt_tmpfile, comment, keyword)
 
-    burt.take_snapshot([paths.NORMAL_REQ], pyburt_tmpfile, comment, keyword)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    header, _ = snap_parser.parse()
 
-    assert [row for row in open(pyburt_tmpfile)] == [row for row in open(burt_tmpfile)]
+    params = {
+        "DATETIME": header[sp.TIME_PREFIX],
+        "LOGIN_ID": header[sp.LOGINID_PREFIX],
+        "EFF_UID": header[sp.UID_PREFIX],
+        "GRP_ID": header[sp.GROUPID_PREFIX],
+        "DIRECTORY": os.path.dirname(pyburt_tmpfile),
+        "REQ_FILE": paths.BASIC_REQ,
+    }
+
+    with open(pyburt_tmpfile, "r") as pyburt_out:
+        with open(paths.BURT_TEMPLATED_BASIC_SNAP) as burt_out:
+            pyburt_out_header = pyburt_out.read().split(sp.SNAP_HEADER_END)[0]
+            burt_out_header = (
+                burt_out.read().split(sp.SNAP_HEADER_END)[0].format_map(params)
+            )
+
+            assert pyburt_out_header == burt_out_header
 
 
 def test_various_types_against_burt(pyburt_tmpfile):
@@ -298,29 +315,3 @@ def test_various_types_against_burt(pyburt_tmpfile):
 def test_speed_snapshot_group():
     """Speed comparison between different snapshot group schemes."""
     assert False
-
-
-def _vanilla_burtrb(input_req, output_snap, comments, keywords):
-    """Run the original burtrb implementation.
-
-    Args:
-        input_req (str): input req file(s)
-        output_snap (str): output snap file
-        comments (comments): comments
-        keywords (keywords): keywords
-    """
-    burt_rb_cmd = (
-        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
-        + input_req
-        + " -o "
-        + str(output_snap)
-        + " -c "
-        + comments
-        + " -k "
-        + keywords
-    )
-
-    # Without shell=True raises an exception on Python 2.7
-    process = subprocess.Popen(burt_rb_cmd, shell=True)
-    process.wait()
-    assert process.returncode == 0

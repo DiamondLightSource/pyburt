@@ -94,4 +94,3 @@ NORMAL_CHECK_3 = "tests/resources/check/normal_3.check"
 
 # Tmp snap file to be deleted after a test run.
 PYBURT_OUT_FILE = "tmp_pyburt.snap"
-BURT_OUT_FILE = "tmp_burt.snap"
