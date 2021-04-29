@@ -8,17 +8,27 @@ import pytest
 from cothread.catools import caput
 
 import burt
-import tests
 from burt import SnapParser as sp
-from tests import integration
-
-
-NOT_DLS = "DLS_EPICS_RELEASE" not in os.environ
+from tests import paths as core_paths
+from tests.integration import paths
+import tests.integration.softioc as ioc
 
 
 DOUBLE_ZERO_STR = "0.000000000000000e+00"
 FLOAT_ZERO_STR = "0.000000e+00"
 NULL_STR = "\\0"
+NULL_CHAR = chr(0)
+
+
+ioc_manager = ioc.create_ioc_manager()
+
+
+def setup_function(function):
+    ioc_manager.start_ioc()
+
+
+def teardown_function(function):
+    ioc_manager.exit_ioc()
 
 
 @pytest.mark.parametrize(
@@ -33,7 +43,7 @@ NULL_STR = "\\0"
 )
 def test_snapshot_uninitialised_array_compat(index, null_value, pyburt_tmpfile):
     """Run a snapshot against uninitialised arrays."""
-    burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile, compat=True)
+    burt.take_snapshot([paths.ARR_REQ], pyburt_tmpfile, compat=True)
     snap_parser = burt.SnapParser(pyburt_tmpfile)
     _, body = snap_parser.parse()
     array_entry = body[index]
@@ -46,7 +56,7 @@ def test_snapshot_uninitialised_array_compat(index, null_value, pyburt_tmpfile):
 )
 def test_snapshot_uninitialised_array_no_compat(index, null_value, pyburt_tmpfile):
     """Run a snapshot against uninitialised arrays."""
-    burt.take_snapshot([integration.ARR_REQ], pyburt_tmpfile)
+    burt.take_snapshot([paths.ARR_REQ], pyburt_tmpfile)
     snap_parser = burt.SnapParser(pyburt_tmpfile)
     _, body = snap_parser.parse()
     array_entry = body[index]
@@ -64,13 +74,13 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
     DOUBLE_NULL = DOUBLE_ZERO_STR if compat else NULL_STR
     FLOAT_NULL = FLOAT_ZERO_STR if compat else NULL_STR
 
-    caput(integration.IOC_LOCAL_PV_ARR_CHAR, [1, 2, 3])
-    caput(integration.IOC_LOCAL_PV_ARR_DBL, [1.1, 2.2, 3.3])
-    caput(integration.IOC_LOCAL_PV_ARR_FLOAT, [1.1, 2.2, 3.3])
-    caput(integration.IOC_LOCAL_PV_ARR_LONG, [1, 2, 3])
-    caput(integration.IOC_LOCAL_PV_ARR_STR, ["x", "y", "z"])
-    burt.take_snapshot([integration.ARR_REQ], "out.snap", compat=compat)
-    snap_parser = burt.SnapParser("out.snap")
+    caput(ioc.LOCAL_PV_ARR_CHAR, [1, 2, 3])
+    caput(ioc.LOCAL_PV_ARR_DBL, [1.1, 2.2, 3.3])
+    caput(ioc.LOCAL_PV_ARR_FLOAT, [1.1, 2.2, 3.3])
+    caput(ioc.LOCAL_PV_ARR_LONG, [1, 2, 3])
+    caput(ioc.LOCAL_PV_ARR_STR, ["x", "y", "z"])
+    burt.take_snapshot([paths.ARR_REQ], pyburt_tmpfile, compat=compat)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
     _, body = snap_parser.parse()
     char_array_entry = body[5]
     char_expected = ["\x01", "\x02", "\x03"] + [NULL_STR] * 5
@@ -93,13 +103,81 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
     assert str_array_entry.vals == str_expected
 
 
-@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_snapshot_normal(pyburt_tmpfile):
-    """Take a snapshot of a normal .req file that specifies DLS PVs."""
+@pytest.mark.xfail  # Scalar chars are not currently working correctly in Pyburt
+def test_snapshot_scalar_char(pyburt_tmpfile):
+    """Run a snapshot including scalar chars.
+
+    Pyburt now records the null value as a null character, rather than the digit zero.
+    """
+    char = "c"
+    caput(ioc.LOCAL_PV_CHAR, ord(char))
+
+    burt.take_snapshot([paths.CHAR_REQ], pyburt_tmpfile)
+
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    _, body = snap_parser.parse()
+    char_uninit_entry = body[0]
+    char_uninit_expected = NULL_CHAR
+    assert char_uninit_entry.vals == [char_uninit_expected]
+
+    char_entry = body[1]
+    char_expected = char
+    assert char_entry.vals == [char_expected]
+
+
+def test_snapshot_with_modifiers_and_comments(pyburt_tmpfile):
+    """Take a snapshot and check modifiers are applied."""
+    float_value = 1.1
+    double_array_values = [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8]
+    float_array_values = double_array_values
+    short_values = [1, 2, 3, 4, 5, 6, 7, 8]
+
+    caput(ioc.LOCAL_PV_DBL, float_value)
+    caput(ioc.LOCAL_PV_ARR_DBL, double_array_values)
+    caput(ioc.LOCAL_PV_ARR_FLOAT, float_array_values)
+    caput(ioc.LOCAL_PV_ARR_SHORT, short_values)
+
+    burt.take_snapshot([paths.MODIFIERS_REQ], pyburt_tmpfile)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    _, body = snap_parser.parse()
+
+    # Scalar value, no modifiers
+    float_entry = body[0]
+    assert float_entry.name == ioc.LOCAL_PV_DBL
+    assert len(float_entry.vals) == 1
+    assert float_entry.modifier == None
+
+    # Double array, no modifiers
+    double_array_entry = body[1]
+    assert double_array_entry.name == ioc.LOCAL_PV_ARR_DBL
+    assert len(double_array_entry.vals) == 8
+    assert double_array_entry.modifier == None
+
+    # Double array, length specifier of 4
+    double_array_reduced = body[2]
+    assert double_array_reduced.name == ioc.LOCAL_PV_ARR_DBL
+    assert len(double_array_reduced.vals) == 4
+    assert double_array_reduced.modifier == None
+
+    # Float array, read-only
+    float_array_ro_entry = body[3]
+    assert float_array_ro_entry.name == ioc.LOCAL_PV_ARR_FLOAT
+    assert len(float_array_ro_entry.vals) == 8
+    assert float_array_ro_entry.modifier == "RO"
+
+    # Short array, read-only notify, length specifier of 6
+    short_array_ron_entry = body[4]
+    assert short_array_ron_entry.name == ioc.LOCAL_PV_ARR_SHORT
+    assert len(short_array_ron_entry.vals) == 6
+    assert short_array_ron_entry.modifier == "RON"
+
+
+def test_snapshot_basic(pyburt_tmpfile):
+    """Take a snapshot of a basic .req file and check header and body."""
     test_comment = "Hello World"
     test_keywords = "cool,snap,file"
 
-    burt.take_snapshot([tests.NORMAL_REQ], pyburt_tmpfile, test_comment, test_keywords)
+    burt.take_snapshot([paths.BASIC_REQ], pyburt_tmpfile, test_comment, test_keywords)
 
     assert os.path.isfile(pyburt_tmpfile)
     assert os.stat(pyburt_tmpfile).st_size != 0
@@ -108,7 +186,7 @@ def test_snapshot_normal(pyburt_tmpfile):
     # properties, e.g. keywords, directory, etc.
     snap_parser = burt.SnapParser(pyburt_tmpfile)
     header, body = snap_parser.parse()
-    assert 12 == len(body)
+    assert 2 == len(body)
     assert header[sp.TIME_PREFIX]
     assert header[sp.LOGINID_PREFIX]
     assert header[sp.UID_PREFIX]
@@ -117,33 +195,17 @@ def test_snapshot_normal(pyburt_tmpfile):
     assert test_comment == header[sp.COMMENTS_PREFIX]
     assert sp.TYPE_DEFAULT_VAL == header[sp.TYPE_PREFIX]
     assert os.getcwd() == header[sp.DIRECTORY_PREFIX]
-    assert tests.NORMAL_REQ == header[sp.REQ_FILE_PREFIX]
+    assert paths.BASIC_REQ == header[sp.REQ_FILE_PREFIX]
 
-    # Known scalar PV
+    # Scalar PV
     scalar_pv_snapshot = body[0]
-    assert scalar_pv_snapshot.name == "SR01C-DI-COL-01:CENTRE"
+    assert scalar_pv_snapshot.name == ioc.LOCAL_PV_DBL
     assert len(scalar_pv_snapshot.vals) == 1
 
-    # Known ca array PV
-    snapshot_ca_arr_pv = body[1]
-    assert snapshot_ca_arr_pv.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_ca_arr_pv.vals) == 936
-
-    # The PVs below have a known specified max save length (see
-    # tests/resources/normal.req) and readonly modifiers.
-    snapshot_save_length_spec_1 = body[4]
-    assert snapshot_save_length_spec_1.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_save_length_spec_1.vals) == 5
-
-    snapshot_save_length_spec_2 = body[5]
-    assert snapshot_save_length_spec_2.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_save_length_spec_2.vals) == 10
-    assert snapshot_save_length_spec_2.modifier == "RO"
-
-    snapshot_save_length_spec_3 = body[6]
-    assert snapshot_save_length_spec_3.name == "SR-DI-PICO-01:BUCKETS"
-    assert len(snapshot_save_length_spec_3.vals) == 25
-    assert snapshot_save_length_spec_3.modifier == "RON"
+    # Array PV
+    snapshot_arr_pv = body[1]
+    assert snapshot_arr_pv.name == ioc.LOCAL_PV_ARR_LONG
+    assert len(snapshot_arr_pv.vals) == 8
 
 
 @pytest.mark.xfail  # take_snapshot_group is not yet implemented
@@ -156,7 +218,7 @@ def test_snapshot_group_normal(pyburt_tmpfile):
     test_keywords = "cool,snap,file"
 
     burt.take_snapshot_group(
-        tests.NORMAL_RQG, pyburt_tmpfile, test_comment, test_keywords, False
+        core_paths.NORMAL_RQG, pyburt_tmpfile, test_comment, test_keywords, False
     )
 
     assert os.path.isfile(pyburt_tmpfile)
@@ -184,130 +246,66 @@ def test_snapshot_req_file_length_bigger_than_pv(pyburt_tmpfile):
     size. This is a case which would not be caught by the parser.
     """
     with pytest.raises(ValueError):
-        burt.take_snapshot([tests.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile)
+        burt.take_snapshot(
+            [core_paths.MALFORMED_SAVE_LEN_TOO_LARGE_REQ], pyburt_tmpfile
+        )
 
 
 @pytest.mark.xfail  # The output is no longer exactly the same.
-def test_burt_vanilla_rb(burt_tmpfile, pyburt_tmpfile):
-    """Compare vanilla BURT against pyburt snapshots."""
+def test_header_against_burt(pyburt_tmpfile):
+    """Compare vanilla BURT header against pyburt snapshots."""
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    _vanilla_burtrb(integration.NORMAL_REQ, burt_tmpfile, comment, keyword)
+    burt.take_snapshot([paths.BASIC_REQ], pyburt_tmpfile, comment, keyword)
 
-    burt.take_snapshot([integration.NORMAL_REQ], pyburt_tmpfile, comment, keyword)
+    snap_parser = burt.SnapParser(pyburt_tmpfile)
+    header, _ = snap_parser.parse()
 
-    assert filecmp.cmp(burt_tmpfile, pyburt_tmpfile, shallow=False)
+    params = {
+        "DATETIME": header[sp.TIME_PREFIX],
+        "LOGIN_ID": header[sp.LOGINID_PREFIX],
+        "EFF_UID": header[sp.UID_PREFIX],
+        "GRP_ID": header[sp.GROUPID_PREFIX],
+        "DIRECTORY": os.path.dirname(pyburt_tmpfile),
+        "REQ_FILE": paths.BASIC_REQ,
+    }
 
+    with open(pyburt_tmpfile, "r") as pyburt_out:
+        with open(paths.BURT_TEMPLATED_BASIC_SNAP) as burt_out:
+            pyburt_out_header = pyburt_out.read().split(sp.SNAP_HEADER_END)[0]
+            burt_out_header = (
+                burt_out.read().split(sp.SNAP_HEADER_END)[0].format_map(params)
+            )
 
-@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
-def test_speed_snapshot(pyburt_tmpfile):
-    """Speed comparison between different snapshot schemes."""
-    test_comment = "Hello World"
-    test_keywords = "cool,snap,file"
-
-    t0 = time.time()
-    burt.take_snapshot(
-        [integration.BCDORBIT_REQ], pyburt_tmpfile, test_comment, test_keywords
-    )
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_snapshot_pyburt_1:{tend}")
-
-    t0 = time.time()
-    burt.take_snapshot(
-        [integration.BCDORBIT_REQ], pyburt_tmpfile, test_comment, test_keywords
-    )
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_snapshot_pyburt_2:{tend}")
-
-    t0 = time.time()
-    _vanilla_burtrb(
-        "/home/ops/burt/requestFiles/bcdorbit.req",
-        pyburt_tmpfile,
-        test_comment,
-        test_keywords,
-    )
-    t1 = time.time()
-    tend = t1 - t0
-    print(f"test_speed_snapshot_burt_vanilla:{tend}")
+            assert pyburt_out_header == burt_out_header
 
 
-@pytest.mark.skipif(NOT_DLS, reason="Run only inside DLS")
 def test_various_types_against_burt(pyburt_tmpfile):
-    """Test edge case types against old burt.
+    """Test various types against snap file generated by old burt."""
+    caput(ioc.LOCAL_PV_SHORT, 4)
+    caput(ioc.LOCAL_PV_ARR_SHORT, [3, 4, 13, 19])
+    caput(ioc.LOCAL_PV_LONG, 9)
+    caput(ioc.LOCAL_PV_ARR_LONG, [124, 623, 8392, 23, 1, -10, 14, 2])
+    caput(ioc.LOCAL_PV_DBL, 5.01)
+    caput(ioc.LOCAL_PV_ARR_DBL, [3.53, 9.35, 1.23, 1.0, 545.0, 800.0, 111.111, 3.0])
+    caput(ioc.LOCAL_PV_FLOAT, 2.0)
+    caput(ioc.LOCAL_PV_ARR_FLOAT, [3.53, 9.35, 1.23, 1.0, 545.0, 800.0, 111.111, 3.0])
+    caput(ioc.LOCAL_PV_ENUM, "Warning")
+    caput(ioc.LOCAL_PV_STR, "dummyString")
+    caput(ioc.LOCAL_PV_ARR_STR, ["x", "y", "z", "This", "is", "a", "test", "but"])
+    caput(ioc.LOCAL_PV_ARR_CHAR, [72, 101, 108, 108, 111, 32, 73, 0])
+    caput(ioc.LOCAL_PV_CHAR, 98)
 
-    Requires the following DLS PVs to be active:
-
-    % Scalar long
-    SR-RF-LLRF-30:T-MOTOR.SREV
-    % Array long
-    LI-VA-FVALV-01:GETRAWILK
-    % Scalar double
-    SR-RF-RFPGU-34:SETPHASE
-    % Array double
-    SR-CS-FILL-01:FITGUNCHGE
-    % Array float
-    BR-RF-LLRF-01:AM:WAVE
-    % Scalar enum
-    SR-RF-IOC-31:BURT:OK
-    % Scalar string
-    SR-RF-IOT-34:SERIAL
-    % Scalar char
-    BR01C-PC-EVR-02:LINAC-PRE
-    % Array char
-    CS-CS-MSTAT-01:MESS01
-    % Scalar short
-    LI-TI-EVG-01:LINAC-PRE
-    % Array short
-    LI-VA-VLVCC-01:SOFTWARE
-
-    """
     comment = "Hello World"
     keyword = "little red sally jumped over the fence"
 
-    burt.take_snapshot([tests.TYPES_REQ], pyburt_tmpfile, comment, keyword)
+    burt.take_snapshot([paths.VARIOUS_TYPES_REQ], pyburt_tmpfile)
 
     # Read into strings to discard time dependent header.
     with open(pyburt_tmpfile, "r") as pyburt_out:
-        with open(tests.CONTROL_ROOM_TYPES_SNAP, "r") as burt_out:
+        with open(paths.BURT_VARIOUS_TYPES_SNAP, "r") as burt_out:
             pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
             burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
 
-            # Some of the str type PV's can change their case, so this test is
-            # a bit brittle. E.g. CS-CS-MSTAT-01:MESS01 can have a lower case b or
-            # capital case B for "User beam time".
-            assert pyburt_out_str.strip().lower() == burt_out_str.strip().lower()
-
-
-@pytest.mark.skip  # take_snapshot_group is not yet implemented
-def test_speed_snapshot_group():
-    """Speed comparison between different snapshot group schemes."""
-    assert False
-
-
-def _vanilla_burtrb(input_req, output_snap, comments, keywords):
-    """Run the original burtrb implementation.
-
-    Args:
-        input_req (str): input req file(s)
-        output_snap (str): output snap file
-        comments (comments): comments
-        keywords (keywords): keywords
-    """
-    burt_rb_cmd = (
-        "/dls_sw/epics/R3.14.12.3/extensions/bin/linux-x86_64/burtrb -f "
-        + input_req
-        + " -o "
-        + output_snap
-        + " -c "
-        + comments
-        + " -k "
-        + keywords
-    )
-
-    # Without shell=True raises an exception on Python 2.7
-    process = subprocess.Popen(burt_rb_cmd, shell=True)
-    process.wait()
-    assert process.returncode == 0
+            assert pyburt_out_str.strip() == burt_out_str.strip()

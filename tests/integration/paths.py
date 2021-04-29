@@ -1,0 +1,20 @@
+# Shared test .req files.
+NORMAL_REQ = "tests/resources/req/normal.req"
+BASIC_REQ = "tests/resources/req/basic.req"
+MODIFIERS_REQ = "tests/resources/req/modifiers_and_comments.req"
+VARIOUS_TYPES_REQ = "tests/resources/req/various_types.req"
+ARR_REQ = "tests/resources/req/array.req"
+CHAR_REQ = "tests/resources/req/char.req"
+
+# Shared test .snap files.
+VARIOUS_TYPES_ALT_SNAP = "tests/resources/snap/various_types.alternative.snap"
+BURT_VARIOUS_TYPES_SNAP = "tests/resources/snap/various_types.burt.snap"
+BURT_TEMPLATED_BASIC_SNAP = "tests/resources/snap/templated_basic.burt.snap"
+ARR_SNAP = "tests/resources/snap/ioc_restore_array.snap"
+CHAR_SNAP = "tests/resources/snap/ioc_restore_char.snap"
+SCALAR_SNAP = "tests/resources/snap/ioc_restore_scalar.snap"
+LONG_SNAP = "tests/resources/snap/ioc_restore_long.snap"
+ENUM_SNAP = "tests/resources/snap/ioc_restore_enum.snap"
+STRING_SNAP = "tests/resources/snap/ioc_restore_string.snap"
+NULL_ARRAY_SNAP = "tests/resources/snap/null_arrays.snap"
+PARTIAL_ARRAY_SNAP = "tests/resources/snap/partial_arrays.snap"

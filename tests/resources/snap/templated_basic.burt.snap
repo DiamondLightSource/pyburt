@@ -1,0 +1,13 @@
+--- Start BURT header
+Time:     {DATETIME}
+Login ID: {LOGIN_ID}
+Eff  UID: {EFF_UID}
+Group ID: {GRP_ID}
+Keywords: little red sally jumped over the fence
+Comments: Hello World
+Type:     Absolute
+Directory {DIRECTORY}
+Req File: {REQ_FILE}
+--- End BURT header
+SR-CS-SOFT-01:AI 1 0.000000000000000e+00
+SR-CS-SOFT-01:LONG_ARR 8 \0 \0 \0 \0 \0 \0 \0 \0

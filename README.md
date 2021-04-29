@@ -109,8 +109,7 @@ The generated pages are in `docs/_build/html`.
 To run the core pytest unit tests:
 
 ```bash
-$ pipenv shell
-$ pytest -vv tests/unit
+$ pipenv run unit-tests
 ```
 
 Note: the unit tests should be run from the root project directory.
@@ -118,23 +117,22 @@ Note: the unit tests should be run from the root project directory.
 ##### DLS Integration Tests
 
 There are separate DLS integration tests for pyburt. These tests run snapshot
-and restore operations against known Diamond and Pytac PV's. See 
-`tests/integration/README.md` for instructions.
+and restore operations against a soft IOC (see `tests/integration/softioc.py`).
 
-Note that running pytest against `tests/integration` without running the test
-IOC first,
-as described in `tests/integration/README.md`, will cause the tests to
-fail.
+To run both integration and unit tests:
+
+```bash
+$ pipenv run tests
+```
 
 ## Developing outside Diamond
 
 At present `Pipfile.lock` contains Diamond dependencies. To use a development
-environment outside Diamond, you need Python 3.6 or greater and Pipenv installed. Then
+environment outside Diamond, you need Python 3.7 or greater and Pipenv installed. Then
 
 ```bash
 $ pipenv install --skip-lock --dev
-$ export EPICS_BASE=<path-to-epics-base>
-$ pipenv run python -m pytest tests
+$ pipenv run tests
 ```
 
 If the tests pass then your development environment is set up correctly.
