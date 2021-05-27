@@ -22,7 +22,7 @@ class ReqParser(BurtParser):
 
     """
 
-    REQ_PV = namedtuple("PV", "name save_len modifier")
+    REQ_PV = namedtuple("REQ_PV", "name save_len modifier")
 
     def __init__(self, path):
         """Class constructor.
