@@ -25,3 +25,6 @@ pyburt = {editable = true, path = "."}
 tests = "python -m pytest --cov=burt tests"
 unit-tests = "python -m pytest --cov=burt tests/unit"
 docs = "sphinx-build -E -b html docs build/html"
+build = "python setup.py sdist bdist_wheel"
+# Delete any files that git ignore hides from us
+gitclean = "git clean -fdX"
