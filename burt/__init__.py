@@ -1,6 +1,7 @@
 """The top-level burt package."""
 from pathlib import Path
 
+from burt._version_git import __version__
 from burt.checks import CheckFailedException, check
 from burt.parsers.check import CheckParser
 from burt.parsers.req import ReqParser
@@ -23,12 +24,3 @@ __all__ = [
     "RqgParser",
     "CheckParser",
 ]
-
-
-def get_version():
-    version_file = Path(__file__).parent / "VERSION"
-    with open(version_file) as f:
-        return f.read().strip()
-
-
-__version__ = get_version()
