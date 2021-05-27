@@ -205,7 +205,7 @@ def test_various_types_restore():
     caput(ioc.LOCAL_PV_SHORT, randint(1, 100))
     caput(ioc.LOCAL_PV_ARR_SHORT, randint(1, 100))
     # Ignored case: See test_restore_scalar_char
-    #caput(ioc.LOCAL_PV_CHAR, ord('c'))
+    # caput(ioc.LOCAL_PV_CHAR, ord('c'))
     caput(ioc.LOCAL_PV_ARR_CHAR, "dummy")
 
     # Execute the restore.
@@ -221,7 +221,7 @@ def test_various_types_restore():
     pv_arr_str = caget(ioc.LOCAL_PV_ARR_STR)
     pv_short = caget(ioc.LOCAL_PV_SHORT)
     pv_arr_short = caget(ioc.LOCAL_PV_ARR_SHORT)
-    #pv_char = caget(ioc.LOCAL_PV_CHAR)
+    # pv_char = caget(ioc.LOCAL_PV_CHAR)
     pv_arr_char = caget(ioc.LOCAL_PV_ARR_CHAR)
 
     # Note the curious format in the snap file for this PV.
