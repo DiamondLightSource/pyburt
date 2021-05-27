@@ -20,10 +20,9 @@ import logging
 import os
 import sys
 from collections import OrderedDict
-from typing import Any, cast, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import cothread
-from cothread.catools import caput, connect
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -32,6 +31,8 @@ from cothread.catools import (
     DBR_LONG,
     DBR_SHORT,
     DBR_STRING,
+    caput,
+    connect,
 )
 
 import burt

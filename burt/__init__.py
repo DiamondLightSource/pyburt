@@ -29,19 +29,19 @@ __all__ = [
     "CheckParser",
 ]
 
+from burt.checks import CheckFailedException  # noqa
+from burt.checks import check  # noqa
+from burt.parsers.check import CheckParser  # noqa
+from burt.parsers.req import ReqParser  # noqa
+from burt.parsers.rgr import RgrParser  # noqa
+from burt.parsers.rqg import RqgParser  # noqa
+from burt.parsers.snap import SnapParser  # noqa
+from burt.read import take_snapshot  # noqa
+from burt.read import take_snapshot_group  # noqa
+
 # Ignore PEP8 warning as imports below require globals above.
 from burt.write import restore  # noqa
 from burt.write import restore_group  # noqa
-from burt.read import take_snapshot  # noqa
-from burt.read import take_snapshot_group  # noqa
-from burt.checks import check  # noqa
-from burt.checks import CheckFailedException  # noqa
-from burt.parsers.req import ReqParser  # noqa
-from burt.parsers.snap import SnapParser  # noqa
-from burt.parsers.rgr import RgrParser  # noqa
-from burt.parsers.rqg import RqgParser  # noqa
-from burt.parsers.check import CheckParser  # noqa
-
 
 def get_version():
     version_file = Path(__file__).parent / "VERSION"

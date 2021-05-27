@@ -1,13 +1,8 @@
-import logging
-import time
-from unittest.mock import MagicMock, patch
+from unittest import TestCase
 
-import cothread
 from cothread.catools import caget, caput
-from cothread.pv import PV
 
 from tests.ioc_manager import IocManager
-from unittest import TestCase
 
 MYPV = "BLXXI-CS-FILL-01:MYPV01"
 

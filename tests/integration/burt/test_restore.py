@@ -1,8 +1,5 @@
 """Various integration tests for Pyburt restore which require a running IOC."""
 import itertools
-import os
-import subprocess
-import time
 from random import randint
 
 import numpy
@@ -10,10 +7,9 @@ import pytest
 from cothread.catools import caget, caput
 
 import burt
+import tests.integration.softioc as ioc
 from tests import paths as core_paths
 from tests.integration import paths
-import tests.integration.softioc as ioc
-
 
 NULL_CHAR = chr(0)
 

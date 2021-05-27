@@ -1,9 +1,9 @@
 """Various tests for the check parser."""
 import pytest
 
-from tests import paths
 from burt import CheckParser as cp
 from burt.parsers import ParserException
+from tests import paths
 
 
 def test_base_case():

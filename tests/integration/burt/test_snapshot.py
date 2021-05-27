@@ -1,18 +1,14 @@
 """Various integration tests for Pyburt snapshots."""
-import filecmp
 import os
-import subprocess
-import time
 
 import pytest
 from cothread.catools import caput
 
 import burt
+import tests.integration.softioc as ioc
 from burt import SnapParser as sp
 from tests import paths as core_paths
 from tests.integration import paths
-import tests.integration.softioc as ioc
-
 
 DOUBLE_ZERO_STR = "0.000000000000000e+00"
 FLOAT_ZERO_STR = "0.000000e+00"
@@ -145,19 +141,19 @@ def test_snapshot_with_modifiers_and_comments(pyburt_tmpfile):
     float_entry = body[0]
     assert float_entry.name == ioc.LOCAL_PV_DBL
     assert len(float_entry.vals) == 1
-    assert float_entry.modifier == None
+    assert float_entry.modifier is None
 
     # Double array, no modifiers
     double_array_entry = body[1]
     assert double_array_entry.name == ioc.LOCAL_PV_ARR_DBL
     assert len(double_array_entry.vals) == 8
-    assert double_array_entry.modifier == None
+    assert double_array_entry.modifier is None
 
     # Double array, length specifier of 4
     double_array_reduced = body[2]
     assert double_array_reduced.name == ioc.LOCAL_PV_ARR_DBL
     assert len(double_array_reduced.vals) == 4
-    assert double_array_reduced.modifier == None
+    assert double_array_reduced.modifier is None
 
     # Float array, read-only
     float_array_ro_entry = body[3]
@@ -296,9 +292,6 @@ def test_various_types_against_burt(pyburt_tmpfile):
     caput(ioc.LOCAL_PV_ARR_STR, ["x", "y", "z", "This", "is", "a", "test", "but"])
     caput(ioc.LOCAL_PV_ARR_CHAR, [72, 101, 108, 108, 111, 32, 73, 0])
     caput(ioc.LOCAL_PV_CHAR, 98)
-
-    comment = "Hello World"
-    keyword = "little red sally jumped over the fence"
 
     burt.take_snapshot([paths.VARIOUS_TYPES_REQ], pyburt_tmpfile)
 

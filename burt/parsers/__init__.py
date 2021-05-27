@@ -227,7 +227,6 @@ class ParserException(Exception):
 
     pass
 
-
 # These need to be imported after the Parser class.
 from burt.parsers.req import ReqParser  # noqa
 from burt.parsers.rgr import RgrParser  # noqa
