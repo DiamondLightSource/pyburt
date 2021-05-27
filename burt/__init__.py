@@ -1,19 +1,14 @@
 """The top-level burt package."""
 from pathlib import Path
 
-# Possible PV prefixes.
-READONLY_SPECIFIER = "RO"
-READONLY_NOTIFY_SPECIFIER = "RON"
-WRITEONLY_SPECIFIER = "WO"
-
-# BURT file extensions.
-REQ_FILE_EXT = ".req"
-SNAP_FILE_EXT = ".snap"
-PYBURT_SNAP_FILE_EXT = ".pyburt.snap"
-RQG_FILE_EXT = ".rqg"
-RGR_FILE_EXT = ".rgr"
-PYBURT_RGR_FILE_EXT = ".pyburt.rgr"
-CHECK_FILE_EXT = ".check"
+from burt.checks import CheckFailedException, check
+from burt.parsers.check import CheckParser
+from burt.parsers.req import ReqParser
+from burt.parsers.rgr import RgrParser
+from burt.parsers.rqg import RqgParser
+from burt.parsers.snap import SnapParser
+from burt.read import take_snapshot, take_snapshot_group
+from burt.write import restore, restore_group
 
 __all__ = [
     "restore",
@@ -29,19 +24,6 @@ __all__ = [
     "CheckParser",
 ]
 
-from burt.checks import CheckFailedException  # noqa
-from burt.checks import check  # noqa
-from burt.parsers.check import CheckParser  # noqa
-from burt.parsers.req import ReqParser  # noqa
-from burt.parsers.rgr import RgrParser  # noqa
-from burt.parsers.rqg import RqgParser  # noqa
-from burt.parsers.snap import SnapParser  # noqa
-from burt.read import take_snapshot  # noqa
-from burt.read import take_snapshot_group  # noqa
-
-# Ignore PEP8 warning as imports below require globals above.
-from burt.write import restore  # noqa
-from burt.write import restore_group  # noqa
 
 def get_version():
     version_file = Path(__file__).parent / "VERSION"

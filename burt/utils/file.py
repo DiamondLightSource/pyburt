@@ -1,7 +1,7 @@
 """BURT file related utility functions."""
 from os.path import isfile, splitext
 
-import burt
+from burt import consts
 
 
 def is_null_char(snap_char: str) -> bool:
@@ -23,7 +23,7 @@ def is_req_file(filename: str, check_existence: bool = False) -> bool:
         True if the file is a .req file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.REQ_FILE_EXT, check_existence)
+    return _is_correct_ext(filename, consts.REQ_FILE_EXT, check_existence)
 
 
 def is_snap_file(filename: str, check_existence: bool = False) -> bool:
@@ -37,7 +37,7 @@ def is_snap_file(filename: str, check_existence: bool = False) -> bool:
         True if the file is a .snap file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.SNAP_FILE_EXT, check_existence)
+    return _is_correct_ext(filename, consts.SNAP_FILE_EXT, check_existence)
 
 
 def is_rqg_file(filename: str, check_existence: bool = False) -> bool:
@@ -51,7 +51,7 @@ def is_rqg_file(filename: str, check_existence: bool = False) -> bool:
         True if the file is a .rqg file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.RQG_FILE_EXT, check_existence)
+    return _is_correct_ext(filename, consts.RQG_FILE_EXT, check_existence)
 
 
 def is_rgr_file(filename: str, check_existence: bool = False) -> bool:
@@ -65,7 +65,7 @@ def is_rgr_file(filename: str, check_existence: bool = False) -> bool:
         True if the file is a .rgr file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.RGR_FILE_EXT, check_existence)
+    return _is_correct_ext(filename, consts.RGR_FILE_EXT, check_existence)
 
 
 def is_check_file(filename: str, check_existence: bool = False) -> bool:
@@ -79,7 +79,7 @@ def is_check_file(filename: str, check_existence: bool = False) -> bool:
         True if the file is a .check file, False otherwise.
 
     """
-    return _is_correct_ext(filename, burt.CHECK_FILE_EXT, check_existence)
+    return _is_correct_ext(filename, consts.CHECK_FILE_EXT, check_existence)
 
 
 def _is_correct_ext(

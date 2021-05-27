@@ -2,7 +2,7 @@
 import re
 from collections import namedtuple
 
-import burt
+from burt import consts
 from burt.parsers import BurtParser, ParserException
 
 
@@ -99,9 +99,9 @@ class SnapParser(BurtParser):
             )
 
         is_modifier_specified = pv_snapshot[0] in (
-            burt.READONLY_SPECIFIER,
-            burt.READONLY_NOTIFY_SPECIFIER,
-            burt.WRITEONLY_SPECIFIER,
+            consts.READONLY_SPECIFIER,
+            consts.READONLY_NOTIFY_SPECIFIER,
+            consts.WRITEONLY_SPECIFIER,
         )
 
         pv_name_index = 1 if is_modifier_specified else 0
