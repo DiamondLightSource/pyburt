@@ -3,20 +3,19 @@ import os
 import subprocess
 import sys
 import time
-from tempfile import NamedTemporaryFile
-from typing import Optional, Dict, List, Any, IO
 from dataclasses import dataclass, field
-
-from epicsdbbuilder import (
-    InitialiseDbd,
-    SetSimpleRecordNames,
-    records,
-    WriteRecords,
-    ResetRecords,
-)
+from tempfile import NamedTemporaryFile
+from typing import IO, Any, Dict, List, Optional
 
 import cothread
 from cothread import catools
+from epicsdbbuilder import (
+    InitialiseDbd,
+    ResetRecords,
+    SetSimpleRecordNames,
+    WriteRecords,
+    records,
+)
 
 EPICS_SERVER_PORT = os.getenv("EPICS_CA_SERVER_PORT", "7064")
 EPICS_REPEATER_PORT = os.getenv("EPICS_CA_REPEATER_PORT", "7065")

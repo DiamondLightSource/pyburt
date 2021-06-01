@@ -20,10 +20,9 @@ import logging
 import os
 import sys
 from collections import OrderedDict
-from typing import Any, cast, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import cothread
-from cothread.catools import caput, connect
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -32,9 +31,12 @@ from cothread.catools import (
     DBR_LONG,
     DBR_SHORT,
     DBR_STRING,
+    caput,
+    connect,
 )
 
 import burt
+from burt import consts
 from burt.config import logconfig
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
@@ -191,16 +193,16 @@ def _is_write_instr(pv_entry: SnapParser.SNAP_PV) -> bool:
     """
     ret = True
 
-    if pv_entry.modifier == burt.READONLY_NOTIFY_SPECIFIER:
+    if pv_entry.modifier == consts.READONLY_NOTIFY_SPECIFIER:
         # TODO: write to the no write snapshot file
         logging.warning("RON type PVs currently unimplemented.")
         ret = False
 
-    elif pv_entry.modifier == burt.READONLY_SPECIFIER:
+    elif pv_entry.modifier == consts.READONLY_SPECIFIER:
         logging.debug(f"Readonly PV {pv_entry.name}. Skipping write.")
         ret = False
 
-    elif pv_entry.modifier == burt.WRITEONLY_SPECIFIER:
+    elif pv_entry.modifier == consts.WRITEONLY_SPECIFIER:
         # TODO: write the "correct" value, not the saved ones.
         logging.warning("WO type PVs currently unimplemented.")
         ret = True

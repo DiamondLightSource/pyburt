@@ -14,10 +14,10 @@ from cothread.catools import (
 )
 
 import burt
-from tests import paths
-from tests.utils import aug_val
 from burt import SnapParser as sp
 from burt.read import _flatten_ca_array, _format_ca_reading
+from tests import paths
+from tests.utils import aug_val
 
 
 @mock.patch("burt.read.caget")

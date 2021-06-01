@@ -1,5 +1,6 @@
 """Parser class which reads the information from a .rqg BURT file."""
 from burt.utils.file import is_check_file, is_req_file
+
 from . import BurtParser, ParserException
 
 

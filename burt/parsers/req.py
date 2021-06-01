@@ -1,7 +1,7 @@
 """Request parser class which reads the information from a .req BURT file."""
 from collections import namedtuple
 
-import burt
+from burt import consts
 from burt.parsers import BurtParser, ParserException
 
 
@@ -22,7 +22,7 @@ class ReqParser(BurtParser):
 
     """
 
-    REQ_PV = namedtuple("PV", "name save_len modifier")
+    REQ_PV = namedtuple("REQ_PV", "name save_len modifier")
 
     def __init__(self, path):
         """Class constructor.
@@ -68,9 +68,9 @@ class ReqParser(BurtParser):
 
         """
         is_modifier_specified = pv_entry[0] in (
-            burt.READONLY_SPECIFIER,
-            burt.READONLY_NOTIFY_SPECIFIER,
-            burt.WRITEONLY_SPECIFIER,
+            consts.READONLY_SPECIFIER,
+            consts.READONLY_NOTIFY_SPECIFIER,
+            consts.WRITEONLY_SPECIFIER,
         )
 
         save_len_index = None

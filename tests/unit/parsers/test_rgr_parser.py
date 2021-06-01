@@ -2,9 +2,9 @@
 import pytest
 
 import burt
-from tests import paths
 from burt import RgrParser as rp
 from burt.parsers import ParserException
+from tests import paths
 
 
 def test_base_case():

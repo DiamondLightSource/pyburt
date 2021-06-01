@@ -14,14 +14,11 @@ A request group .rqg file contains a collection of paths to .req files, and is
 used to create bulk snapshots.
 """
 import argparse
-import getpass
 import logging
 import os
-import pwd
 import time
 from typing import Any, List, Tuple
 
-from cothread.catools import caget
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -30,6 +27,7 @@ from cothread.catools import (
     DBR_LONG,
     DBR_SHORT,
     DBR_STRING,
+    caget,
 )
 
 import burt
@@ -37,7 +35,6 @@ from burt.config import logconfig
 from burt.parsers.snap import SnapParser as Snap
 from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
 from burt.utils.utils import get_user_details
-
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_LONG_PYFORMAT = "{:.15e}"
