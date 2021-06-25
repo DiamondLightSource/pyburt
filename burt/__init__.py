@@ -1,7 +1,5 @@
 """The top-level burt package."""
-from pathlib import Path
-
-from burt._version_git import __version__
+from burt._version_git import __version__  # noqa
 from burt.checks import CheckFailedException, check
 from burt.parsers.check import CheckParser
 from burt.parsers.req import ReqParser
