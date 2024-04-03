@@ -8,8 +8,8 @@ import sys
 
 import pygelf
 
-GRAYLOG_HOST = "graylog2.diamond.ac.uk"
-GRAYLOG_PORT = 12201
+GRAYLOG_HOST = "graylog-log-target.diamond.ac.uk"
+GRAYLOG_PORT = 12228
 
 DEFAULT_LOG_FORMAT = (
     "%(asctime)5s - %(filename)s:%(lineno)d - %(" "levelname)5s - %(message)s"
@@ -41,7 +41,7 @@ def get_username():
 
 def get_graylog_handler():
     """Return the DLS Graylog handler."""
-    handler = pygelf.GelfUdpHandler(
+    handler = pygelf.GelfTcpHandler(
         GRAYLOG_HOST,
         GRAYLOG_PORT,
         debug=True,
