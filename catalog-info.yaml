@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: pyburt
+  title: pyburt
+  description: Python version of the BackUp and ResTore tool
+spec:
+  type: application
+  lifecycle: production
+  owner: group:default/high-level-apps

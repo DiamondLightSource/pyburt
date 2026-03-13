@@ -1,34 +1,20 @@
-[![pipeline status](https://gitlab.diamond.ac.uk/controls/python3/pyburt/badges/master/pipeline.svg)](https://gitlab.diamond.ac.uk/controls/python3/pyburt/commits/master)
-[![coverage report](https://gitlab.diamond.ac.uk/controls/python3/pyburt/badges/master/coverage.svg)](https://gitlab.diamond.ac.uk/controls/python3/pyburt/commits/master)
-[![Documentation Status](https://readthedocs.org/projects/pyburt/badge/?version=latest)](https://pyburt.readthedocs.io/en/latest/?badge=latest)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python 3.7](https://img.shields.io/badge/python-3.7-blueviolet.svg)](https://www.python.org/downloads/release/python-373/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![CI](https://github.com/DiamondLightSource/pyburt/actions/workflows/ci.yml/badge.svg)](https://github.com/DiamondLightSource/pyburt/actions/workflows/ci.yml)
+[![Coverage](https://codecov.io/gh/DiamondLightSource/pyburt/branch/main/graph/badge.svg)](https://codecov.io/gh/DiamondLightSource/pyburt)
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 # pyburt
 
-**pyburt** is the Python version of the Burt EPICS extension. It utilises the
-[cothread](https://cothread.readthedocs.io/en/latest/) python library for
-Channel Access operations.
+Python version of the BackUp and ResTore tool
 
-## Documentation
+This is where you should write a short paragraph that describes what your module does,
+how it does it, and why people should use it.
 
-Full documentation is available at [readthedocs](https://readthedocs.org/projects/pyburt/).
+Source          | <https://github.com/DiamondLightSource/pyburt>
+:---:           | :---:
+Docker          | `docker run ghcr.io/diamondlightsource/pyburt:latest`
+Releases        | <https://github.com/DiamondLightSource/pyburt/releases>
 
-## Installation
-
-```bash
-$ pipenv install pyburt
-```
-
-## Development
-
-```bash
-$ git clone git@gitlab.diamond.ac.uk:controls/python3/pyburt.git
-$ cd pyburt
-$ pipenv install -d
-$ python setup.py install
-```
 
 ## API Usage
 
@@ -87,25 +73,9 @@ optional arguments:
   -l L          Optional restore log file destination.
 ```
 
-## License
+## Tests
 
-See [LICENSE](). 
-
-### Build
- 
-To build the Sphinx documentation:
-
-```bash
-$ pipenv shell
-(pyburt) $ cd docs
-(pyburt) $ make html
-```
-
-The generated pages are in `docs/_build/html`.
-
-### Tests
-
-##### Unit Tests
+#### Unit Tests
 To run the core pytest unit tests:
 
 ```bash
@@ -114,7 +84,7 @@ $ pipenv run unit-tests
 
 Note: the unit tests should be run from the root project directory.
 
-##### DLS Integration Tests
+#### DLS Integration Tests
 
 There are separate DLS integration tests for pyburt. These tests run snapshot
 and restore operations against a soft IOC (see `tests/integration/softioc.py`).
@@ -124,15 +94,3 @@ To run both integration and unit tests:
 ```bash
 $ pipenv run tests
 ```
-
-## Developing outside Diamond
-
-At present `Pipfile.lock` contains Diamond dependencies. To use a development
-environment outside Diamond, you need Python 3.7 or greater and Pipenv installed. Then
-
-```bash
-$ pipenv install --skip-lock --dev
-$ pipenv run tests
-```
-
-If the tests pass then your development environment is set up correctly.
