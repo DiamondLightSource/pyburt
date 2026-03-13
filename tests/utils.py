@@ -47,7 +47,7 @@ def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
 
     if count > 1:
         if dtype in (DBR_STRING, DBR_CHAR):
-            npdtype = numpy.object
+            npdtype = object
         else:
             npdtype = numpy.float64
         f = AugArray([len(val)], dtype=npdtype)
