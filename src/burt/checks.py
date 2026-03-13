@@ -25,7 +25,7 @@ class CheckFailedException(Exception):
             msg (str): Any other message.
 
         """
-        super(CheckFailedException, self).__init__(
+        super().__init__(
             f"{check_pv.name} failed with target {check_pv.target} and "
             f"tolerance {check_pv.tolerance}. {msg}"
         )

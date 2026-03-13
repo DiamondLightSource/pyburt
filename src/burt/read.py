@@ -20,11 +20,6 @@ import os
 import time
 from typing import Any
 
-import burt
-from burt.config import logconfig
-from burt.parsers.snap import SnapParser as Snap
-from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
-from burt.utils.utils import get_user_details
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -35,6 +30,12 @@ from cothread.catools import (
     DBR_STRING,
     caget,
 )
+
+import burt
+from burt.config import logconfig
+from burt.parsers.snap import SnapParser as Snap
+from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
+from burt.utils.utils import get_user_details
 
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_LONG_PYFORMAT = "{:.15e}"

@@ -23,12 +23,7 @@ import sys
 from collections import OrderedDict
 from typing import Any, Union, cast
 
-import burt
 import cothread
-from burt import consts
-from burt.config import logconfig
-from burt.parsers.snap import SnapParser
-from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -40,6 +35,12 @@ from cothread.catools import (
     caput,
     connect,
 )
+
+import burt
+from burt import consts
+from burt.config import logconfig
+from burt.parsers.snap import SnapParser
+from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
 
 CaValue = Union[str, int, float]
 
