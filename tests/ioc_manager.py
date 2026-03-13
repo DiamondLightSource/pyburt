@@ -5,7 +5,7 @@ import sys
 import time
 from dataclasses import dataclass, field
 from tempfile import NamedTemporaryFile
-from typing import IO, Any, Dict, List, Optional
+from typing import IO, Any
 
 import cothread
 from cothread import catools
@@ -33,7 +33,7 @@ class Record:
 
     typ: str
     name: str
-    fields: Dict[str, Any] = field(default_factory=dict)
+    fields: dict[str, Any] = field(default_factory=dict)
 
 
 class IocManager:
@@ -42,14 +42,14 @@ class IocManager:
 
         IOC will start using defined EPICS environment variables.
         """
-        self.record_list: List[Record] = []
+        self.record_list: list[Record] = []
         self.db_file: IO = NamedTemporaryFile("w+t")
-        self.process: Optional[subprocess.Popen] = None
+        self.process: subprocess.Popen | None = None
 
     def _add_record(self, typ, pv_name, **fields):
-        assert (
-            not self.is_started()
-        ), f"Cannot add {typ} record to running IOC ({pv_name})"
+        assert not self.is_started(), (
+            f"Cannot add {typ} record to running IOC ({pv_name})"
+        )
         self.record_list.append(Record(typ, pv_name, fields))
 
     def _generate_db_file(self) -> None:
@@ -170,9 +170,9 @@ class IocManager:
     def add_mbbi_record(self, pv_name, states, **fields):
         """Add a new mbbi PV record."""
         nstates = len(states)
-        assert (
-            nstates <= 16
-        ), f"mbbi record does not support more than 16 states ({nstates} requested)"
+        assert nstates <= 16, (
+            f"mbbi record does not support more than 16 states ({nstates} requested)"
+        )
         states.extend([""] * (16 - nstates))
 
         final_fields = self.build_mbbx_fields(states)
@@ -183,9 +183,9 @@ class IocManager:
     def add_mbbo_record(self, pv_name, states, **fields):
         """Add a new mbbo PV record."""
         nstates = len(states)
-        assert (
-            nstates <= 16
-        ), f"mbbo record does not support more than 16 states ({nstates} requested)"
+        assert nstates <= 16, (
+            f"mbbo record does not support more than 16 states ({nstates} requested)"
+        )
         states.extend([""] * (16 - nstates))
 
         final_fields = self.build_mbbx_fields(states)

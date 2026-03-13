@@ -1,4 +1,5 @@
 """Various tests for the snap parser."""
+
 import pytest
 
 import burt

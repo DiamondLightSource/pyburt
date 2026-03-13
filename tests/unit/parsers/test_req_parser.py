@@ -1,4 +1,5 @@
 """Various tests for the req parser."""
+
 import pytest
 
 from burt import ReqParser as rp

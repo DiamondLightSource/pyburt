@@ -23,6 +23,7 @@ def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
         dtype: cothread DBR type
 
     """
+
     # noqa D202  https://github.com/PyCQA/pydocstyle/pull/395
     class AugFloat(float):
         ok = True

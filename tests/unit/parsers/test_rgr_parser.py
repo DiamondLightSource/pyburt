@@ -1,4 +1,5 @@
 """Various tests for the rgr parser."""
+
 import pytest
 
 import burt

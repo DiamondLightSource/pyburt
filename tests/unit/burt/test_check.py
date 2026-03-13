@@ -1,5 +1,7 @@
 """Various tests for the check file functionality."""
-import mock
+
+from unittest import mock
+
 import pytest
 
 import burt

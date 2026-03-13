@@ -1,8 +1,9 @@
 """Various tests for the main burt module."""
+
 import os
+from unittest import mock
 
 import cothread
-import mock
 import pytest
 from cothread.catools import (
     DBR_CHAR,
@@ -174,8 +175,7 @@ def test_burtinter_req_file_prefix_compatability():
     try:
         _old_req_file_header_burtinter_code(bad_req_entry_1)
         pytest.fail(
-            "This test should throw as old burtinter cannot handle more than "
-            "one space."
+            "This test should throw as old burtinter cannot handle more than one space."
         )
     except IndexError:
         # Expected.
@@ -184,8 +184,7 @@ def test_burtinter_req_file_prefix_compatability():
     try:
         _old_req_file_header_burtinter_code(bad_req_entry_2)
         pytest.fail(
-            "This test should throw as old burtinter cannot handle more than "
-            "one space."
+            "This test should throw as old burtinter cannot handle more than one space."
         )
     except IndexError:
         # Expected.

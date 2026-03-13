@@ -1,8 +1,9 @@
 """Unit tests for the BURT restore functionality."""
+
 import io
+from unittest import mock
 
 import cothread
-import mock
 import pytest
 from cothread.catools import (
     DBR_CHAR,

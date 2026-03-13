@@ -1,4 +1,5 @@
 """Various integration tests for Pyburt snapshots."""
+
 import os
 
 import pytest
@@ -267,7 +268,7 @@ def test_header_against_burt(pyburt_tmpfile):
         "REQ_FILE": paths.BASIC_REQ,
     }
 
-    with open(pyburt_tmpfile, "r") as pyburt_out:
+    with open(pyburt_tmpfile) as pyburt_out:
         with open(paths.BURT_TEMPLATED_BASIC_SNAP) as burt_out:
             pyburt_out_header = pyburt_out.read().split(sp.SNAP_HEADER_END)[0]
             burt_out_header = (
@@ -296,8 +297,8 @@ def test_various_types_against_burt(pyburt_tmpfile):
     burt.take_snapshot([paths.VARIOUS_TYPES_REQ], pyburt_tmpfile)
 
     # Read into strings to discard time dependent header.
-    with open(pyburt_tmpfile, "r") as pyburt_out:
-        with open(paths.BURT_VARIOUS_TYPES_SNAP, "r") as burt_out:
+    with open(pyburt_tmpfile) as pyburt_out:
+        with open(paths.BURT_VARIOUS_TYPES_SNAP) as burt_out:
             pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
             burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
 

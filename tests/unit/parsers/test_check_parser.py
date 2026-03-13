@@ -1,4 +1,5 @@
 """Various tests for the check parser."""
+
 import pytest
 
 from burt import CheckParser as cp

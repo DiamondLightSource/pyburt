@@ -1,4 +1,5 @@
 """Various tests for the rqg parser."""
+
 import pytest
 
 import burt
