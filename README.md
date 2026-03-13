@@ -74,12 +74,13 @@ optional arguments:
 ```
 
 ## Tests
+Before running any tests, make sure you build and run the devcontainer.
 
 #### Unit Tests
 To run the core pytest unit tests:
 
 ```bash
-$ pipenv run unit-tests
+$ pytest tests/unit/
 ```
 
 Note: the unit tests should be run from the root project directory.
@@ -92,5 +93,5 @@ and restore operations against a soft IOC (see `tests/integration/softioc.py`).
 To run both integration and unit tests:
 
 ```bash
-$ pipenv run tests
+$ pytest
 ```

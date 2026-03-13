@@ -12,7 +12,11 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 description = "Python version of the BackUp and ResTore tool"
-dependencies = ["cothread>=2.15", "pygelf"] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = [
+    "cothread>=2.15",
+    "pygelf",
+    "epicscorelibs",
+] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
@@ -28,12 +32,14 @@ dev = [
     "ruff",
     "tox-uv",
     "types-mock",
+    "mock",
+    "epicsdbbuilder",
 ]
 
 [project.scripts]
-pyburt = "pyburt.__main__:main"
-burt-read = "pyburt.read:main"
-burt-write = "pyburt.write:main"
+pyburt = "burt.__main__:main"
+burt-read = "burt.read:main"
+burt-write = "burt.write:main"
 
 [project.urls]
 GitHub = "https://github.com/DiamondLightSource/pyburt"
@@ -43,7 +49,7 @@ email = "diamhighlvlapps@diamond.ac.uk"
 name = "High Level Apps"
 
 [tool.setuptools_scm]
-version_file = "src/pyburt/_version.py"
+version_file = "src/burt/_version.py"
 
 [tool.mypy]
 ignore_missing_imports = true # Ignore missing stubs in imported modules
