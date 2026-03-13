@@ -1,4 +1,5 @@
 """Parsers package."""
+
 from burt.parsers.parser import BurtParser, ParserException
 from burt.parsers.req import ReqParser
 from burt.parsers.rgr import RgrParser

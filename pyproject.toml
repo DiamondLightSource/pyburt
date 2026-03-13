@@ -12,7 +12,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
 ]
 description = "Python version of the BackUp and ResTore tool"
-dependencies = [] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = ["cothread>=2.15", "pygelf"] # Add project dependencies here, e.g. ["click", "numpy"]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
@@ -32,6 +32,8 @@ dev = [
 
 [project.scripts]
 pyburt = "pyburt.__main__:main"
+burt-read = "pyburt.read:main"
+burt-write = "pyburt.write:main"
 
 [project.urls]
 GitHub = "https://github.com/DiamondLightSource/pyburt"

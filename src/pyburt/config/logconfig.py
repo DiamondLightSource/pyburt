@@ -1,4 +1,5 @@
 """Modified logconfig.py from dls_ade."""
+
 import getpass
 import logging
 import logging.config
@@ -12,7 +13,7 @@ GRAYLOG_HOST = "graylog-log-target.diamond.ac.uk"
 GRAYLOG_PORT = 12228
 
 DEFAULT_LOG_FORMAT = (
-    "%(asctime)5s - %(filename)s:%(lineno)d - %(" "levelname)5s - %(message)s"
+    "%(asctime)5s - %(filename)s:%(lineno)d - %(levelname)5s - %(message)s"
 )
 
 DEFAULT_CONFIG = {

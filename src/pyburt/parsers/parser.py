@@ -1,7 +1,8 @@
 """Parsers package."""
+
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 # Global inline comment prefix.
 INLINE_COMMENT = "%"
@@ -65,7 +66,7 @@ class BurtParser:
         """
         return self.HEADER(None, None, None)
 
-    def parse(self) -> Tuple[Dict[str, List[str]], List[Any]]:
+    def parse(self) -> tuple[dict[str, list[str]], list[Any]]:
         """Parse the .* BURT file located at self.path.
 
         Returns:
@@ -74,7 +75,7 @@ class BurtParser:
             If there is no header, the dict will be empty.
 
         """
-        with open(self.path, "r") as f:
+        with open(self.path) as f:
             file_contents = f.read()
 
             if self.get_header() and self.get_header().prefixes is not None:
@@ -88,7 +89,7 @@ class BurtParser:
 
             return header_vals, body_vals
 
-    def parse_header(self, header_lines) -> Dict[str, List[str]]:
+    def parse_header(self, header_lines) -> dict[str, list[str]]:
         """Parse the header portion of a .* BURT file.
 
         Args:
@@ -102,7 +103,7 @@ class BurtParser:
             ParserException: If the header is malformed.
 
         """
-        prefix_to_val: Dict[str, List[str]] = {}
+        prefix_to_val: dict[str, list[str]] = {}
 
         for line in header_lines:
             # Ugly wart of old style .snap files: directory line doesn't have a colon.
@@ -129,7 +130,7 @@ class BurtParser:
 
         return prefix_to_val
 
-    def parse_body(self, body_lines) -> List[object]:
+    def parse_body(self, body_lines) -> list[object]:
         """Parse the body portion of a .* BURT file.
 
         Args:
@@ -156,7 +157,7 @@ class BurtParser:
 
         return body_objs
 
-    def _extract_header_and_body(self, file_contents) -> Tuple[List[str], List[str]]:
+    def _extract_header_and_body(self, file_contents) -> tuple[list[str], list[str]]:
         """Get the contents from a BURT file with both a header and a footer.
 
         Args:
@@ -170,7 +171,7 @@ class BurtParser:
             ParserException: If the BURT file is malformed.
 
         """
-        if not (self.get_header().start_label in file_contents) and (
+        if self.get_header().start_label not in file_contents and (
             self.get_header().end_label in file_contents
         ):
             raise ParserException("Malformed BURT header.")

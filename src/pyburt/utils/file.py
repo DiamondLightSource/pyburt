@@ -1,4 +1,5 @@
 """BURT file related utility functions."""
+
 from os.path import isfile, splitext
 
 from burt import consts

@@ -1,4 +1,5 @@
 """Parser class which reads the information from a .rqg BURT file."""
+
 from burt.utils.file import is_check_file, is_req_file
 
 from . import BurtParser, ParserException
@@ -32,7 +33,7 @@ class RqgParser(BurtParser):
             path (str): The path to the .rgr file.
 
         """
-        super(RqgParser, self).__init__(path)
+        super().__init__(path)
 
         self._is_req_section = False
 

@@ -1,4 +1,5 @@
 """Check parser class which reads the information from a .check BURT file."""
+
 from collections import namedtuple
 
 from burt.parsers import BurtParser, ParserException
@@ -42,7 +43,7 @@ class CheckParser(BurtParser):
             path (str): The path to the .snap file.
 
         """
-        super(CheckParser, self).__init__(path)
+        super().__init__(path)
 
     def get_header(self):
         """Get the .check file header.
@@ -51,7 +52,7 @@ class CheckParser(BurtParser):
             namedtuple(super.HEADER): The .snap file header.
 
         """
-        return super(CheckParser, self).HEADER(
+        return super().HEADER(
             self.CHECK_HEADER_START, (self.COMMENTS_PREFIX,), self.CHECK_HEADER_END
         )
 

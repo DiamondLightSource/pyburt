@@ -1,4 +1,5 @@
 """Request parser class which reads the information from a .req BURT file."""
+
 from collections import namedtuple
 
 from burt import consts
@@ -31,7 +32,7 @@ class ReqParser(BurtParser):
             path (str): The path to the .req file.
 
         """
-        super(ReqParser, self).__init__(path)
+        super().__init__(path)
 
     def read_body_line(self, line) -> "REQ_PV":
         """Store a PV entry in the .req file into a namedtuple object.

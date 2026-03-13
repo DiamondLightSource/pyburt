@@ -1,4 +1,5 @@
 """Snap parser class which reads the information from a .snap BURT file."""
+
 import re
 from collections import namedtuple
 
@@ -53,7 +54,7 @@ class SnapParser(BurtParser):
             path (str): The path to the .snap file.
 
         """
-        super(SnapParser, self).__init__(path)
+        super().__init__(path)
 
     def get_header(self):
         """Get the .snap file header.
@@ -62,7 +63,7 @@ class SnapParser(BurtParser):
             namedtuple(super.HEADER): The .snap file header.
 
         """
-        return super(SnapParser, self).HEADER(
+        return super().HEADER(
             self.SNAP_HEADER_START,
             (
                 self.TIME_PREFIX,

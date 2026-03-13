@@ -13,12 +13,18 @@ documentation for more information.
 A request group .rqg file contains a collection of paths to .req files, and is
 used to create bulk snapshots.
 """
+
 import argparse
 import logging
 import os
 import time
-from typing import Any, List, Tuple
+from typing import Any
 
+import burt
+from burt.config import logconfig
+from burt.parsers.snap import SnapParser as Snap
+from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
+from burt.utils.utils import get_user_details
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -30,12 +36,6 @@ from cothread.catools import (
     caget,
 )
 
-import burt
-from burt.config import logconfig
-from burt.parsers.snap import SnapParser as Snap
-from burt.utils.file import is_req_file, is_rgr_file, is_rqg_file, is_snap_file
-from burt.utils.utils import get_user_details
-
 # Scalar pv entries are shown as a 15 width precision number(s) in scientific notation.
 SNAP_PRECISION_LONG_PYFORMAT = "{:.15e}"
 SNAP_PRECISION_SHORT_PYFORMAT = "{:.6e}"
@@ -46,12 +46,12 @@ class InvalidReadingException(Exception):
 
 
 def take_snapshot(
-    req_files: List[str],
+    req_files: list[str],
     snap_file: str,
     comments: str = None,
     keywords: str = None,
     compat: bool = False,
-) -> List[str]:
+) -> list[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
 
     If more than one .req file is given as a list or iterable, then the snapshot values
@@ -78,7 +78,7 @@ def take_snapshot(
     snap_header = _gen_snap_header(req_files, comments, keywords)
     logging.debug(f"Generated .snap header: {snap_header}")
 
-    all_req_failed_pvs: List[str] = []
+    all_req_failed_pvs: list[str] = []
     all_req_snap_footer_entries = []
 
     for req_file in req_files:
@@ -112,7 +112,7 @@ def take_snapshot_group(
     comments: str = None,
     keywords: str = None,
     check: bool = True,
-) -> List[str]:
+) -> list[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.
 
     Args:
@@ -137,7 +137,7 @@ def take_snapshot_group(
     raise NotImplementedError("Not yet implemented.")
 
 
-def _check_snapshot_params(req_files: List[str], snap_file: str) -> None:
+def _check_snapshot_params(req_files: list[str], snap_file: str) -> None:
     """Check take_snapshot parameters for validity.
 
     Args:
@@ -324,7 +324,7 @@ def _gen_snap_footer(ca_readings, pv_entries, compat=False):
 
 def _ca_val_to_snap_entry(
     ca_reading: Any, requested_save_len: int, compat: bool
-) -> Tuple[int, str]:
+) -> tuple[int, str]:
     """Format a reading returned from caget into a string for a snap file.
 
     Cothread automatically converts a DBR channel access type into its python
@@ -429,7 +429,6 @@ def _flatten_ca_array(ca_reading, requested_length, compat):
     # Adding EPICS null chars if applicable.
     # Note: Burt represents empty array elements as null zeroes for integer types.
     if len(ca_reading) < ca_reading.element_count:
-
         # DBR_ENUM and DBR_ENUM_STR are never expected because we caget with
         # DBR_ENUM_STR as a return type request.
         if ca_reading.datatype in (DBR_SHORT, DBR_LONG, DBR_CHAR, DBR_STRING):

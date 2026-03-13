@@ -15,14 +15,20 @@ A restore group .rgr file is just a collection of paths to .snap files,
 and some .check files which verifies certain preconditions prior to the
 restore operation proceeding. It is used for bulk restoring of PVs.
 """
+
 import argparse
 import logging
 import os
 import sys
 from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Union, cast
 
+import burt
 import cothread
+from burt import consts
+from burt.config import logconfig
+from burt.parsers.snap import SnapParser
+from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
 from cothread.catools import (
     DBR_CHAR,
     DBR_DOUBLE,
@@ -35,16 +41,10 @@ from cothread.catools import (
     connect,
 )
 
-import burt
-from burt import consts
-from burt.config import logconfig
-from burt.parsers.snap import SnapParser
-from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
-
 CaValue = Union[str, int, float]
 
 
-def restore(snap_file: str) -> List[str]:
+def restore(snap_file: str) -> list[str]:
     """Restores the state of the PVs in the .snap file.
 
     This function does nothing for PVs marked with RO or RON specifiers.
@@ -73,7 +73,7 @@ def restore(snap_file: str) -> List[str]:
     pvs = _get_pvs_in_snap(snap_file)
 
     # Improve performance by putting all at once later on.
-    pvs_to_restore: Dict[str, Any] = OrderedDict()
+    pvs_to_restore: dict[str, Any] = OrderedDict()
 
     # Obtain for the channel type prior to the put for each pv, so we can put the
     # correct type.
@@ -101,7 +101,7 @@ def restore(snap_file: str) -> List[str]:
     return failed_pvs
 
 
-def restore_group(rgr_file: str, check: bool = True) -> List[str]:
+def restore_group(rgr_file: str, check: bool = True) -> list[str]:
     """Perform BURT restore for each .snap file contained in the .rgr file.
 
     Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
@@ -127,7 +127,6 @@ def restore_group(rgr_file: str, check: bool = True) -> List[str]:
 
     all_failed_pvs = []
     for file_path in body:
-
         if check and is_check_file(file_path):
             burt.check(file_path)
 
@@ -220,7 +219,7 @@ def _get_pvs_in_snap(snap_file):
 
 def _snap_entry_to_ca_type(
     pv_entry: SnapParser.SNAP_PV, datatype: int
-) -> Union[CaValue, List[CaValue]]:
+) -> CaValue | list[CaValue]:
     """Coerce the correct ca type from the channel type."""
     # Array value.
     if pv_entry.dtype_len > 1:
@@ -241,7 +240,7 @@ def _snap_entry_to_ca_type(
             stripped_converted_vals = converted_vals
 
         # Tell Mypy that we have removed the Nones.
-        return cast(List[CaValue], stripped_converted_vals)
+        return cast(list[CaValue], stripped_converted_vals)
     # Scalar value
     else:
         converted_val = _convert_to_ca_type(pv_entry.vals[0], datatype)
@@ -254,13 +253,13 @@ def _snap_entry_to_ca_type(
             return converted_val
 
 
-def _convert_to_ca_type(snap_val, datatype) -> Optional[CaValue]:
+def _convert_to_ca_type(snap_val, datatype) -> CaValue | None:
     """Convert a single snap value given a channel type."""
     if is_null_char(snap_val):
         return None
 
     if datatype == DBR_CHAR:
-        ascii_code: Optional[int] = None
+        ascii_code: int | None = None
         try:
             ascii_code = ord(snap_val)
         except (ValueError, TypeError) as e:

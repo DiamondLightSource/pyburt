@@ -1,4 +1,5 @@
 """The top-level burt package."""
+
 from burt._version import __version__  # noqa
 from burt.checks import CheckFailedException, check
 from burt.parsers.check import CheckParser
@@ -21,5 +22,5 @@ __all__ = [
     "RgrParser",
     "RqgParser",
     "CheckParser",
-    "__version__"
+    "__version__",
 ]

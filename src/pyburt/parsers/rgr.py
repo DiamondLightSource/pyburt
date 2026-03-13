@@ -1,4 +1,5 @@
 """Parser class which reads the information from a .rgr BURT file."""
+
 from burt.parsers import BurtParser, ParserException
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_snap_file
@@ -38,7 +39,7 @@ class RgrParser(BurtParser):
             path (str): The path to the .rgr file.
 
         """
-        super(RgrParser, self).__init__(path)
+        super().__init__(path)
 
         self._is_snap_section = False
 
@@ -49,7 +50,7 @@ class RgrParser(BurtParser):
             namedtuple(super.HEADER): The .rgr file header.
 
         """
-        return super(RgrParser, self).HEADER(
+        return super().HEADER(
             self.RGR_HEADER_START,
             (SnapParser.COMMENTS_PREFIX, self.RQG_PREFIX),
             self.RGR_HEADER_END,
