@@ -21,7 +21,7 @@ import logging
 import os
 import sys
 from collections import OrderedDict
-from typing import Any, Union, cast
+from typing import Any, cast
 
 import cothread
 from cothread.catools import (
@@ -42,7 +42,7 @@ from burt.config import logconfig
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
 
-CaValue = Union[str, int, float]
+CaValue = str | int | float
 
 
 def restore(snap_file: str) -> list[str]:

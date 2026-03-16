@@ -14,6 +14,7 @@ from cothread.catools import (
     DBR_LONG,
     DBR_SHORT,
     DBR_STRING,
+    ca_nothing,
 )
 
 import burt
@@ -109,11 +110,11 @@ def test_restore_channel_types(mock_connect, mock_caput):
 @mock.patch("burt.write.connect")
 def test_restore_write_fail(mock_connect, mock_caput):
     """Run BURT restore against a write exception case."""
-    mock_caput.side_effect = Exception
+    mock_caput.side_effect = ca_nothing
 
     # TODO: discuss if anything special needs to occur on write failure.
     # Probable solution is to not do anything.
-    with pytest.raises(Exception):
+    with pytest.raises(ca_nothing):
         burt.restore(paths.ARRAYS_AND_SCALARS_WITH_MODS_SNAP)
 
 

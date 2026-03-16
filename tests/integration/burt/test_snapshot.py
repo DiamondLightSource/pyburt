@@ -68,8 +68,8 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
 
     """
     # Define the expected compatibility behaviour.
-    DOUBLE_NULL = DOUBLE_ZERO_STR if compat else NULL_STR
-    FLOAT_NULL = FLOAT_ZERO_STR if compat else NULL_STR
+    double_null = DOUBLE_ZERO_STR if compat else NULL_STR
+    float_null = FLOAT_ZERO_STR if compat else NULL_STR
 
     caput(ioc.LOCAL_PV_ARR_CHAR, [1, 2, 3])
     caput(ioc.LOCAL_PV_ARR_DBL, [1.1, 2.2, 3.3])
@@ -87,10 +87,10 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
         "1.100000000000000e+00",
         "2.200000000000000e+00",
         "3.300000000000000e+00",
-    ] + [DOUBLE_NULL] * 5
+    ] + [double_null] * 5
     assert double_array_entry.vals == double_expected
     float_array_entry = body[7]
-    float_expected = ["1.100000e+00", "2.200000e+00", "3.300000e+00"] + [FLOAT_NULL] * 5
+    float_expected = ["1.100000e+00", "2.200000e+00", "3.300000e+00"] + [float_null] * 5
     assert float_array_entry.vals == float_expected
     long_array_entry = body[8]
     long_expected = ["1", "2", "3"] + [NULL_STR] * 5

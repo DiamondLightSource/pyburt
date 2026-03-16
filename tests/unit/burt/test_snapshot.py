@@ -555,21 +555,21 @@ def test_snapshot_group(mock_caget):
     """Runs a take snapshot group test of a .rqg file."""
     # TODO: this is a broken test with incorrect behaviour. To be changed when
     #  snapshot groups are implemented.
-    assert False
+    raise AssertionError
 
 
-def _old_req_file_header_burtinter_code(snapshotString):
+def _old_req_file_header_burtinter_code(snapshot_string):
     """Remnant in old burtinter code."""
     # Old code start
-    if snapshotString[0:9] == "Req File:":
-        requestFileName = snapshotString.split(" ")[2].split("\n")[0]
-        fileNameParts = requestFileName.split("/")
-        if fileNameParts[1] == "mt":
-            fileNameParts[1] = ""
-            requestFileName = "/".join(fileNameParts[1:])
+    if snapshot_string[0:9] == "Req File:":
+        request_file_name = snapshot_string.split(" ")[2].split("\n")[0]
+        file_name_parts = request_file_name.split("/")
+        if file_name_parts[1] == "mt":
+            file_name_parts[1] = ""
+            request_file_name = "/".join(file_name_parts[1:])
     # Old code end
     else:
         pytest.fail(
-            f"Last prefix entry is unexpectedly not Req File: {snapshotString}",
-            snapshotString,
+            f"Last prefix entry is unexpectedly not Req File: {snapshot_string}",
+            snapshot_string,
         )
