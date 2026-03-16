@@ -2,7 +2,7 @@
 
 from burt.utils.file import is_check_file, is_req_file
 
-from . import BurtParser, ParserException
+from . import BurtParser, ParserError
 
 
 class RqgParser(BurtParser):
@@ -45,12 +45,12 @@ class RqgParser(BurtParser):
 
         """
         if not is_req_file(line) and not is_check_file(line):
-            raise ParserException(
+            raise ParserError(
                 "Malformed .rqg file: invalid .req or .check file specified."
             )
 
         if self._is_req_section and is_check_file(line):
-            raise ParserException(
+            raise ParserError(
                 "Malformed .rqg file: .check files must be ordered before .req files."
             )
 

@@ -113,7 +113,7 @@ class BurtParser:
                 key, value = (part.strip() for part in line.split(None, 1))
 
             if key not in self.get_header().prefixes:
-                raise ParserException(f"Unexpected Burt header prefix {key}.")
+                raise ParserError(f"Unexpected Burt header prefix {key}.")
             else:
                 # Duplicated prefix case. Use a list to keep track of duplicated values.
                 if key in prefix_to_val:
@@ -174,7 +174,7 @@ class BurtParser:
         if self.get_header().start_label not in file_contents and (
             self.get_header().end_label in file_contents
         ):
-            raise ParserException("Malformed BURT header.")
+            raise ParserError("Malformed BURT header.")
 
         try:
             header, body = [
@@ -182,7 +182,7 @@ class BurtParser:
                 for part in file_contents.split(self.get_header().end_label)
             ]
         except ValueError:
-            raise ParserException("Duplicated BURT headers.")
+            raise ParserError("Duplicated BURT headers.") from ValueError
 
         header_lines = header.splitlines()[1:]
         body_lines = body.splitlines()
@@ -223,7 +223,7 @@ class BurtParser:
         return cleaned_line.strip()
 
 
-class ParserException(Exception):
+class ParserError(Exception):
     """Raise when the parsers run into unexpected malformed formats."""
 
     pass

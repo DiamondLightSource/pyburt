@@ -14,7 +14,7 @@ import burt
 from burt.utils.file import is_check_file
 
 
-class CheckFailedException(Exception):
+class CheckFailedError(Exception):
     """Raise when a check unexpectedly fails. Encapsulate failed check info."""
 
     def __init__(self, check_pv, msg=""):
@@ -57,10 +57,10 @@ def check(check_file: str) -> None:
     for pv, ca_reading in zip(pvs, ca_readings):
         if not ca_reading.ok:
             logging.critical(f"Check {check_file} caget failure on {pv.name}")
-            raise CheckFailedException(pv, "Caget failure.")
+            raise CheckFailedError(pv, "Caget failure.")
 
         elif abs(ca_reading - pv.target) > pv.tolerance:
-            e = CheckFailedException(pv)
+            e = CheckFailedError(pv)
             logging.debug(e)
             logging.critical(f"Check {check_file} failed on {pv.name}")
 

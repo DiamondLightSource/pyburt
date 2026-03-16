@@ -2,7 +2,7 @@
 
 from collections import namedtuple
 
-from burt.parsers import BurtParser, ParserException
+from burt.parsers import BurtParser, ParserError
 
 
 class CheckParser(BurtParser):
@@ -67,9 +67,7 @@ class CheckParser(BurtParser):
         pv_snapshot = [segment.strip() for segment in line.split()]
 
         if len(pv_snapshot) < 2 or len(pv_snapshot) > 3:
-            raise ParserException(
-                "Malformed .check body: Unexpected number of elements."
-            )
+            raise ParserError("Malformed .check body: Unexpected number of elements.")
 
         is_tolerance_specified = len(pv_snapshot) == 3
 
@@ -81,6 +79,8 @@ class CheckParser(BurtParser):
             target = float(target)
             tolerance = float(tolerance)
         except ValueError:
-            raise ParserException("Malformed .check file: values must be numbers.")
+            raise ParserError(
+                "Malformed .check file: values must be numbers."
+            ) from ValueError
 
         return self.CHECK_PV(pv_name, target, tolerance)

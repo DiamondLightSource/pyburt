@@ -4,7 +4,7 @@ import re
 from collections import namedtuple
 
 from burt import consts
-from burt.parsers import BurtParser, ParserException
+from burt.parsers import BurtParser, ParserError
 
 
 class SnapParser(BurtParser):
@@ -95,7 +95,7 @@ class SnapParser(BurtParser):
         ]
 
         if len(pv_snapshot) < 3:
-            raise ParserException(
+            raise ParserError(
                 f"Malformed .snap body {pv_snapshot}: Too few elements for a PV."
             )
 
@@ -117,8 +117,8 @@ class SnapParser(BurtParser):
         try:
             dtype_len_int = int(dtype_len)
         except ValueError:
-            raise ParserException(
+            raise ParserError(
                 f"Malformed .snap file: data type length {dtype_len} is a non integer."
-            )
+            ) from ValueError
 
         return self.SNAP_PV(pv_name, dtype_len_int, vals, modifier)

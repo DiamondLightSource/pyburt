@@ -3,7 +3,7 @@
 from collections import namedtuple
 
 from burt import consts
-from burt.parsers import BurtParser, ParserException
+from burt.parsers import BurtParser, ParserError
 
 
 class ReqParser(BurtParser):
@@ -48,7 +48,7 @@ class ReqParser(BurtParser):
         pv_entry = [segment.strip() for segment in line.split()]
 
         if len(pv_entry) > 3:
-            raise ParserException("Malformed .req file: Too many elements in line.")
+            raise ParserError("Malformed .req file: Too many elements in line.")
 
         pv_name, save_len_index, modifier = ReqParser._extract_elements(pv_entry)
 
@@ -111,13 +111,13 @@ class ReqParser(BurtParser):
             try:
                 save_len = int(pv_entry[save_len_index])
             except ValueError:
-                raise ParserException(
+                raise ParserError(
                     "Malformed .req file: save length (third tuple element)"
                     "must be an integer"
-                )
+                ) from ValueError
 
         if save_len and save_len <= 0:
-            raise ParserException(
+            raise ParserError(
                 "Malformed .req file: save length (third tuple element) must"
                 "be a positive integer"
             )

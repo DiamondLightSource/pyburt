@@ -1,6 +1,6 @@
 """Parser class which reads the information from a .rgr BURT file."""
 
-from burt.parsers import BurtParser, ParserException
+from burt.parsers import BurtParser, ParserError
 from burt.parsers.snap import SnapParser
 from burt.utils.file import is_check_file, is_snap_file
 
@@ -64,12 +64,12 @@ class RgrParser(BurtParser):
 
         """
         if not is_snap_file(line) and not is_check_file(line):
-            raise ParserException(
+            raise ParserError(
                 "Malformed .rgr file: invalid .snap or .check file specified."
             )
 
         if self._is_snap_section and is_check_file(line):
-            raise ParserException(
+            raise ParserError(
                 "Malformed .rgr file: .check files must be ordered before .snap files."
             )
 

@@ -4,7 +4,7 @@ import pytest
 
 import burt
 from burt import SnapParser as sp
-from burt.parsers import ParserException
+from burt.parsers import ParserError
 from tests import paths
 
 
@@ -13,7 +13,7 @@ def test_base_case():
     snap_parser = burt.SnapParser(paths.BLANK_SNAP)
     assert paths.BLANK_SNAP == snap_parser.path
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         snap_parser.parse()
 
 
@@ -64,7 +64,7 @@ def test_inline_comments():
 )
 def test_malformed_snap_files(invalid_snap_file):
     """Run the .snap parser against the malformed .snap files."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         snap_parser = sp(invalid_snap_file)
         snap_parser.parse()
 

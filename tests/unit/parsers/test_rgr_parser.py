@@ -4,7 +4,7 @@ import pytest
 
 import burt
 from burt import RgrParser as rp
-from burt.parsers import ParserException
+from burt.parsers import ParserError
 from tests import paths
 
 
@@ -13,7 +13,7 @@ def test_base_case():
     rgr_parser = burt.RgrParser(paths.BLANK_RGR)
     assert paths.BLANK_RGR == rgr_parser.path
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         rgr_parser.parse()
 
 
@@ -62,7 +62,7 @@ def test_inline_comments():
 )
 def test_malformed_files(filename):
     """Run the .rgr parser against the malformed .snap files."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         rgr_parser = rp(filename)
         rgr_parser.parse()
 

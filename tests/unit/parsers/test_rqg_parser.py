@@ -4,7 +4,7 @@ import pytest
 
 import burt
 from burt import RqgParser as rp
-from burt.parsers import ParserException
+from burt.parsers import ParserError
 from tests import paths
 
 
@@ -13,7 +13,7 @@ def test_base_case():
     rgr_parser = burt.RgrParser(paths.BLANK_RQG)
     assert paths.BLANK_RQG == rgr_parser.path
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         rgr_parser.parse()
 
 
@@ -44,11 +44,11 @@ def test_inline_comments():
 
 def test_malformed_files():
     """Run the .rqg parser against the malformed .rqg files."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         rqg_parser = burt.RqgParser(paths.MALFORMED_RQG)
         rqg_parser.parse()
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         rqg_parser = burt.RqgParser(paths.MALFORMED_MISORDERED_CHECKS_RQG)
         rqg_parser.parse()
 

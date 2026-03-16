@@ -42,7 +42,7 @@ SNAP_PRECISION_LONG_PYFORMAT = "{:.15e}"
 SNAP_PRECISION_SHORT_PYFORMAT = "{:.6e}"
 
 
-class InvalidReadingException(Exception):
+class InvalidReadingError(Exception):
     """Exception used to denote an incorrect CA reading."""
 
 
@@ -316,7 +316,7 @@ def _gen_snap_footer(ca_readings, pv_entries, compat=False):
                 length, ca_reading_str, pv_entry
             )
             snap_entries.append(formatted_snapshot_entry)
-        except InvalidReadingException as e:
+        except InvalidReadingError as e:
             logging.warning(f"Problem getting {pv_entry.name}: {e}")
             failed_pvs.append(pv_entry.name)
 
@@ -346,9 +346,9 @@ def _ca_val_to_snap_entry(
     # if present will be stored in the reading itself.
     try:
         if not ca_reading.ok:
-            raise InvalidReadingException(f"Caget failure: {ca_reading.errorcode}.")
+            raise InvalidReadingError(f"Caget failure: {ca_reading.errorcode}.")
     except AttributeError as e:
-        raise InvalidReadingException(f"Malformed cothread object: {e}.")
+        raise InvalidReadingError(f"Malformed cothread object: {e}.") from e
 
     # If a save length is specified in the .req file, this is used to shorten the
     # cothread array length to the desired value.

@@ -17,7 +17,7 @@ from cothread.catools import (
 )
 
 import burt
-from burt.parsers import ParserException, SnapParser
+from burt.parsers import ParserError, SnapParser
 from burt.write import _snap_entry_to_ca_type
 from tests import paths
 
@@ -133,7 +133,7 @@ def test_restore_write_fail(mock_connect, mock_caput):
 )
 def test_restore_bad_snap(mock_connect, mock_caput, snapfile):
     """Run BURT restore against some bad .snap files."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         burt.restore(snapfile)
 
 
@@ -186,7 +186,7 @@ def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
 
 def test_blank_restore():
     """Run burt restore against a blank .snap file."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         burt.restore(paths.BLANK_SNAP)
 
 

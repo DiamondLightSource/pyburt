@@ -1,7 +1,7 @@
 """The top-level burt package."""
 
 from burt._version import __version__  # noqa
-from burt.checks import CheckFailedException, check
+from burt.checks import CheckFailedError, check
 from burt.parsers.check import CheckParser
 from burt.parsers.req import ReqParser
 from burt.parsers.rgr import RgrParser
@@ -16,7 +16,7 @@ __all__ = [
     "take_snapshot",
     "take_snapshot_group",
     "check",
-    "CheckFailedException",
+    "CheckFailedError",
     "ReqParser",
     "SnapParser",
     "RgrParser",
