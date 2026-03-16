@@ -110,7 +110,7 @@ def test_restore_channel_types(mock_connect, mock_caput):
 @mock.patch("burt.write.connect")
 def test_restore_write_fail(mock_connect, mock_caput):
     """Run BURT restore against a write exception case."""
-    mock_caput.side_effect = ca_nothing
+    mock_caput.side_effect = ca_nothing("Test")
 
     # TODO: discuss if anything special needs to occur on write failure.
     # Probable solution is to not do anything.
