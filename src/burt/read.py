@@ -49,8 +49,8 @@ class InvalidReadingError(Exception):
 def take_snapshot(
     req_files: list[str],
     snap_file: str,
-    comments: str = None,
-    keywords: str = None,
+    comments: str | None = None,
+    keywords: str | None = None,
     compat: bool = False,
 ) -> list[str]:
     """Save the PVs and their state to the specified snap file, with metadata.
@@ -110,8 +110,8 @@ def take_snapshot(
 def take_snapshot_group(
     rqg_file: str,
     rgr_file: str,
-    comments: str = None,
-    keywords: str = None,
+    comments: str | None = None,
+    keywords: str | None = None,
     check: bool = True,
 ) -> list[str]:
     """Perform a BURT snapshot for each request file in the .rqg file.

@@ -70,7 +70,7 @@ def get_logfile_handler(log_file_path: str):
     return handler
 
 
-def setup_logging(default_level: int = logging.INFO, log_file_path: str = None):
+def setup_logging(default_level: int = logging.INFO, log_file_path: str | None = None):
     """Set logging configuration.
 
     Call this only once from the application main() function or __main__ module!
