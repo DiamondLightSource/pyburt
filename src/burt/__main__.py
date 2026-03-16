@@ -1,4 +1,4 @@
-"""Interface for ``python -m pyburt``."""
+"""Interface for ``python -m burt``."""
 
 from argparse import ArgumentParser
 from collections.abc import Sequence
