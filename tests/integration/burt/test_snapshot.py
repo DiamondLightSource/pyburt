@@ -7,7 +7,7 @@ from cothread.catools import caput
 
 import burt
 import tests.integration.softioc as ioc
-from burt import SnapParser as sp
+from burt import SnapParser as sp  # noqa: N813
 from tests import paths as core_paths
 from tests.integration import paths
 

@@ -3,7 +3,7 @@
 import pytest
 
 import burt
-from burt import RqgParser as rp
+from burt import RqgParser as rp  # noqa: N813
 from burt.parsers import ParserError
 from tests import paths
 

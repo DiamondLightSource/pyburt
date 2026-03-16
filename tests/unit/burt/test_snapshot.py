@@ -15,7 +15,7 @@ from cothread.catools import (
 )
 
 import burt
-from burt import SnapParser as sp
+from burt import SnapParser as sp  # noqa: N813
 from burt.read import _flatten_ca_array, _format_ca_reading
 from tests import paths
 from tests.utils import aug_val

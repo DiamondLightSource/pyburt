@@ -2,7 +2,7 @@
 
 import pytest
 
-from burt import ReqParser as rp
+from burt import ReqParser as rp  # noqa: N813
 from burt.parsers import ParserError
 from tests import paths
 

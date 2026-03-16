@@ -2,7 +2,7 @@
 
 import pytest
 
-from burt import CheckParser as cp
+from burt import CheckParser as cp  # noqa: N813
 from burt.parsers import ParserError
 from tests import paths
 
