@@ -302,7 +302,7 @@ def _gen_snap_footer(ca_readings, pv_entries, compat=False):
     snap_entries = []
     failed_pvs = []
 
-    for ca_reading, pv_entry in zip(ca_readings, pv_entries):
+    for ca_reading, pv_entry in zip(ca_readings, pv_entries, strict=False):
         if ca_reading.element_count > 1 and len(ca_reading) == 0:
             logging.warning(f"Uninitialised array PV {pv_entry.name}.")
             logging.warning(

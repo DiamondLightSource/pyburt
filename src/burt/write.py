@@ -82,7 +82,7 @@ def restore(snap_file: str) -> list[str]:
 
     pvs_to_restore = OrderedDict()
 
-    for pv_entry, ca_info in zip(pvs, ca_infos):
+    for pv_entry, ca_info in zip(pvs, ca_infos, strict=False):
         if _is_write_instr(pv_entry):
             if not ca_info.ok:
                 logging.warning(f"PV invalid, skipping: {ca_info}")
@@ -95,7 +95,7 @@ def restore(snap_file: str) -> list[str]:
     failed_pvs = []
     return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
 
-    for pv, return_value in zip(pvs_to_restore.keys(), return_values):
+    for pv, return_value in zip(pvs_to_restore.keys(), return_values, strict=False):
         if not return_value.ok:
             failed_pvs.append(pv)
 

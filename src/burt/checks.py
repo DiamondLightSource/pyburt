@@ -54,7 +54,7 @@ def check(check_file: str) -> None:
 
     ca_readings = caget([pv.name for pv in pvs], throw=False)
 
-    for pv, ca_reading in zip(pvs, ca_readings):
+    for pv, ca_reading in zip(pvs, ca_readings, strict=False):
         if not ca_reading.ok:
             logging.critical(f"Check {check_file} caget failure on {pv.name}")
             raise CheckFailedError(pv, "Caget failure.")

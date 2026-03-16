@@ -224,7 +224,7 @@ class IocManager:
 
         # Create the correct number of keyword arguments to mbbi/mbbo:
         # ZRST=states[0], ZRVL=0, etc.
-        st_dict = {nn + "ST": s for nn, s in zip(number_names, states)}
+        st_dict = {nn + "ST": s for nn, s in zip(number_names, states, strict=False)}
         vl_dict = {nn + "VL": i for i, nn in enumerate(number_names)}
 
         # All calls use VAL=0, PINI='YES'
