@@ -1,0 +1,300 @@
+"""BURT restore python implementation.
+
+A BURT restore triggers a revert of the PVs specified in a .snap file to the
+snapshot values that are in the .snap file. A .snap file contains some meta
+data and a list of PVs with their values at the the time of the BURT
+snapshot (retrieved via caget operations). Additional specifiers may also exist
+which modifies the restore behaviour, such as read-only and write-only PVs.
+See the BURT restore documentation for more information.
+
+Restoring the PV values involves channel access put operations; thus the
+restore operation may fail if it is run by a user with insufficient write
+privileges to the target PVs.
+
+A restore group .rgr file is just a collection of paths to .snap files,
+and some .check files which verifies certain preconditions prior to the
+restore operation proceeding. It is used for bulk restoring of PVs.
+"""
+
+import argparse
+import logging
+import os
+import sys
+from collections import OrderedDict
+from typing import Any, cast
+
+import cothread
+from cothread.catools import (
+    DBR_CHAR,
+    DBR_DOUBLE,
+    DBR_ENUM,
+    DBR_FLOAT,
+    DBR_LONG,
+    DBR_SHORT,
+    DBR_STRING,
+    caput,
+    connect,
+)
+
+import burt
+from burt import consts
+from burt.config import logconfig
+from burt.parsers.snap import SnapParser
+from burt.utils.file import is_check_file, is_null_char, is_rgr_file, is_snap_file
+
+CaValue = str | int | float
+
+
+def restore(snap_file: str) -> list[str]:
+    """Restores the state of the PVs in the .snap file.
+
+    This function does nothing for PVs marked with RO or RON specifiers.
+
+    Note that cothread invokes numpy integer conversion for arrays, which must
+    be handled separately; each value is converted to a floating point number,
+    which is possible as array record types are only supported for DBR_CHAR,
+    DBR_SHORT, DBR_LONG, DBR_FLOAT, and DBR_DOUBLE.
+
+    Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
+
+    Args:
+        snap_file (str): The path to the .snap file.
+
+    Returns:
+        list(str): The list of pvs which failed to be caput-ed to.
+
+    Raises:
+        ValueError: If the snap file has an invalid extension, or if it does
+            not exist.
+
+    """
+    if not is_snap_file(snap_file, True):
+        raise ValueError(f"Invalid .snap file {snap_file}.")
+
+    pvs = _get_pvs_in_snap(snap_file)
+
+    # Improve performance by putting all at once later on.
+    pvs_to_restore: dict[str, Any] = OrderedDict()
+
+    # Obtain for the channel type prior to the put for each pv, so we can put the
+    # correct type.
+    ca_infos = connect([pv_entry.name for pv_entry in pvs], cainfo=True, throw=False)
+
+    pvs_to_restore = OrderedDict()
+
+    for pv_entry, ca_info in zip(pvs, ca_infos, strict=False):
+        if _is_write_instr(pv_entry):
+            if not ca_info.ok:
+                logging.warning(f"PV invalid, skipping: {ca_info}")
+            else:
+                pvs_to_restore[pv_entry.name] = _snap_entry_to_ca_type(
+                    pv_entry, ca_info.datatype
+                )
+                logging.debug(f"Restoring PVs: {pvs_to_restore}.")
+
+    failed_pvs = []
+    return_values = caput(pvs_to_restore.keys(), pvs_to_restore.values(), throw=False)
+
+    for pv, return_value in zip(pvs_to_restore.keys(), return_values, strict=False):
+        if not return_value.ok:
+            failed_pvs.append(pv)
+
+    return failed_pvs
+
+
+def restore_group(rgr_file: str, check: bool = True) -> list[str]:
+    """Perform BURT restore for each .snap file contained in the .rgr file.
+
+    Cothread returns cothread.catools.ca_nothing upon a successful caput(s).
+
+    Args:
+        rgr_file (str): The path to the .rgr file.
+        check (bool): Whether to inspect .check files or not.
+
+    Returns:
+        list(str): The list of pvs which failed to be caput-ed to.
+
+    Raises:
+        ValueError: If the rgr file has an invalid extension, or if it does
+            not exist.
+
+    """
+    if not is_rgr_file(rgr_file):
+        raise ValueError(f"Invalid .rgr file {rgr_file}.")
+
+    rgr_parser = burt.RgrParser(rgr_file)
+    _, body = rgr_parser.parse()
+    logging.debug(f"Parsed .snap files: {body}")
+
+    all_failed_pvs = []
+    for file_path in body:
+        if check and is_check_file(file_path):
+            burt.check(file_path)
+
+        elif is_snap_file(file_path):
+            failed_pvs = restore(file_path)
+
+            if failed_pvs is not cothread.catools.ca_nothing:
+                all_failed_pvs.extend(failed_pvs)
+
+    return all_failed_pvs
+
+
+def main():
+    """Start command-line interface."""
+    cli = argparse.ArgumentParser()
+    cli.add_argument(
+        "restore_file", type=str, help="The path to either a .snap or .rgr file."
+    )
+    cli.add_argument(
+        "-v", help="Enable verbose logging (debug) level.", action="store_true"
+    )
+    cli.add_argument("-l", type=str, help="Optional restore log file location.")
+
+    args = cli.parse_args()
+
+    logconfig.setup_logging(log_file_path=args.l)
+
+    if "DLS_EPICS_RELEASE" in os.environ:
+        # Add graylog if running inside DLS.
+        logging.getLogger().addHandler(logconfig.get_graylog_handler())
+
+    if args.l:
+        logging.getLogger().addHandler(logconfig.get_logfile_handler(args.l))
+
+    if args.v:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    if is_snap_file(args.restore_file):
+        logging.info(f"Restoring {args.restore_file}")
+        failed_pvs = restore(args.restore_file)
+    elif is_rgr_file(args.restore_file):
+        logging.info(f"Restoring {args.restore_file}")
+        failed_pvs = restore_group(args.restore_file)
+    else:
+        logging.critical(f"Invalid restore file argument {args.restore_file}.")
+        sys.exit(1)
+
+    if failed_pvs:
+        logging.warning("Restore failed for the following PVs:")
+        for pv in failed_pvs:
+            logging.warning(pv)
+        sys.exit(1)
+
+
+def _is_write_instr(pv_entry: SnapParser.SNAP_PV) -> bool:
+    """Check pv modifier prefix for write/no write instructions.
+
+    Args:
+        pv_entry: PV currently being checked.
+
+    Returns:
+        True if writing to PV, False if flagged otherwise.
+    """
+    ret = True
+
+    if pv_entry.modifier == consts.READONLY_NOTIFY_SPECIFIER:
+        # TODO: write to the no write snapshot file
+        logging.warning("RON type PVs currently unimplemented.")
+        ret = False
+
+    elif pv_entry.modifier == consts.READONLY_SPECIFIER:
+        logging.debug(f"Readonly PV {pv_entry.name}. Skipping write.")
+        ret = False
+
+    elif pv_entry.modifier == consts.WRITEONLY_SPECIFIER:
+        # TODO: write the "correct" value, not the saved ones.
+        logging.warning("WO type PVs currently unimplemented.")
+        ret = True
+
+    return ret
+
+
+def _get_pvs_in_snap(snap_file):
+    """Parse and extract the PV entries in a snap file."""
+    snap_parser = SnapParser(snap_file)
+    _, body = snap_parser.parse()
+    logging.debug(f"Parsed .snap PVs: {body}")
+    return body
+
+
+def _snap_entry_to_ca_type(
+    pv_entry: SnapParser.SNAP_PV, datatype: int
+) -> CaValue | list[CaValue]:
+    """Coerce the correct ca type from the channel type."""
+    # Array value.
+    if pv_entry.dtype_len > 1:
+        converted_vals = [_convert_to_ca_type(val, datatype) for val in pv_entry.vals]
+        # There is no way to reset an array to completely uninitialised.
+        if all(val is None for val in converted_vals):
+            if datatype == DBR_STRING:
+                logging.warning(f"Snap entry for array {pv_entry.name} is all null.")
+                logging.warning("All elements will be set to an empty string.")
+                converted_vals = [""] * pv_entry.dtype_len
+            else:
+                logging.warning(f"Snap entry for array {pv_entry.name} is all null.")
+                logging.warning("All elements will be set to zero")
+                converted_vals = [0] * pv_entry.dtype_len
+        if None in converted_vals:
+            stripped_converted_vals = converted_vals[: converted_vals.index(None)]
+        else:
+            stripped_converted_vals = converted_vals
+
+        # Tell Mypy that we have removed the Nones.
+        return cast(list[CaValue], stripped_converted_vals)
+    # Scalar value
+    else:
+        converted_val = _convert_to_ca_type(pv_entry.vals[0], datatype)
+
+        # Singleton string case, where a null should be written as an empty string.
+        if converted_val is None:
+            assert datatype in (DBR_STRING, DBR_ENUM)
+            return ""
+        else:
+            return converted_val
+
+
+def _convert_to_ca_type(snap_val, datatype) -> CaValue | None:
+    """Convert a single snap value given a channel type."""
+    if is_null_char(snap_val):
+        return None
+
+    if datatype == DBR_CHAR:
+        ascii_code: int | None = None
+        try:
+            ascii_code = ord(snap_val)
+        except (ValueError, TypeError) as e:
+            logging.warning(f"Unable to convert .snap value to ascii code: {e}.")
+
+        return ascii_code
+
+    elif datatype in (DBR_STRING, DBR_ENUM):
+        return str(snap_val)
+
+    elif datatype in (DBR_SHORT, DBR_LONG):
+        # Problematic case where the channel type is an int type, but stored value
+        # is float. Python cannot convert a str float representation to an int,
+        # without converting to an int first.
+        try:
+            return int(snap_val)
+        except ValueError as e:
+            logging.warning(
+                f"Unable to convert: {snap_val}, to int type,"
+                f"given channel type: {datatype}. Converting to float value "
+                f"first: {e}."
+            )
+            fl_val = float(snap_val)
+            return int(fl_val)
+
+    # Note: for double and float arrays, \0 null should never appear in the snap file.
+    elif datatype in (DBR_FLOAT, DBR_DOUBLE):
+        return float(snap_val)
+
+    # Fall back on older technique wth trying to convert by force.
+    else:
+        logging.warning(f"Unexpected channel type: {datatype}.")
+        try:
+            return float(snap_val)
+        except ValueError as e:
+            logging.warning(f"Unable to convert to float type: {e}.")
+            return snap_val

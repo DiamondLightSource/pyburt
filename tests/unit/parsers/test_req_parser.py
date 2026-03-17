@@ -1,8 +1,9 @@
 """Various tests for the req parser."""
+
 import pytest
 
-from burt import ReqParser as rp
-from burt.parsers import ParserException
+from burt import ReqParser as rp  # noqa: N813
+from burt.parsers import ParserError
 from tests import paths
 
 
@@ -41,7 +42,7 @@ def test_inline_comments():
 )
 def test_malformed_files(filename):
     """Run the parser against the malformed .req files."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         req_parser = rp(filename)
         req_parser.parse()
 

@@ -1,8 +1,9 @@
 """Various tests for the check parser."""
+
 import pytest
 
-from burt import CheckParser as cp
-from burt.parsers import ParserException
+from burt import CheckParser as cp  # noqa: N813
+from burt.parsers import ParserError
 from tests import paths
 
 
@@ -11,51 +12,51 @@ def test_base_case():
     check_parser = cp(paths.BLANK_REQ)
     assert paths.BLANK_REQ == check_parser.path
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser.parse()
 
 
 def test_multiline_comments():
     """Run the parser against a case with multi line comments in the header."""
     check_parser = cp(paths.MULTI_LINE_COMMENT_CHECK)
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser.parse()
 
 
 def test_malformed_files():
     """Run the parser against the malformed .check files."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.BAD_PREFIX_CHECK)
         check_parser.parse()
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.BAD_VALUES_CHECK)
         check_parser.parse()
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.EXCESS_VALUES_CHECK)
         check_parser.parse()
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.EXTRA_PREFIX_CHECK)
         check_parser.parse()
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.MISSING_TARGET_CHECK)
         check_parser.parse()
 
 
 def test_non_floats():
     """Run the parser against cases with non parseable numbers."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.NORMAL_CHECK_1)
         check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL a")
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.NORMAL_CHECK_1)
         check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL blabla dummy")
 
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         check_parser = cp(paths.NORMAL_CHECK_1)
         check_parser.read_body_line("SR-DI-DCCT-01:SIGNAL blabla dummy dummy2")
 

@@ -1,8 +1,9 @@
 """Various tests for the main burt module."""
+
 import os
+from unittest import mock
 
 import cothread
-import mock
 import pytest
 from cothread.catools import (
     DBR_CHAR,
@@ -14,7 +15,7 @@ from cothread.catools import (
 )
 
 import burt
-from burt import SnapParser as sp
+from burt import SnapParser as sp  # noqa: N813
 from burt.read import _flatten_ca_array, _format_ca_reading
 from tests import paths
 from tests.utils import aug_val
@@ -174,8 +175,7 @@ def test_burtinter_req_file_prefix_compatability():
     try:
         _old_req_file_header_burtinter_code(bad_req_entry_1)
         pytest.fail(
-            "This test should throw as old burtinter cannot handle more than "
-            "one space."
+            "This test should throw as old burtinter cannot handle more than one space."
         )
     except IndexError:
         # Expected.
@@ -184,8 +184,7 @@ def test_burtinter_req_file_prefix_compatability():
     try:
         _old_req_file_header_burtinter_code(bad_req_entry_2)
         pytest.fail(
-            "This test should throw as old burtinter cannot handle more than "
-            "one space."
+            "This test should throw as old burtinter cannot handle more than one space."
         )
     except IndexError:
         # Expected.
@@ -556,21 +555,21 @@ def test_snapshot_group(mock_caget):
     """Runs a take snapshot group test of a .rqg file."""
     # TODO: this is a broken test with incorrect behaviour. To be changed when
     #  snapshot groups are implemented.
-    assert False
+    raise AssertionError
 
 
-def _old_req_file_header_burtinter_code(snapshotString):
+def _old_req_file_header_burtinter_code(snapshot_string):
     """Remnant in old burtinter code."""
     # Old code start
-    if snapshotString[0:9] == "Req File:":
-        requestFileName = snapshotString.split(" ")[2].split("\n")[0]
-        fileNameParts = requestFileName.split("/")
-        if fileNameParts[1] == "mt":
-            fileNameParts[1] = ""
-            requestFileName = "/".join(fileNameParts[1:])
+    if snapshot_string[0:9] == "Req File:":
+        request_file_name = snapshot_string.split(" ")[2].split("\n")[0]
+        file_name_parts = request_file_name.split("/")
+        if file_name_parts[1] == "mt":
+            file_name_parts[1] = ""
+            request_file_name = "/".join(file_name_parts[1:])
     # Old code end
     else:
         pytest.fail(
-            f"Last prefix entry is unexpectedly not Req File: {snapshotString}",
-            snapshotString,
+            f"Last prefix entry is unexpectedly not Req File: {snapshot_string}",
+            snapshot_string,
         )

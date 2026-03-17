@@ -1,5 +1,7 @@
 """Various tests for the check file functionality."""
-import mock
+
+from unittest import mock
+
 import pytest
 
 import burt
@@ -25,7 +27,7 @@ def test_normal_check(mock_caget):
     burt.check(paths.NORMAL_CHECK_1)
 
     # 1E-6 tolerance
-    for vai in (0, 1e-6, 1e-7, -1e-7):
+    for _ in (0, 1e-6, 1e-7, -1e-7):
         mock_caget.return_value = [aug_val(0)]
         burt.check(paths.NORMAL_CHECK_3)
 
@@ -35,19 +37,19 @@ def test_fail_check(mock_caget):
     """Run the check against failure cases."""
     # Zero tolerance
     for val in (9, 0, 11, 9.99, 10.01, -10):
-        with pytest.raises(burt.CheckFailedException):
+        with pytest.raises(burt.CheckFailedError):
             mock_caget.return_value = [aug_val(val)]
             burt.check(paths.NORMAL_CHECK_1)
     # 1E-6 tolerance
     for val in (1, -1, 10, 1e-5, -1e-5):
-        with pytest.raises(burt.CheckFailedException):
+        with pytest.raises(burt.CheckFailedError):
             mock_caget.return_value = [aug_val(val)]
             burt.check(paths.NORMAL_CHECK_3)
 
 
 @mock.patch("burt.checks.caget")
-def test_check_fails_if_ok_False(mock_caget):
+def test_check_fails_if_ok_false(mock_caget):
     """Run the check and simulate caget returning .ok as False."""
     mock_caget.return_value = [aug_val(1, ok=False)]
-    with pytest.raises(burt.CheckFailedException):
+    with pytest.raises(burt.CheckFailedError):
         burt.check(paths.NORMAL_CHECK_1)

@@ -23,6 +23,7 @@ def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
         dtype: cothread DBR type
 
     """
+
     # noqa D202  https://github.com/PyCQA/pydocstyle/pull/395
     class AugFloat(float):
         ok = True
@@ -46,7 +47,7 @@ def aug_val(val, ok=True, count=1, dtype=DBR_FLOAT):
 
     if count > 1:
         if dtype in (DBR_STRING, DBR_CHAR):
-            npdtype = numpy.object
+            npdtype = object
         else:
             npdtype = numpy.float64
         f = AugArray([len(val)], dtype=npdtype)

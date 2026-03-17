@@ -1,8 +1,9 @@
 """Unit tests for the BURT restore functionality."""
+
 import io
+from unittest import mock
 
 import cothread
-import mock
 import pytest
 from cothread.catools import (
     DBR_CHAR,
@@ -13,10 +14,11 @@ from cothread.catools import (
     DBR_LONG,
     DBR_SHORT,
     DBR_STRING,
+    ca_nothing,
 )
 
 import burt
-from burt.parsers import ParserException, SnapParser
+from burt.parsers import ParserError, SnapParser
 from burt.write import _snap_entry_to_ca_type
 from tests import paths
 
@@ -108,11 +110,11 @@ def test_restore_channel_types(mock_connect, mock_caput):
 @mock.patch("burt.write.connect")
 def test_restore_write_fail(mock_connect, mock_caput):
     """Run BURT restore against a write exception case."""
-    mock_caput.side_effect = Exception
+    mock_caput.side_effect = ca_nothing("Test")
 
     # TODO: discuss if anything special needs to occur on write failure.
     # Probable solution is to not do anything.
-    with pytest.raises(Exception):
+    with pytest.raises(ca_nothing):
         burt.restore(paths.ARRAYS_AND_SCALARS_WITH_MODS_SNAP)
 
 
@@ -132,7 +134,7 @@ def test_restore_write_fail(mock_connect, mock_caput):
 )
 def test_restore_bad_snap(mock_connect, mock_caput, snapfile):
     """Run BURT restore against some bad .snap files."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         burt.restore(snapfile)
 
 
@@ -185,7 +187,7 @@ def test_restore_returns_pv_names_if_caput_fails(mock_connect, mock_caput):
 
 def test_blank_restore():
     """Run burt restore against a blank .snap file."""
-    with pytest.raises(ParserException):
+    with pytest.raises(ParserError):
         burt.restore(paths.BLANK_SNAP)
 
 

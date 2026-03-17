@@ -1,4 +1,5 @@
 """Various integration tests for Pyburt snapshots."""
+
 import os
 
 import pytest
@@ -6,7 +7,7 @@ from cothread.catools import caput
 
 import burt
 import tests.integration.softioc as ioc
-from burt import SnapParser as sp
+from burt import SnapParser as sp  # noqa: N813
 from tests import paths as core_paths
 from tests.integration import paths
 
@@ -67,8 +68,8 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
 
     """
     # Define the expected compatibility behaviour.
-    DOUBLE_NULL = DOUBLE_ZERO_STR if compat else NULL_STR
-    FLOAT_NULL = FLOAT_ZERO_STR if compat else NULL_STR
+    double_null = DOUBLE_ZERO_STR if compat else NULL_STR
+    float_null = FLOAT_ZERO_STR if compat else NULL_STR
 
     caput(ioc.LOCAL_PV_ARR_CHAR, [1, 2, 3])
     caput(ioc.LOCAL_PV_ARR_DBL, [1.1, 2.2, 3.3])
@@ -86,10 +87,10 @@ def test_snapshot_partial_array(pyburt_tmpfile, compat):
         "1.100000000000000e+00",
         "2.200000000000000e+00",
         "3.300000000000000e+00",
-    ] + [DOUBLE_NULL] * 5
+    ] + [double_null] * 5
     assert double_array_entry.vals == double_expected
     float_array_entry = body[7]
-    float_expected = ["1.100000e+00", "2.200000e+00", "3.300000e+00"] + [FLOAT_NULL] * 5
+    float_expected = ["1.100000e+00", "2.200000e+00", "3.300000e+00"] + [float_null] * 5
     assert float_array_entry.vals == float_expected
     long_array_entry = body[8]
     long_expected = ["1", "2", "3"] + [NULL_STR] * 5
@@ -267,7 +268,7 @@ def test_header_against_burt(pyburt_tmpfile):
         "REQ_FILE": paths.BASIC_REQ,
     }
 
-    with open(pyburt_tmpfile, "r") as pyburt_out:
+    with open(pyburt_tmpfile) as pyburt_out:
         with open(paths.BURT_TEMPLATED_BASIC_SNAP) as burt_out:
             pyburt_out_header = pyburt_out.read().split(sp.SNAP_HEADER_END)[0]
             burt_out_header = (
@@ -296,8 +297,8 @@ def test_various_types_against_burt(pyburt_tmpfile):
     burt.take_snapshot([paths.VARIOUS_TYPES_REQ], pyburt_tmpfile)
 
     # Read into strings to discard time dependent header.
-    with open(pyburt_tmpfile, "r") as pyburt_out:
-        with open(paths.BURT_VARIOUS_TYPES_SNAP, "r") as burt_out:
+    with open(pyburt_tmpfile) as pyburt_out:
+        with open(paths.BURT_VARIOUS_TYPES_SNAP) as burt_out:
             pyburt_out_str = pyburt_out.read().split(sp.SNAP_HEADER_END)[1]
             burt_out_str = burt_out.read().split(sp.SNAP_HEADER_END)[1]
 
