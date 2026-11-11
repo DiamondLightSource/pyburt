@@ -75,6 +75,13 @@ def test_malformed_but_valid_file():
     rgr_parser.parse()
 
 
+def test_standalone_req_file():
+    """Run the .rgr parser against a file with only a standalone .req file."""
+    rgr_parser = rp(paths.STANDALONE_REQ_ONLY_RGR)
+    header, _ = rgr_parser.parse()
+    assert "/home/ops/sample.req" == header[rp.STANDALONE_REQ_PREFIX]
+
+
 def normal_case():
     """Run the rgr parser against a typical case."""
     correct_checks = [
@@ -98,6 +105,7 @@ def normal_case():
     header, body = rgr_parser.parse()
     assert paths.INLINE_COMMENTS_RGR == rgr_parser.path
     assert "/home/ops/sample.rqg" == header[rp.RQG_PREFIX]
+    assert "/home/ops/sample.req" == header[rp.STANDALONE_REQ_PREFIX]
     assert (
         header["Comments"]
         == "LOCO applied for skews only, vertical emittance corrected to"
