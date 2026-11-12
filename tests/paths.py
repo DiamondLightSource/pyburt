@@ -50,6 +50,7 @@ BLANK_RGR = "tests/resources/rgr/blank.rgr"
 INLINE_COMMENTS_RGR = "tests/resources/rgr/inline_comments.rgr"
 NORMAL_RGR = "tests/resources/rgr/normal.rgr"
 NORMAL_ALT_RGR = "tests/resources/rgr/normal_alt.rgr"
+STANDALONE_REQ_ONLY_RGR = "tests/resources/rgr/standalone_req_only.rgr"
 
 DUPLICATE_HEADERS_RGR = "tests/resources/rgr/duplicate_rgr_headers.rgr"
 MALFORMED_BODY_RGR = "tests/resources/rgr/malformed_body.rgr"

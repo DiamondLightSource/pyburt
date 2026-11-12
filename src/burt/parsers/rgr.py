@@ -31,6 +31,7 @@ class RgrParser(BurtParser):
     RGR_HEADER_START = "--- Start Restore Group header"
     RGR_HEADER_END = "--- End Restore Group header"
     RQG_PREFIX = "Rqg File"
+    STANDALONE_REQ_PREFIX = "Standalone Req File"
 
     def __init__(self, path):
         """Class constructor.
@@ -52,7 +53,7 @@ class RgrParser(BurtParser):
         """
         return super().HEADER(
             self.RGR_HEADER_START,
-            (SnapParser.COMMENTS_PREFIX, self.RQG_PREFIX),
+            (SnapParser.COMMENTS_PREFIX, self.RQG_PREFIX, self.STANDALONE_REQ_PREFIX),
             self.RGR_HEADER_END,
         )
 
