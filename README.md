@@ -10,8 +10,9 @@ Python version of the BackUp and ResTore tool
 This is where you should write a short paragraph that describes what your module does,
 how it does it, and why people should use it.
 
-Source          | <https://github.com/DiamondLightSource/pyburt>
+What            | Where
 :---:           | :---:
+Source          | <https://github.com/DiamondLightSource/pyburt>
 Docker          | `docker run ghcr.io/diamondlightsource/pyburt:latest`
 Releases        | <https://github.com/DiamondLightSource/pyburt/releases>
 
